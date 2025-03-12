@@ -1,0 +1,131 @@
+Here's the **final, complete ERD** with everything you need:  
+
+---
+
+### **Final ERD for Calisto Baby Boutique**  
+
+#### **1️⃣ customers_accounts (Tracks registered customers)**
+- customer_id (PK)  
+- first_name  
+- last_name  
+- email (Unique)  
+- phone_number  
+- address  
+- password  
+
+#### **2️⃣ products (Stores all product details)**
+- product_id (PK)  
+- admin_id (FK → admin)  
+- name  
+- description  
+- price  
+- currency (USD/LBP)  
+- stock (Available quantity)  
+- color  
+- size  
+- image  
+
+#### **3️⃣ tags (Stores product tags)**
+- tag_id (PK)  
+- name  
+- description  
+- image  
+
+#### **4️⃣ product_tags (Junction table for products & tags)**
+- product_id (FK → products)  
+- tag_id (FK → tags)  
+
+#### **5️⃣ cart (Tracks items customers add before checkout)**
+- cart_id (PK)  
+- customer_id (FK → customers_accounts)  
+- product_id (FK → products)  
+- quantity  
+- added_at
+
+#### **6️⃣ orders (Stores order details)**
+- order_id (PK)  
+- customer_id (FK → customers_accounts)  
+- total_amount  
+- currency (USD/LBP)  
+- status (Pending, Paid, Shipped, Delivered)  
+- created_at  
+
+#### **7️⃣ order_items (Tracks products in each order)**
+- order_item_id (PK)  
+- order_id (FK → orders)  
+- product_id (FK → products)  
+- quantity  
+- price_at_purchase  
+
+#### **8️⃣ payments (Tracks payments for orders)**
+- payment_id (PK)  
+- order_id (FK → orders)  
+- payment_method (USD Cash / LBP Cash / Bank Transfer)  
+- exchange_rate (If LBP is used)  
+- status (Pending, Paid)  
+- paid_at  
+
+#### **9️⃣ discounts (First-order discounts for specific customers)**
+- discount_id (PK)  
+- customer_id (FK → customers_accounts)  
+- discount_type (First Order / Promo Code)  
+- discount_value (Percentage or Fixed Amount)  
+- status (Used / Not Used)  
+
+#### **🔟 promo_codes (Promo codes available for all customers)**
+- promo_id (PK)  
+- code (Unique promo code like "WELCOME10")  
+- discount_type (Percentage / Fixed Amount)  
+- discount_value (e.g., 10% or $5)  
+- min_order_value (Required order total for use)  
+- max_uses (How many times it can be redeemed)  
+- expires_at (Expiration date)  
+- status (Active / Expired / Disabled)  
+
+#### **1️⃣1️⃣ customer_promo_usage (Tracks promo code usage per customer)**
+- usage_id (PK)  
+- customer_id (FK → customers_accounts)  
+- promo_id (FK → promo_codes)  
+- order_id (FK → orders)  
+- used_at  
+
+#### **1️⃣2️⃣ customer_messages (Handles customer support & live chat)**
+- message_id (PK)  
+- customer_id (FK → customers_accounts)  
+- sender_name  
+- message_content  
+- created_at  
+
+#### **1️⃣3️⃣ admin (Manages website operations)**
+- admin_id (PK)  
+- username  
+- email  
+- password  
+
+#### **1️⃣4️⃣ social_media (Stores social media links)**
+- social_id (PK)  
+- platform (Facebook, Instagram, TikTok)  
+- link  
+- image  
+
+#### **1️⃣5️⃣ shipping (Tracks shipping details)**
+- shipping_id (PK)  
+- order_id (FK → orders)  
+- carrier  
+- tracking_number  
+- estimated_delivery  
+- status (Processing, Shipped, Delivered)  
+
+---
+
+### **📌 Key Features & Why It Works**
+✅ **Cart System** → Customers add items before ordering.  
+✅ **Orders & Order Items** → Tracks full purchases as one order.  
+✅ **Payments Tracking** → Supports multiple payment methods.  
+✅ **Stock Management** → `products.stock` keeps track of available quantity.  
+✅ **Discounts & Promo Codes** → Supports first-time & general promotions.  
+✅ **Admin Panel** → Admin can manage products, discounts, and customers.  
+✅ **Customer Messages** → Live chat & inquiries for customer support.  
+✅ **Shipping Tracking** → Updates customers on delivery status.  
+
+This **final ERD** ensures **smooth order processing, stock tracking, discounts, and customer engagement**. Let me know if you need any tweaks! 🚀
