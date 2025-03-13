@@ -146,7 +146,7 @@ session_start();
                                         <li><a href="single-blog.php">Single Blog</a></li>
                                     </ul>
                                 </li>
-                                <li><a href="contact.php">CONTACT</a></li>
+                                <li class="<?php if(explode('/',$_SERVER['PHP_SELF'])[2] == 'contact.php'): ?>active<?php endif?>"><a href="contact.php">CONTACT</a></li>
                             </ul>
                         </nav>
                     </div>

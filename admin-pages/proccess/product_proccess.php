@@ -34,6 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $product->best_deal = isset($_POST['best_deal']) ? 1 : 0;
     $product->on_sale = isset($_POST['on_sale']) ? 1 : 0;
     $tags = isset($_POST['tags']) ? $_POST['tags'] : [];
+    
 
     if (empty($product->name) || empty($product->description) || empty($product->price) || empty($product->currency)) {
         $_SESSION['error'] = "Please fill in all the required fields.";
@@ -83,10 +84,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sizes = $_POST['sizes'];
     $stocks = $_POST['stocks'];
 
+    $color_images = $_FILES['color_images'];
+
     $product->sizes = [];
     for ($i = 0; $i < count($sizes); $i++) {
-        $product->sizes[$sizes[$i]][$colors[$i]] = $stocks[$i];
+        $color_image_name = basename($color_images['name'][$i]);
+        $color_image_tmp = $color_images['tmp_name'][$i];
+        $color_image_path = 'uploads/' . $color_image_name;
+
+        if (move_uploaded_file($color_image_tmp, $color_image_path)) {
+            $product->sizes[$sizes[$i]][$colors[$i]] = [
+                'stock' => $stocks[$i],
+                'color_image' => $color_image_path
+            ];
+        } else {
+            $_SESSION['error'] = "Failed to upload color image.";
+            header("Location: ../index.php?file=productpage.php");
+            exit();
+        }
     }
+
+    // $product->sizes = [];
+    // for ($i = 0; $i < count($sizes); $i++) {
+    //     $product->sizes[$sizes[$i]][$colors[$i]] = $stocks[$i];
+    // }
 
     try {
         if ($product->create($admin_id)) {

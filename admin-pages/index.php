@@ -64,23 +64,27 @@ $last_loaded_file = isset($_SESSION['last_loaded_file']) ? $_SESSION['last_loade
       <h1><a href="" class="logo">administration</a></h1>
       <ul class="list-unstyled components mb-5">
         <li <?php if ($last_loaded_file == 'dashboard.php')
-          echo 'class="active"'; ?>><a href="?file=dashboard.php"
+              echo 'class="active"'; ?>><a href="?file=dashboard.php"
             data-file="dashboard.php"><span class="fa fa-home mr-3"></span> Dashboard</a></li>
         <li <?php if ($last_loaded_file == 'createproductpage.php')
-          echo 'class="active"'; ?>><a
+              echo 'class="active"'; ?>><a
             href="?file=createproductpage.php" data-file="createproductpage.php"><span
               class="fa fa-cart-plus mr-3"></span>Create Products</a></li>
         <li <?php if ($last_loaded_file == 'productpage.php')
-          echo 'class="active"'; ?>><a href="?file=productpage.php"
+              echo 'class="active"'; ?>><a href="?file=productpage.php"
             data-file="productpage.php"><span class="fa fa-shopping-cart mr-3"></span>Products</a></li>
         <li <?php if ($last_loaded_file == 'createtagspage.php')
-          echo 'class="active"'; ?>><a
+              echo 'class="active"'; ?>><a
             href="?file=createtagspage.php" data-file="productpage.php"><span
               class="fa fa-user-plus mr-3"></span>create tag</a></li>
         <li <?php if ($last_loaded_file == 'tagspage.php')
-          echo 'class="active"'; ?>><a
+              echo 'class="active"'; ?>><a
             href="?file=tagspage.php" data-file="tagspage.php"><span
               class="fa fa-tag mr-3"></span>tags</a></li>
+        <li <?php if ($last_loaded_file == 'socialMediaPage.php')
+              echo 'class="active"'; ?>><a
+            href="?file=socialMediaPage.php" data-file="socialMediaPage.php"><span
+              class="fa fa-file-image-o mr-3"></span>Social Media</a></li>
       </ul>
     </nav>
 
@@ -145,16 +149,16 @@ $last_loaded_file = isset($_SESSION['last_loaded_file']) ? $_SESSION['last_loade
   <script src="js/main.js"></script>
 
   <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
       // Auto-dismiss floating alerts after 15 seconds
-      setTimeout(function () {
-        $("#floatingAlert").fadeOut('slow', function () {
+      setTimeout(function() {
+        $("#floatingAlert").fadeOut('slow', function() {
           $(this).remove();
         });
       }, 15000);
 
       // Handle click event on sidebar links
-      $(".list-unstyled a").click(function () {
+      $(".list-unstyled a").click(function() {
         $(".list-unstyled li").removeClass("active");
         $(this).parent().addClass("active");
       });

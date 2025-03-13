@@ -31,7 +31,7 @@ class Product
         try {
             // Insert product details
             $query = "INSERT INTO " . $this->table_name . " (admin_id, name, description, price, new_price, currency, image, popular, best_deal, on_sale, created_at) 
-                  VALUES (:admin_id, :name, :description, :price, :new_price, :currency, :image, :popular, :best_deal, :on_sale, NOW())"; // Add NOW() for created_at
+                  VALUES (:admin_id, :name, :description, :price, :new_price, :currency, :image, :popular, :best_deal, :on_sale, NOW())";
             $stmt = $this->conn->prepare($query);
 
             // Bind main product details
@@ -39,7 +39,7 @@ class Product
             $stmt->bindParam(":name", $this->name);
             $stmt->bindParam(":description", $this->description);
             $stmt->bindParam(":price", $this->price);
-            $stmt->bindParam(":new_price", $this->new_price); // Bind new_price
+            $stmt->bindParam(":new_price", $this->new_price);
             $stmt->bindParam(":currency", $this->currency);
             $stmt->bindParam(":image", $this->image);
             $stmt->bindParam(":popular", $this->popular);
@@ -51,18 +51,19 @@ class Product
                 // Get the last inserted product_id
                 $this->product_id = $this->conn->lastInsertId();
 
-                // Insert sizes, colors, and stock into product_sizes table
+                // Insert sizes, colors, stock, and color images into product_sizes table
                 foreach ($this->sizes as $size => $colorStocks) {
-                    foreach ($colorStocks as $color => $stock) {
-                        $size_query = "INSERT INTO " . $this->size_table . " (product_id, size, color, stock) 
-                                   VALUES (:product_id, :size, :color, :stock)";
+                    foreach ($colorStocks as $color => $data) {
+                        $size_query = "INSERT INTO " . $this->size_table . " (product_id, size, color, stock, color_image) 
+                                   VALUES (:product_id, :size, :color, :stock, :color_image)";
                         $size_stmt = $this->conn->prepare($size_query);
 
                         // Bind parameters
                         $size_stmt->bindParam(":product_id", $this->product_id);
                         $size_stmt->bindParam(":size", $size);
                         $size_stmt->bindParam(":color", $color);
-                        $size_stmt->bindParam(":stock", $stock);
+                        $size_stmt->bindParam(":stock", $data['stock']);
+                        $size_stmt->bindParam(":color_image", $data['color_image']);
 
                         // Execute the query for sizes and stocks
                         $size_stmt->execute();
@@ -73,32 +74,30 @@ class Product
                 throw new Exception("Database insert failed.");
             }
         } catch (Exception $e) {
-            // Log the error to the server log for debugging
             error_log("Error in creating product: " . $e->getMessage());
             return false;
         }
     }
 
-    // update product
     public function update($admin_id)
     {
         try {
-            $this->conn->beginTransaction(); // Start transaction
+            $this->conn->beginTransaction();
 
             // Update product details
             $query = "UPDATE " . $this->table_name . " SET
-                    admin_id = :admin_id,
-                    name = :name,
-                    description = :description,
-                    price = :price,
-                    new_price = :new_price, -- Corrected: Removed inline comment
-                    currency = :currency,
-                    image = :image,
-                    popular = :popular,
-                    best_deal = :best_deal,
-                    on_sale = :on_sale,
-                    updated_at = NOW()
-                WHERE product_id = :product_id";
+                admin_id = :admin_id,
+                name = :name,
+                description = :description,
+                price = :price,
+                new_price = :new_price,
+                currency = :currency,
+                image = :image,
+                popular = :popular,
+                best_deal = :best_deal,
+                on_sale = :on_sale,
+                updated_at = NOW()
+            WHERE product_id = :product_id";
 
             $stmt = $this->conn->prepare($query);
 
@@ -107,7 +106,7 @@ class Product
             $stmt->bindParam(":name", $this->name);
             $stmt->bindParam(":description", $this->description);
             $stmt->bindParam(":price", $this->price);
-            $stmt->bindParam(":new_price", $this->new_price); // Bind new_price
+            $stmt->bindParam(":new_price", $this->new_price);
             $stmt->bindParam(":currency", $this->currency);
             $stmt->bindParam(":image", $this->image);
             $stmt->bindParam(":popular", $this->popular);
@@ -131,15 +130,16 @@ class Product
 
             // Insert new sizes and colors
             foreach ($this->sizes as $size => $colorStocks) {
-                foreach ($colorStocks as $color => $stock) {
-                    $size_query = "INSERT INTO " . $this->size_table . " (product_id, size, color, stock)
-                               VALUES (:product_id, :size, :color, :stock)";
+                foreach ($colorStocks as $color => $data) {
+                    $size_query = "INSERT INTO " . $this->size_table . " (product_id, size, color, stock, color_image)
+                               VALUES (:product_id, :size, :color, :stock, :color_image)";
                     $size_stmt = $this->conn->prepare($size_query);
 
                     $size_stmt->bindParam(":product_id", $this->product_id);
                     $size_stmt->bindParam(":size", $size);
                     $size_stmt->bindParam(":color", $color);
-                    $size_stmt->bindParam(":stock", $stock);
+                    $size_stmt->bindParam(":stock", $data['stock']);
+                    $size_stmt->bindParam(":color_image", $data['color_image']);
 
                     if (!$size_stmt->execute()) {
                         throw new Exception("Failed to insert new size/color.");
@@ -147,10 +147,10 @@ class Product
                 }
             }
 
-            $this->conn->commit(); // Commit transaction
+            $this->conn->commit();
             return true;
         } catch (Exception $e) {
-            $this->conn->rollBack(); // Rollback transaction on error
+            $this->conn->rollBack();
             error_log("Error in updating product: " . $e->getMessage());
             return false;
         }
@@ -197,7 +197,7 @@ class Product
     // Get sizes and stock for a product
     public function getSizesAndColors()
     {
-        $query = "SELECT size, color, stock FROM " . $this->size_table . " WHERE product_id = :product_id";
+        $query = "SELECT size, color, stock, color_image FROM " . $this->size_table . " WHERE product_id = :product_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":product_id", $this->product_id);
         $stmt->execute();
