@@ -91,9 +91,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
     $sizes = $_POST['sizes'];
     $stocks = $_POST['stocks'];
 
+    $color_images = $_FILES['color_images'];
+
     $product->sizes = [];
     for ($i = 0; $i < count($sizes); $i++) {
-        $product->sizes[$sizes[$i]][$colors[$i]] = $stocks[$i];
+        $color_image_name = basename($color_images['name'][$i]);
+        $color_image_tmp = $color_images['tmp_name'][$i];
+        $color_image_path = $target_dir . $color_image_name;
+
+        // If a new color image is uploaded, move it to the uploads directory
+        if (!empty($color_image_name)) {
+            if (move_uploaded_file($color_image_tmp, $color_image_path)) {
+                $product->sizes[$sizes[$i]][$colors[$i]] = [
+                    'stock' => $stocks[$i],
+                    'color_image' => $color_image_path
+                ];
+            } else {
+                $_SESSION['error'] = "Failed to upload color image.";
+                header("Location: ../index.php?file=updateproductpage.php&id=" . $product->product_id);
+                exit();
+            }
+        } else {
+            // If no new color image is uploaded, keep the old one
+            $old_sizes_and_colors = $product->getSizesAndColors();
+            foreach ($old_sizes_and_colors as $old_item) {
+                if ($old_item['size'] == $sizes[$i] && $old_item['color'] == $colors[$i]) {
+                    $product->sizes[$sizes[$i]][$colors[$i]] = [
+                        'stock' => $stocks[$i],
+                        'color_image' => $old_item['color_image']
+                    ];
+                    break;
+                }
+            }
+        }
     }
 
     try {

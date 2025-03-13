@@ -139,7 +139,7 @@ if (isset($_GET['id'])) {
             </div>
 
             <div class="row mb-3">
-                <label class="col-sm-2 col-form-label">Colors, Sizes & Stock</label>
+                <label class="col-sm-2 col-form-label">Colors, Sizes, Stock & Images</label>
                 <div class="col-sm-10">
                     <div id="color-size-fields">
                         <?php
@@ -150,14 +150,14 @@ if (isset($_GET['id'])) {
                             echo '<input type="text" name="colors[]" class="form-control d-inline-block w-25" placeholder="Color (e.g., Red, Blue)" value="' . htmlspecialchars($item['color']) . '" required>';
                             echo '<input type="text" name="sizes[]" class="form-control d-inline-block w-25" placeholder="Size (e.g., S, M, L)" value="' . htmlspecialchars($item['size']) . '" required>';
                             echo '<input type="number" name="stocks[]" class="form-control d-inline-block w-25" placeholder="Stock for this size" value="' . htmlspecialchars($item['stock']) . '" required>';
+                            echo '<input type="file" name="color_images[]" class="form-control d-inline-block w-25">';
                             echo '<button type="button" class="btn btn-danger btn-sm ms-2 remove-field">X</button>';
                             echo '</div>';
                             $count++;
                         }
                         ?>
                     </div>
-                    <button type="button" id="add-color-size" class="btn btn-secondary mt-2">Add Another Color &
-                        Size</button>
+                    <button type="button" id="add-color-size" class="btn btn-secondary mt-2">Add Another Color & Size</button>
                 </div>
             </div>
 
@@ -210,15 +210,13 @@ if (isset($_GET['id'])) {
             var newField = document.createElement('div');
             newField.classList.add('color-size-field', 'mb-2', 'd-flex', 'align-items-center');
             newField.innerHTML = `
-            <label class="fw-bold me-2">${fieldCount}.</label>
-            <input type="text" name="colors[]" class="form-control d-inline-block w-25"
-                placeholder="Color (e.g., Red, Blue)" required>
-            <input type="text" name="sizes[]" class="form-control d-inline-block w-25"
-                placeholder="Size (e.g., S, M, L)" required>
-            <input type="number" name="stocks[]" class="form-control d-inline-block w-25"
-                placeholder="Stock for this size" required>
-            <button type="button" class="btn btn-danger btn-sm ms-2 remove-field">X</button>
-        `;
+                    <label class="fw-bold me-2">${fieldCount}.</label>
+                    <input type="text" name="colors[]" class="form-control d-inline-block w-25" placeholder="Color (e.g., Red, Blue)" required>
+                    <input type="text" name="sizes[]" class="form-control d-inline-block w-25" placeholder="Size (e.g., S, M, L)" required>
+                    <input type="number" name="stocks[]" class="form-control d-inline-block w-25" placeholder="Stock for this size" required>
+                    <input type="file" name="color_images[]" class="form-control d-inline-block w-25">
+                    <button type="button" class="btn btn-danger btn-sm ms-2 remove-field">X</button>
+                `;
 
             colorSizeFields.appendChild(newField);
             updateLabels();
