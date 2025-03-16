@@ -462,24 +462,65 @@
     /*----- 
         Quantity
     --------------------------------*/
+
+    /*----- 
+    Quantity
+--------------------------------*/
     $('.pro-qty').prepend('<span class="dec qtybtn"><i class="ti-minus"></i></span>');
     $('.pro-qty').append('<span class="inc qtybtn"><i class="ti-plus"></i></span>');
+
+    // Attach the event handler only once
     $('.qtybtn').on('click', function () {
         var $button = $(this);
-        var oldValue = $button.parent().find('input').val();
-        if ($button.hasClass('inc')) {
-            var newVal = parseFloat(oldValue) + 1;
-        } else {
-            // Don't allow decrementing below zero
-            if (oldValue > 0) {
-                var newVal = parseFloat(oldValue) - 1;
-            } else {
-                newVal = 0;
-            }
-        }
-        $button.parent().find('input').val(newVal);
-    });
+        var $input = $button.parent().find('input'); // Find the input field
+        var oldValue = parseFloat($input.val()); // Get the current quantity
+        var cartId = $input.data('cart-id'); // Get the cart_id from the data attribute
+        var quantity;
 
+        if ($button.hasClass('inc')) {
+            quantity = oldValue + 1; // Increment quantity
+        } else {
+            quantity = oldValue > 1 ? oldValue - 1 : 1; // Decrement quantity, but not below 1
+        }
+
+        $input.val(quantity); // Update the input field with the new quantity
+
+        // AJAX call to update the cart
+        $.ajax({
+            type: 'POST',
+            url: '/calistobaby/proccess/update_cart_quantity.php',
+            data: JSON.stringify({
+                cart_id: cartId, // Use the cart_id from the data attribute
+                quantity: quantity
+            }),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function (response) {
+                if (response.success) {
+                    // Format the subtotal and total with commas
+                    var formattedSubtotal = response.subtotal.toLocaleString();
+                    var formattedTotal = response.total.toLocaleString();
+                    var formattedItemSubtotal = response.item_subtotal.toLocaleString();
+
+                    // Update cart totals and display messages
+                    $('.cart-subtotal .amount').text('$' + formattedSubtotal);
+                    $('.order-total .amount').text('$' + formattedTotal);
+
+                    // Update the individual item subtotal
+                    $button.closest('tr').find('.pro-subtotal').text('$' + formattedItemSubtotal);
+
+                    console.log("Cart updated successfully");
+                } else {
+                    console.error("Cart update failed:", response.message);
+                    // Optionally display an error message to the user
+                }
+            },
+            error: function (error) {
+                console.error("Error updating cart:", error);
+                // Optionally display an error message to the user
+            }
+        });
+    });
     /*----- 
         Shipping Form Toggle
     --------------------------------*/

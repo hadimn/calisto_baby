@@ -181,7 +181,7 @@ if (isset($_GET['product_id'])) {
                                         <form id="add-to-cart-form" method="POST" action="proccess/add_to_cart.php">
                                             <input type="hidden" name="product_id" value="<?= $prod['product_id'] ?>">
                                             <input type="hidden" name="quantity" id="quantity-input" value="1">
-                                            <input type="hidden" name="color" id="selected-color" value="">
+                                            <input type="hidden" name="color" id="selected-color" value="<?= $prodSizesAndColors[0]['color'] ?>"> <!-- Default color -->
                                             <input type="hidden" name="size" id="selected-size-hidden" value="<?= $sizes[0] ?>"> <!-- Default size -->
                                             <button type="submit"><i class="ti-shopping-cart"></i><span>ADD TO CART</span></button>
                                         </form>
@@ -388,35 +388,7 @@ if (isset($_GET['product_id'])) {
     <!-- Main JS -->
     <script src="assets/js/main.js"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const quantityInput = document.querySelector('.pro-qty input');
-            const colorButtons = document.querySelectorAll('.color-options button');
-            const selectedColorInput = document.getElementById('selected-color');
-            const selectedSizeInput = document.getElementById('selected-size');
-            const quantityHiddenInput = document.getElementById('quantity-input');
-
-            // Update the hidden quantity input when the quantity changes
-            quantityInput.addEventListener('change', function() {
-                quantityHiddenInput.value = this.value;
-            });
-
-            // Update the hidden color input when a color is selected
-            colorButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    colorButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
-                    selectedColorInput.value = this.style.backgroundColor;
-                });
-            });
-
-            // Update the hidden size input when a size is selected
-            selectedSizeInput.addEventListener('change', function() {
-                document.getElementById('selected-size-hidden').value = this.value;
-            });
-        });
-    </script>
+    
 
 </body>
 

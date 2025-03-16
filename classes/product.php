@@ -318,4 +318,16 @@ class Product
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getStockForSizeAndColor($size, $color)
+    {
+        $query = "SELECT stock FROM " . $this->size_table . " WHERE product_id = :product_id AND size = :size AND color = :color";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":product_id", $this->product_id);
+        $stmt->bindParam(":size", $size);
+        $stmt->bindParam(":color", $color);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? $result['stock'] : 0;
+    }
 }

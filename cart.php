@@ -4,7 +4,8 @@ include 'classes/database.php';
 include 'classes/cart.php';
 
 if (!isset($_SESSION['customer_id'])) {
-    die("You need to be logged in to view the cart.");
+    $_SESSION['error'] = 'you need to be logged in.';
+    header('Location: index.php');
 }
 
 $customer_id = $_SESSION['customer_id'];
@@ -18,6 +19,11 @@ $cart = new Cart($db);
 $cart->customer_id = $customer_id;
 $stmt = $cart->getItems();
 $cart_items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Calculate cart totals
+$totals = $cart->calculateCartTotals($customer_id);
+$subtotal = $totals['subtotal'];
+$total = $totals['total'];
 session_abort();
 ?>
 
@@ -118,6 +124,7 @@ session_abort();
                                                     <small>Color: <?= htmlspecialchars($item['color']) ?></small>
                                                     <br>
                                                     <small>Size: <?= htmlspecialchars($item['size']) ?></small>
+                                                    <br>
                                                 </td>
                                                 <td class="pro-price">
                                                     <span class="amount">$<?= htmlspecialchars($price) ?></span>
@@ -129,7 +136,9 @@ session_abort();
                                                 </td>
                                                 <td class="pro-quantity">
                                                     <div class="pro-qty">
-                                                        <input type="text" value="<?= htmlspecialchars($item['quantity']) ?>">
+                                                        <span class="dec qtybtn"><i class="ti-minus"></i></span>
+                                                        <input type="text" value="<?= htmlspecialchars($item['quantity']) ?>" data-cart-id="<?= htmlspecialchars($item['cart_id']) ?>">
+                                                        <span class="inc qtybtn"><i class="ti-plus"></i></span>
                                                     </div>
                                                 </td>
                                                 <td class="pro-subtotal">
@@ -165,12 +174,12 @@ session_abort();
                                     <tbody>
                                         <tr class="cart-subtotal">
                                             <th>Subtotal</th>
-                                            <td><span class="amount">$306.00</span></td>
+                                            <td><span class="amount">$<?= number_format($subtotal, 2) ?></span></td>
                                         </tr>
                                         <tr class="order-total">
                                             <th>Total</th>
                                             <td>
-                                                <strong><span class="amount">$306.00</span></strong>
+                                                <strong><span class="amount">$<?= number_format($total, 2) ?></span></strong>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -228,6 +237,8 @@ session_abort();
     <!-- JS
 ============================================ -->
 
+
+
     <!-- jQuery JS -->
     <script src="assets/js/vendor/jquery-3.6.0.min.js"></script>
     <!-- Migrate JS -->
@@ -238,33 +249,6 @@ session_abort();
     <script src="assets/js/plugins.js"></script>
     <!-- Main JS -->
     <script src="assets/js/main.js"></script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const quantityInputs = document.querySelectorAll('.pro-qty input');
-
-            quantityInputs.forEach(input => {
-                input.addEventListener('change', function() {
-                    const row = this.closest('tr');
-                    const price = parseFloat(row.querySelector('.pro-price .amount').textContent.replace('$', ''));
-                    const quantity = parseInt(this.value);
-                    const subtotal = price * quantity;
-
-                    row.querySelector('.pro-subtotal').textContent = `$${subtotal.toFixed(2)}`;
-                    updateCartTotal();
-                });
-            });
-
-            function updateCartTotal() {
-                let total = 0;
-                document.querySelectorAll('.pro-subtotal').forEach(subtotal => {
-                    total += parseFloat(subtotal.textContent.replace('$', ''));
-                });
-                document.querySelector('.order-total .amount').textContent = `$${total.toFixed(2)}`;
-            }
-        });
-    </script>
-
 </body>
 
 </html>

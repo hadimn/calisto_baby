@@ -52,6 +52,21 @@ $best_deal_products = $product->getPorductsBestDeal();
 
     <!-- Modernizer JS -->
     <script src="assets/js/vendor/modernizr-3.11.2.min.js"></script>
+
+    <style>
+        .floating-alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1050;
+            /* Ensure it's above other elements */
+            width: 80%;
+            /* Adjust width as needed */
+            max-width: 500px;
+            /* Limit maximum width */
+        }
+    </style>
 </head>
 
 <body>
@@ -62,6 +77,18 @@ $best_deal_products = $product->getPorductsBestDeal();
 
         <!-- Hero Section Start "last 4 on-sale products" -->
         <div class="hero-section section">
+
+            <div class="container">
+                <?php
+
+                if (isset($_SESSION['error'])) {
+                    echo '<div style="width: fit-content;" class="alert alert-danger alert-dismissible fade show floating-alert" role="alert" id="floatingAlert">';
+                    echo '  ' . $_SESSION['error'];
+                    echo '</div>';
+                    unset($_SESSION['error']);
+                }
+                ?>
+            </div>
 
             <!-- Hero Slider Start -->
             <div class="hero-slider hero-slider-one fix">
@@ -167,7 +194,7 @@ $best_deal_products = $product->getPorductsBestDeal();
 
                                         <div class="content-left">
 
-                                            <h4 class="title"><a href="single-product.php?product_id=<?=$popular_product['product_id']?>"><?= $popular_product['name'] ?></a></h4>
+                                            <h4 class="title"><a href="single-product.php?product_id=<?= $popular_product['product_id'] ?>"><?= $popular_product['name'] ?></a></h4>
 
                                             <div class="ratting">
                                                 <i class="fa fa-star"></i>
@@ -309,8 +336,8 @@ $best_deal_products = $product->getPorductsBestDeal();
                                                 <span class="price">$<?= explode('.', $best_deal_product['new_price'])[0] ?><?php if (explode(".", $best_deal_product['new_price'])[1] != "00") {
                                                                                                                                 echo ("." . explode(".", $best_deal_product['new_price'])[1]);
                                                                                                                             } ?>
-                                                    <span class="old">$<?= explode(".",$best_deal_product['price'])[0] ?></span></span>
-                                                    </span>
+                                                    <span class="old">$<?= explode(".", $best_deal_product['price'])[0] ?></span></span>
+                                                </span>
                                                 </span>
                                             </div>
 
@@ -342,9 +369,9 @@ $best_deal_products = $product->getPorductsBestDeal();
                             <?php foreach ($productsOnSale as $productOnSale): ?>
                                 <div class="col mb-40">
                                     <div class="on-sale-product">
-                                        <a href="single-product.php?product_id=<?=$productOnSale['product_id']?>" class="image"><img src="admin-pages/<?= $productOnSale['image'] ?>" height="175" alt="Image"></a>
+                                        <a href="single-product.php?product_id=<?= $productOnSale['product_id'] ?>" class="image"><img src="admin-pages/<?= $productOnSale['image'] ?>" height="175" alt="Image"></a>
                                         <div class="content text-center">
-                                            <h4 class="title"><a href="single-product.php?product_id=<?=$productOnSale['product_id']?>"><?= $productOnSale['name'] ?></a></h4>
+                                            <h4 class="title"><a href="single-product.php?product_id=<?= $productOnSale['product_id'] ?>"><?= $productOnSale['name'] ?></a></h4>
                                             <span class="price"><?php if ($productOnSale['currency'] == "USD") {
                                                                     echo "$";
                                                                 } else {
@@ -560,7 +587,7 @@ $best_deal_products = $product->getPorductsBestDeal();
             </div>
         </div><!-- Brand Section End -->
 
-        <?php include 'footer.php'?>
+        <?php include 'footer.php' ?>
 
     </div>
 
@@ -578,6 +605,13 @@ $best_deal_products = $product->getPorductsBestDeal();
     <!-- Main JS -->
     <script src="assets/js/main.js"></script>
 
+    <script>
+        $(document).ready(function() {
+            setTimeout(function() {
+                $('#floatingAlert').alert('close');
+            }, 5000); // 5000 milliseconds = 5 seconds
+        });
+    </script>
 </body>
 
 </html>
