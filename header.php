@@ -50,7 +50,7 @@ session_start();
                     <div class="header-top-right">
                         <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == true): ?>
                             <div style="display: flex; align-items: center;">
-                                <p style="margin-right: 10px;"><a href="my-account.php">My Account</a></p>
+                                <p style="margin-right: 10px; <?php if(explode('/',$_SERVER['PHP_SELF'])[2] == 'my-account.php'): ?>color:#FF7B8D<?php endif?>"><a href="my-account.php">My Account</a></p>
                                 <form action="proccess/logout-proccess.php" method="post">
                                     <button type="submit" class="btn btn-danger">Logout</button>
                                 </form>

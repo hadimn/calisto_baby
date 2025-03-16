@@ -12,7 +12,11 @@ if (isset($_GET['file'])) {
 }
 
 // Get the last loaded file from session or default to homepage
-$last_loaded_file = isset($_SESSION['last_loaded_file']) ? $_SESSION['last_loaded_file'] : 'homepage.php';
+$last_loaded_file = isset($_SESSION['last_loaded_file']) ? $_SESSION['last_loaded_file'] : 'dashboard.php';
+
+if(!isset($_GET['file'])){
+  header("Location: index.php?file=$last_loaded_file");
+}
 ?>
 
 <!doctype html>

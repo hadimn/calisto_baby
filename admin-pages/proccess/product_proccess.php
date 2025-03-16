@@ -132,6 +132,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         print($e->getMessage());
     }
 
-    header("Location: index.php");
+    header("Location: index.php?file=productpage.php");
     exit();
 }

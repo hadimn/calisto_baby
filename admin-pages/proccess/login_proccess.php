@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['logged_in'] = true;
 
                     // Redirect to the admin dashboard
-                    header("Location: ../index.php");
+                    header("Location: ../index.php?file=dashboard.php");
                     exit();
                 } else {
                     // Incorrect password, log the failed attempt

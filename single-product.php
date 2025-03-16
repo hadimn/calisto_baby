@@ -8,6 +8,9 @@ if (isset($_GET['product_id'])) {
     $product = new Product($db);
     $product->product_id = $_GET['product_id'];
     $prod = $product->getById();
+    $prodSizesAndColors = $product->getSizesAndColors();
+    $prodTags = $product->getTags();
+    $relatedProducts = $product->getRelatedProducts();
 }
 ?>
 
@@ -24,8 +27,15 @@ if (isset($_GET['product_id'])) {
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="assets/images/favicon.ico">
 
+    <!-- Other meta tags -->
+    <meta property="og:title" content="<?= $prod['name'] ?>" />
+    <meta property="og:description" content="<?= $prod['description'] ?>" />
+    <meta property="og:image" content="http://<?= $_SERVER['HTTP_HOST'] ?>/admin-pages/<?= $prod['image'] ?>" />
+    <meta property="og:url" content="http://<?= $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ?>" />
+    <meta property="og:type" content="product" />
+
     <!-- CSS
-	============================================ -->
+ ============================================ -->
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
@@ -44,6 +54,17 @@ if (isset($_GET['product_id'])) {
 
     <!-- Modernizer JS -->
     <script src="assets/js/vendor/modernizr-3.11.2.min.js"></script>
+
+    <style>
+        .color-options button.active {
+            border: 2px solid #94C7EB !important;
+            /* Solid border for the active button */
+            box-shadow: 0 0 2px #94C7EB;
+            /* Glowing effect */
+            transition: box-shadow 0.3s ease;
+            /* Smooth transition for the glow */
+        }
+    </style>
 </head>
 
 <body>
@@ -78,19 +99,22 @@ if (isset($_GET['product_id'])) {
                         <div class="row row-20 mb-10">
 
                             <div class="col-lg-6 col-12 mb-40">
-
-                                <div class="pro-large-img mb-10 fix easyzoom easyzoom--overlay easyzoom--with-thumbnails">
-                                    <a href="assets/images/product/product-zoom-1.jpg">
-                                        <img src="assets/images/product/product-big-1.jpg" alt="" />
+                                <!-- Main Image Container -->
+                                <div class="pro-large-img mb-10 fix easyzoom easyzoom--with-thumbnails d-flex justify-content-center align-items-center" style="width: 400px; height: 400px; margin: 0 auto;">
+                                    <a href="admin-pages/<?= $prodSizesAndColors[0]['color_image'] ?>">
+                                        <img src="admin-pages/<?= $prod['image'] ?>" alt="" class="img-fluid main-image object-fit-contain" style="max-width: 100%; max-height: 100%;" />
                                     </a>
                                 </div>
-                                <!-- Single Product Thumbnail Slider -->
-                                <ul id="pro-thumb-img" class="pro-thumb-img">
-                                    <li><a href="assets/images/product/product-zoom-1.jpg" data-standard="assets/images/product/product-big-1.jpg"><img src="assets/images/product/product-1.jpg" alt="" /></a></li>
-                                    <li><a href="assets/images/product/product-zoom-2.jpg" data-standard="assets/images/product/product-big-2.jpg"><img src="assets/images/product/product-2.jpg" alt="" /></a></li>
-                                    <li><a href="assets/images/product/product-zoom-3.jpg" data-standard="assets/images/product/product-big-3.jpg"><img src="assets/images/product/product-3.jpg" alt="" /></a></li>
-                                    <li><a href="assets/images/product/product-zoom-4.jpg" data-standard="assets/images/product/product-big-4.jpg"><img src="assets/images/product/product-4.jpg" alt="" /></a></li>
-                                    <li><a href="assets/images/product/product-zoom-5.jpg" data-standard="assets/images/product/product-big-5.jpg"><img src="assets/images/product/product-5.jpg" alt="" /></a></li>
+
+                                <!-- Thumbnail Slider -->
+                                <ul id="pro-thumb-img" class="pro-thumb-img list-unstyled d-flex gap-2 overflow-auto">
+                                    <?php foreach ($prodSizesAndColors as $prodSizeAndColor): ?>
+                                        <li class="flex-shrink-0">
+                                            <a href="#" data-standard="admin-pages/<?= $prodSizeAndColor['color_image'] ?>" data-color="<?= $prodSizeAndColor['color'] ?>">
+                                                <img src="admin-pages/<?= $prodSizeAndColor['color_image'] ?>" alt="" class="img-thumbnail object-fit-cover" style="width: 200px; height: 80px;" />
+                                            </a>
+                                        </li>
+                                    <?php endforeach; ?>
                                 </ul>
                             </div>
 
@@ -133,43 +157,61 @@ if (isset($_GET['product_id'])) {
                                         <div class="colors">
                                             <h5>Color:</h5>
                                             <div class="color-options">
-                                                <button style="background-color: #ff502e"></button>
-                                                <button style="background-color: #fff600"></button>
-                                                <button style="background-color: #1b2436"></button>
+                                                <?php foreach ($prodSizesAndColors as $prodSizeAndColor): ?>
+                                                    <button style="background-color: <?= $prodSizeAndColor['color'] ?>"></button>
+                                                <?php endforeach; ?>
                                             </div>
+                                        </div>
+
+                                        <div class="sizes">
+                                            <h5>Size:</h5>
+                                            <select name="size" id="selected-size">
+                                                <?php
+                                                // Get unique sizes for the product
+                                                $sizes = array_unique(array_column($prodSizesAndColors, 'size'));
+                                                foreach ($sizes as $size): ?>
+                                                    <option value="<?= htmlspecialchars($size) ?>"><?= htmlspecialchars($size) ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
                                         </div>
 
                                     </div>
 
                                     <div class="actions">
-
-                                        <button><i class="ti-shopping-cart"></i><span>ADD TO CART</span></button>
+                                        <form id="add-to-cart-form" method="POST" action="proccess/add_to_cart.php">
+                                            <input type="hidden" name="product_id" value="<?= $prod['product_id'] ?>">
+                                            <input type="hidden" name="quantity" id="quantity-input" value="1">
+                                            <input type="hidden" name="color" id="selected-color" value="">
+                                            <input type="hidden" name="size" id="selected-size-hidden" value="<?= $sizes[0] ?>"> <!-- Default size -->
+                                            <button type="submit"><i class="ti-shopping-cart"></i><span>ADD TO CART</span></button>
+                                        </form>
                                         <button class="box" data-tooltip="Compare"><i class="ti-control-shuffle"></i></button>
                                         <button class="box" data-tooltip="Wishlist"><i class="ti-heart"></i></button>
-
                                     </div>
 
                                     <div class="tags">
 
                                         <h5>Tags:</h5>
-                                        <a href="#">Electronic</a>
-                                        <a href="#">Smartphone</a>
-                                        <a href="#">Phone</a>
-                                        <a href="#">Charger</a>
-                                        <a href="#">Powerbank</a>
+                                        <?php foreach ($prodTags as $prodTag): ?>
+                                            <a href="#"><?= $prodTag['name'] ?></a>
+                                        <?php endforeach; ?>
 
                                     </div>
 
                                     <div class="share">
 
                                         <h5>Share: </h5>
-                                        <a href="#"><i class="fa fa-facebook"></i></a>
-                                        <a href="#"><i class="fa fa-twitter"></i></a>
-                                        <a href="#"><i class="fa fa-instagram"></i></a>
-                                        <a href="#"><i class="fa fa-google-plus"></i></a>
+                                        <!-- Facebook -->
+                                        <a href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) ?>"
+                                            target="_blank"><i class="fa fa-facebook"></i></a>
+                                        <!-- Instagram -->
+                                        <a href="https://www.instagram.com/" target="_blank"><i
+                                                class="fa fa-instagram"></i></a>
+                                        <!-- Twitter (Optional) -->
+                                        <a href="https://twitter.com/intent/tweet?url=<?= urlencode('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']) ?>&text=Check%20out%20this%20product:%20<?= urlencode($prod['name']) ?>"
+                                            target="_blank"><i class="fa fa-twitter"></i></a>
 
                                     </div>
-
                                 </div>
                             </div>
 
@@ -187,7 +229,13 @@ if (isset($_GET['product_id'])) {
                             <!-- Tab panes -->
                             <div class="tab-content col-12">
                                 <div class="pro-info-tab tab-pane active" id="more-info">
-                                    <p>Fashion has been creating well-designed collections since 2010. The brand offers feminine designs delivering stylish separates and statement dresses which have since evolved into a full ready-to-wear collection in which every item is a vital part of a woman's wardrobe. The result? Cool, easy, chic looks with youthful elegance and unmistakable signature style. All the beautiful pieces are made in Italy and manufactured with the greatest attention. Now Fashion extends to a range of accessories including shoes, hats, belts and more!</p>
+                                    <p>Fashion has been creating well-designed collections since 2010. The brand offers
+                                        feminine designs delivering stylish separates and statement dresses which have
+                                        since evolved into a full ready-to-wear collection in which every item is a
+                                        vital part of a woman's wardrobe. The result? Cool, easy, chic looks with
+                                        youthful elegance and unmistakable signature style. All the beautiful pieces are
+                                        made in Italy and manufactured with the greatest attention. Now Fashion extends
+                                        to a range of accessories including shoes, hats, belts and more!</p>
                                 </div>
                                 <div class="pro-info-tab tab-pane" id="data-sheet">
                                     <table class="table-data-sheet">
@@ -229,240 +277,59 @@ if (isset($_GET['product_id'])) {
 
                 <div class="related-product-slider related-product-slider-1 slick-space p-0">
 
-                    <div class="slick-slide">
+                    <?php foreach ($relatedProducts as $relatedProduct): ?>
+                        <div class="slick-slide">
 
-                        <div class="product-item">
-                            <div class="product-inner">
+                            <div class="product-item">
+                                <div class="product-inner">
 
-                                <div class="image">
-                                    <img src="assets/images/product/product-1.jpg" alt="">
+                                    <div class="image">
+                                        <img src="admin-pages/<?= $relatedProduct['image'] ?>" alt="">
 
-                                    <div class="image-overlay">
-                                        <div class="action-buttons">
-                                            <button>add to cart</button>
-                                            <button>add to wishlist</button>
+                                        <div class="image-overlay">
+                                            <div class="action-buttons">
+                                                <button>add to cart</button>
+                                                <button>add to wishlist</button>
+                                            </div>
                                         </div>
+
+                                    </div>
+
+                                    <div class="content">
+
+                                        <div class="content-left">
+
+                                            <h4 class="title"><a href="single-product.html">Tmart Baby Dress</a></h4>
+
+                                            <div class="ratting">
+                                                <i class="fa fa-star"></i>
+                                                <i class="fa fa-star"></i>
+                                                <i class="fa fa-star"></i>
+                                                <i class="fa fa-star-half-o"></i>
+                                                <i class="fa fa-star-o"></i>
+                                            </div>
+
+                                            <h5 class="size">Size:
+                                                <span>S</span><span>M</span><span>L</span><span>XL</span>
+                                            </h5>
+                                            <h5 class="color">Color: <span style="background-color: #ffb2b0"></span><span
+                                                    style="background-color: #0271bc"></span><span
+                                                    style="background-color: #efc87c"></span><span
+                                                    style="background-color: #00c183"></span></h5>
+
+                                        </div>
+
+                                        <div class="content-right">
+                                            <span class="price">$25</span>
+                                        </div>
+
                                     </div>
 
                                 </div>
-
-                                <div class="content">
-
-                                    <div class="content-left">
-
-                                        <h4 class="title"><a href="single-product.html">Tmart Baby Dress</a></h4>
-
-                                        <div class="ratting">
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star-half-o"></i>
-                                            <i class="fa fa-star-o"></i>
-                                        </div>
-
-                                        <h5 class="size">Size: <span>S</span><span>M</span><span>L</span><span>XL</span></h5>
-                                        <h5 class="color">Color: <span style="background-color: #ffb2b0"></span><span style="background-color: #0271bc"></span><span style="background-color: #efc87c"></span><span style="background-color: #00c183"></span></h5>
-
-                                    </div>
-
-                                    <div class="content-right">
-                                        <span class="price">$25</span>
-                                    </div>
-
-                                </div>
-
                             </div>
+
                         </div>
-
-                    </div>
-
-                    <div class="slick-slide">
-
-                        <div class="product-item">
-                            <div class="product-inner">
-
-                                <div class="image">
-                                    <img src="assets/images/product/product-2.jpg" alt="">
-
-                                    <div class="image-overlay">
-                                        <div class="action-buttons">
-                                            <button>add to cart</button>
-                                            <button>add to wishlist</button>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <div class="content">
-
-                                    <div class="content-left">
-
-                                        <h4 class="title"><a href="single-product.html">Jumpsuit Outfits</a></h4>
-
-                                        <div class="ratting">
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                        </div>
-
-                                        <h5 class="size">Size: <span>S</span><span>M</span><span>L</span><span>XL</span></h5>
-                                        <h5 class="color">Color: <span style="background-color: #ffb2b0"></span><span style="background-color: #0271bc"></span><span style="background-color: #efc87c"></span><span style="background-color: #00c183"></span></h5>
-
-                                    </div>
-
-                                    <div class="content-right">
-                                        <span class="price">$09</span>
-                                    </div>
-
-                                </div>
-
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="slick-slide">
-
-                        <div class="product-item">
-                            <div class="product-inner">
-
-                                <div class="image">
-                                    <img src="assets/images/product/product-3.jpg" alt="">
-
-                                    <div class="image-overlay">
-                                        <div class="action-buttons">
-                                            <button>add to cart</button>
-                                            <button>add to wishlist</button>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <div class="content">
-
-                                    <div class="content-left">
-
-                                        <h4 class="title"><a href="single-product.html">Smart Shirt</a></h4>
-
-                                        <div class="ratting">
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star-o"></i>
-                                        </div>
-
-                                        <h5 class="size">Size: <span>S</span><span>M</span><span>L</span><span>XL</span></h5>
-                                        <h5 class="color">Color: <span style="background-color: #ffb2b0"></span><span style="background-color: #0271bc"></span><span style="background-color: #efc87c"></span><span style="background-color: #00c183"></span></h5>
-
-                                    </div>
-
-                                    <div class="content-right">
-                                        <span class="price">$18</span>
-                                    </div>
-
-                                </div>
-
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="slick-slide">
-
-                        <div class="product-item">
-                            <div class="product-inner">
-
-                                <div class="image">
-                                    <img src="assets/images/product/product-4.jpg" alt="">
-
-                                    <div class="image-overlay">
-                                        <div class="action-buttons">
-                                            <button>add to cart</button>
-                                            <button>add to wishlist</button>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <div class="content">
-
-                                    <div class="content-left">
-
-                                        <h4 class="title"><a href="single-product.html">Kids Shoe</a></h4>
-
-                                        <div class="ratting">
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star-half-o"></i>
-                                            <i class="fa fa-star-o"></i>
-                                        </div>
-
-                                        <h5 class="size">Size: <span>S</span><span>M</span><span>L</span><span>XL</span></h5>
-                                        <h5 class="color">Color: <span style="background-color: #ffb2b0"></span><span style="background-color: #0271bc"></span><span style="background-color: #efc87c"></span><span style="background-color: #00c183"></span></h5>
-
-                                    </div>
-
-                                    <div class="content-right">
-                                        <span class="price">$15</span>
-                                    </div>
-
-                                </div>
-
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="slick-slide">
-
-                        <div class="product-item">
-                            <div class="product-inner">
-
-                                <div class="image">
-                                    <img src="assets/images/product/product-5.jpg" alt="">
-
-                                    <div class="image-overlay">
-                                        <div class="action-buttons">
-                                            <button>add to cart</button>
-                                            <button>add to wishlist</button>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <div class="content">
-
-                                    <div class="content-left">
-
-                                        <h4 class="title"><a href="single-product.html"> Bowknot Bodysuit</a></h4>
-
-                                        <div class="ratting">
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star-half-o"></i>
-                                        </div>
-
-                                        <h5 class="size">Size: <span>S</span><span>M</span><span>L</span><span>XL</span></h5>
-                                        <h5 class="color">Color: <span style="background-color: #ffb2b0"></span><span style="background-color: #0271bc"></span><span style="background-color: #efc87c"></span><span style="background-color: #00c183"></span></h5>
-
-                                    </div>
-
-                                    <div class="content-right">
-                                        <span class="price">$12</span>
-                                    </div>
-
-                                </div>
-
-                            </div>
-                        </div>
-
-                    </div>
+                    <?php endforeach; ?>
 
                 </div>
             </div>
@@ -503,76 +370,7 @@ if (isset($_GET['product_id'])) {
             </div>
         </div><!-- Brand Section End -->
 
-        <!-- Footer Top Section Start -->
-        <div class="footer-top-section section bg-theme-two-light section-padding">
-            <div class="container">
-                <div class="row mbn-40">
-
-                    <div class="footer-widget col-lg-3 col-md-6 col-12 mb-40">
-                        <h4 class="title">CONTACT US</h4>
-                        <p>You address will be here<br /> Lorem Ipsum text</p>
-                        <p><a href="tel:01234567890">01234 567 890</a><a href="tel:01234567891">01234 567 891</a></p>
-                        <p><a href="mailto:info@example.com">info@example.com</a><a href="#">www.example.com</a></p>
-                    </div>
-
-                    <div class="footer-widget col-lg-3 col-md-6 col-12 mb-40">
-                        <h4 class="title">PRODUCTS</h4>
-                        <ul>
-                            <li><a href="#">New Arrivals</a></li>
-                            <li><a href="#">Best Seller</a></li>
-                            <li><a href="#">Trendy Items</a></li>
-                            <li><a href="#">Best Deals</a></li>
-                            <li><a href="#">On Sale Products</a></li>
-                            <li><a href="#">Featured Products</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="footer-widget col-lg-3 col-md-6 col-12 mb-40">
-                        <h4 class="title">INFORMATION</h4>
-                        <ul>
-                            <li><a href="#">About us</a></li>
-                            <li><a href="#">Terms & Conditions</a></li>
-                            <li><a href="#">Payment Method</a></li>
-                            <li><a href="#">Product Warranty</a></li>
-                            <li><a href="#">Return Process</a></li>
-                            <li><a href="#">Payment Security</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="footer-widget col-lg-3 col-md-6 col-12 mb-40">
-                        <h4 class="title">NEWSLETTER</h4>
-                        <p>Subscribe our newsletter and get all update of our product</p>
-
-                        <form id="mc-form" class="mc-form footer-subscribe-form">
-                            <input id="mc-email" autocomplete="off" placeholder="Enter your email here" name="EMAIL" type="email">
-                            <button id="mc-submit"><i class="fa fa-paper-plane-o"></i></button>
-                        </form>
-                        <!-- mailchimp-alerts Start -->
-                        <div class="mailchimp-alerts">
-                            <div class="mailchimp-submitting"></div><!-- mailchimp-submitting end -->
-                            <div class="mailchimp-success"></div><!-- mailchimp-success end -->
-                            <div class="mailchimp-error"></div><!-- mailchimp-error end -->
-                        </div><!-- mailchimp-alerts end -->
-
-                        <h5>FOLLOW US</h5>
-                        <p class="footer-social"><a href="#">Facebook</a> - <a href="#">Twitter</a> - <a href="#">Google+</a></p>
-
-                    </div>
-
-                </div>
-            </div>
-        </div><!-- Footer Top Section End -->
-
-        <!-- Footer Bottom Section Start -->
-        <div class="footer-bottom-section section bg-theme-two pt-15 pb-15">
-            <div class="container">
-                <div class="row">
-                    <div class="col text-center">
-                        <p class="footer-copyright">© 2022 Jadusona. Made with <i class="fa fa-heart heart-icon"></i> By <a target="_blank" href="https://hasthemes.com">HasThemes</a></p>
-                    </div>
-                </div>
-            </div>
-        </div><!-- Footer Bottom Section End -->
+        <?php include 'footer.php' ?>
 
     </div>
 
@@ -590,6 +388,38 @@ if (isset($_GET['product_id'])) {
     <!-- Main JS -->
     <script src="assets/js/main.js"></script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const quantityInput = document.querySelector('.pro-qty input');
+            const colorButtons = document.querySelectorAll('.color-options button');
+            const selectedColorInput = document.getElementById('selected-color');
+            const selectedSizeInput = document.getElementById('selected-size');
+            const quantityHiddenInput = document.getElementById('quantity-input');
+
+            // Update the hidden quantity input when the quantity changes
+            quantityInput.addEventListener('change', function() {
+                quantityHiddenInput.value = this.value;
+            });
+
+            // Update the hidden color input when a color is selected
+            colorButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    colorButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedColorInput.value = this.style.backgroundColor;
+                });
+            });
+
+            // Update the hidden size input when a size is selected
+            selectedSizeInput.addEventListener('change', function() {
+                document.getElementById('selected-size-hidden').value = this.value;
+            });
+        });
+    </script>
+
 </body>
+
+</html>
 
 </html>

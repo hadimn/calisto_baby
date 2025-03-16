@@ -302,4 +302,20 @@ class Product
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getRelatedProducts()
+    {
+        $query = "SELECT DISTINCT p.*
+              FROM " . $this->table_name . " p
+              JOIN product_tags pt1 ON p.product_id = pt1.product_id
+              JOIN product_tags pt2 ON pt1.tag_id = pt2.tag_id
+              WHERE pt2.product_id = :product_id AND p.product_id != :product_id
+              LIMIT 8";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":product_id", $this->product_id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

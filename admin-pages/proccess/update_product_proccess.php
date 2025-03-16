@@ -73,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
             exit();
         }
 
-        if (!move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
+        if (!move_uploaded_file($_FILES['image']['tmp_name'], "../".$target_file)) {
             $_SESSION['error'] = "Failed to upload image.";
             header("Location: ../index.php?file=updateproductpage.php&id=" . $product->product_id);
             exit();
@@ -95,13 +95,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['product_id'])) {
 
     $product->sizes = [];
     for ($i = 0; $i < count($sizes); $i++) {
+        $target_dir = 'uploads/';
         $color_image_name = basename($color_images['name'][$i]);
         $color_image_tmp = $color_images['tmp_name'][$i];
         $color_image_path = $target_dir . $color_image_name;
 
         // If a new color image is uploaded, move it to the uploads directory
         if (!empty($color_image_name)) {
-            if (move_uploaded_file($color_image_tmp, $color_image_path)) {
+            if (move_uploaded_file($color_image_tmp, "../".$color_image_path)) {
                 $product->sizes[$sizes[$i]][$colors[$i]] = [
                     'stock' => $stocks[$i],
                     'color_image' => $color_image_path

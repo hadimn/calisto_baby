@@ -4,7 +4,7 @@ $errors = isset($_SESSION['form_errors']) ? $_SESSION['form_errors'] : [];
 unset($_SESSION['form_errors']); // Clear errors after displaying
 
 if (isset($_SESSION['admin_id'])) {
-  header("Location: index.php");
+  header("Location: index.php?file=dashboard.php");
   exit();
 }
 ?>
