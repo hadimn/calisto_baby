@@ -761,6 +761,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    $(document).ready(function () {
+        // Function to highlight the selected size button
+        $('.size-options button').on('click', function () {
+            $('.size-options button').removeClass('active'); // Remove active class from all buttons
+            $(this).addClass('active'); // Add active class to the clicked button
+        });
+    });
+
+    
     // Helper function to convert RGB to Hex
     function rgbToHex(rgb) {
         // Extract RGB values from the string

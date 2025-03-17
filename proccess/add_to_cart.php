@@ -5,15 +5,18 @@ include '../classes/product.php';
 include '../classes/cart.php';
 
 if (!isset($_SESSION['customer_id'])) {
-    $_SESSION['error'] = 'you need to be logged in.';
-    header('Location: index.php');
+    echo json_encode(['success' => false, 'message' => 'You need to be logged in.']);
+    exit;
 }
 
+// Get the raw POST data
+$data = json_decode(file_get_contents('php://input'), true);
+
 $customer_id = $_SESSION['customer_id'];
-$product_id = $_POST['product_id'];
-$quantity = $_POST['quantity'];
-$color = $_POST['color'];
-$size = $_POST['size'];
+$product_id = $data['product_id'];
+$quantity = $data['quantity'];
+$color = $data['color'];
+$size = $data['size'];
 
 // Connect to the database
 $database = new Database();
@@ -25,7 +28,8 @@ $product->product_id = $product_id;
 $stock = $product->getStockForSizeAndColor($size, $color);
 
 if ($stock < $quantity) {
-    die("Not enough stock available for the selected size and color.");
+    echo json_encode(['success' => false, 'message' => 'Not enough stock available for the selected size and color.']);
+    exit;
 }
 
 // Add to cart
@@ -38,7 +42,7 @@ $cart->size = $size;
 $cart->added_at = date('Y-m-d H:i:s');
 
 if ($cart->add()) {
-    header("Location: ../cart.php");
+    echo json_encode(['success' => true]);
 } else {
-    die("Failed to add product to cart.");
+    echo json_encode(['success' => false, 'message' => 'Failed to add product to cart.']);
 }

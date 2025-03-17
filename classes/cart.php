@@ -38,6 +38,36 @@ class Cart
         return false;
     }
 
+    // Remove a single cart item
+    public function removeItem($cart_id)
+    {
+        $query = "DELETE FROM " . $this->table_name . " WHERE cart_id = :cart_id";
+        $stmt = $this->conn->prepare($query);
+
+        // Bind the cart_id parameter
+        $stmt->bindParam(":cart_id", $cart_id);
+
+        if ($stmt->execute()) {
+            return true;
+        }
+        return false;
+    }
+
+    // Clear the entire cart for a customer
+    public function clearCart($customer_id)
+    {
+        $query = "DELETE FROM " . $this->table_name . " WHERE customer_id = :customer_id";
+        $stmt = $this->conn->prepare($query);
+
+        // Bind the customer_id parameter
+        $stmt->bindParam(":customer_id", $customer_id);
+
+        if ($stmt->execute()) {
+            return true;
+        }
+        return false;
+    }
+
     // Get items in cart with product details
     public function getItems()
     {

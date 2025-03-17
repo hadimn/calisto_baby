@@ -54,17 +54,6 @@ if (isset($_GET['product_id'])) {
 
     <!-- Modernizer JS -->
     <script src="assets/js/vendor/modernizr-3.11.2.min.js"></script>
-
-    <style>
-        .color-options button.active {
-            border: 2px solid #94C7EB !important;
-            /* Solid border for the active button */
-            box-shadow: 0 0 2px #94C7EB;
-            /* Glowing effect */
-            transition: box-shadow 0.3s ease;
-            /* Smooth transition for the glow */
-        }
-    </style>
 </head>
 
 <body>
@@ -148,43 +137,34 @@ if (isset($_GET['product_id'])) {
                                     <span class="availability">Availability: <span>In Stock</span></span>
 
                                     <div class="quantity-colors">
-
                                         <div class="quantity">
                                             <h5>Quantity:</h5>
-                                            <div class="pro-qty"><input type="text" value="1"></div>
+                                            <div class="pro-qty"><input type="text" id="quantity-input" value="1"></div>
                                         </div>
 
                                         <div class="colors">
                                             <h5>Color:</h5>
                                             <div class="color-options">
                                                 <?php foreach ($prodSizesAndColors as $prodSizeAndColor): ?>
-                                                    <button style="background-color: <?= $prodSizeAndColor['color'] ?>"></button>
+                                                    <button style="background-color: <?= $prodSizeAndColor['color'] ?>" data-color="<?= $prodSizeAndColor['color'] ?>"></button>
                                                 <?php endforeach; ?>
                                             </div>
                                         </div>
 
                                         <div class="sizes">
                                             <h5>Size:</h5>
-                                            <select name="size" id="selected-size">
+                                            <div class="size-options">
                                                 <?php
-                                                // Get unique sizes for the product
                                                 $sizes = array_unique(array_column($prodSizesAndColors, 'size'));
                                                 foreach ($sizes as $size): ?>
-                                                    <option value="<?= htmlspecialchars($size) ?>"><?= htmlspecialchars($size) ?></option>
+                                                    <button value="<?= htmlspecialchars($size) ?>" data-size="<?= htmlspecialchars($size) ?>"><?= htmlspecialchars($size) ?></button>
                                                 <?php endforeach; ?>
-                                            </select>
+                                            </div>
                                         </div>
-
                                     </div>
 
                                     <div class="actions">
-                                        <form id="add-to-cart-form" method="POST" action="proccess/add_to_cart.php">
-                                            <input type="hidden" name="product_id" value="<?= $prod['product_id'] ?>">
-                                            <input type="hidden" name="quantity" id="quantity-input" value="1">
-                                            <input type="hidden" name="color" id="selected-color" value="<?= $prodSizesAndColors[0]['color'] ?>"> <!-- Default color -->
-                                            <input type="hidden" name="size" id="selected-size-hidden" value="<?= $sizes[0] ?>"> <!-- Default size -->
-                                            <button type="submit"><i class="ti-shopping-cart"></i><span>ADD TO CART</span></button>
-                                        </form>
+                                        <button id="add-to-cart-button"><i class="ti-shopping-cart"></i><span>ADD TO CART</span></button>
                                         <button class="box" data-tooltip="Compare"><i class="ti-control-shuffle"></i></button>
                                         <button class="box" data-tooltip="Wishlist"><i class="ti-heart"></i></button>
                                     </div>
@@ -388,7 +368,64 @@ if (isset($_GET['product_id'])) {
     <!-- Main JS -->
     <script src="assets/js/main.js"></script>
 
-    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize selected values
+            let selectedColor = document.querySelector('.color-options button').getAttribute('data-color');
+            let selectedSize = document.querySelector('.size-options button').getAttribute('data-size');
+            let selectedQuantity = document.getElementById('quantity-input').value;
+
+            // Update selected color when a color button is clicked
+            document.querySelectorAll('.color-options button').forEach(button => {
+                button.addEventListener('click', function() {
+                    selectedColor = this.getAttribute('data-color');
+                });
+            });
+
+            // Update selected size when a size button is clicked
+            document.querySelectorAll('.size-options button').forEach(button => {
+                button.addEventListener('click', function() {
+                    selectedSize = this.getAttribute('data-size');
+                });
+            });
+
+            // Update selected quantity when the quantity input changes
+            document.getElementById('quantity-input').addEventListener('change', function() {
+                selectedQuantity = this.value;
+            });
+
+            // Handle the add to cart button click
+            document.getElementById('add-to-cart-button').addEventListener('click', function() {
+                const productId = <?= $prod['product_id'] ?>; // Get the product ID from PHP
+
+                // Send the data via AJAX
+                fetch('proccess/add_to_cart.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            product_id: productId,
+                            quantity: selectedQuantity,
+                            color: selectedColor,
+                            size: selectedSize
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = 'cart.php'; // Redirect to cart page
+                        } else {
+                            alert('Failed to add product to cart: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+        });
+    </script>
+
 
 </body>
 

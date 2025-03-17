@@ -156,6 +156,7 @@ session_abort();
                         <div class="col-lg-8 col-md-7 col-12 mb-40">
                             <div class="cart-buttons mb-30">
                                 <input type="submit" value="Update Cart" />
+                                <a href="#" id="clear-cart-button">Clear Cart</a>
                                 <a href="#">Continue Shopping</a>
                             </div>
                             <div class="cart-coupon">
@@ -185,7 +186,7 @@ session_abort();
                                     </tbody>
                                 </table>
                                 <div class="proceed-to-checkout section mt-30">
-                                    <a href="#">Proceed to Checkout</a>
+                                    <a href="checkout.php">Proceed to Checkout</a>
                                 </div>
                             </div>
                         </div>
@@ -249,6 +250,60 @@ session_abort();
     <script src="assets/js/plugins.js"></script>
     <!-- Main JS -->
     <script src="assets/js/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle remove item button clicks
+            document.querySelectorAll('.pro-remove a').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault(); // Prevent the default link behavior
+
+                    const cartId = this.getAttribute('href').split('=')[1]; // Extract cart_id from the URL
+
+                    // Send an AJAX request to remove the item
+                    fetch(`proccess/remove_from_cart.php?cart_id=${cartId}`, {
+                            method: 'GET'
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Reload the page to reflect the updated cart
+                                window.location.reload();
+                            } else {
+                                alert('Failed to remove item: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                });
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle clear cart button click
+            document.getElementById('clear-cart-button').addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent the default link behavior
+
+                // Send an AJAX request to clear the cart
+                fetch('proccess/clear_cart.php', {
+                        method: 'GET'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Reload the page to reflect the updated cart
+                            window.location.reload();
+                        } else {
+                            alert('Failed to clear cart: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            });
+        });
+    </script>
 </body>
 
 </html>
