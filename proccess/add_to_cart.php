@@ -4,6 +4,7 @@ include '../classes/database.php';
 include '../classes/product.php';
 include '../classes/cart.php';
 
+// Check if the user is logged in
 if (!isset($_SESSION['customer_id'])) {
     echo json_encode(['success' => false, 'message' => 'You need to be logged in.']);
     exit;
@@ -11,6 +12,12 @@ if (!isset($_SESSION['customer_id'])) {
 
 // Get the raw POST data
 $data = json_decode(file_get_contents('php://input'), true);
+
+// Validate the input data
+if (!isset($data['product_id'], $data['quantity'], $data['color'], $data['size'])) {
+    echo json_encode(['success' => false, 'message' => 'Invalid data.']);
+    exit;
+}
 
 $customer_id = $_SESSION['customer_id'];
 $product_id = $data['product_id'];
@@ -42,7 +49,8 @@ $cart->size = $size;
 $cart->added_at = date('Y-m-d H:i:s');
 
 if ($cart->add()) {
-    echo json_encode(['success' => true]);
+    echo json_encode(['success' => true, 'message' => 'Product added to cart.']);
 } else {
     echo json_encode(['success' => false, 'message' => 'Failed to add product to cart.']);
 }
+?>

@@ -469,7 +469,6 @@
     $('.pro-qty').prepend('<span class="dec qtybtn"><i class="ti-minus"></i></span>');
     $('.pro-qty').append('<span class="inc qtybtn"><i class="ti-plus"></i></span>');
 
-    // Attach the event handler only once
     $('.qtybtn').on('click', function () {
         var $button = $(this);
         var $input = $button.parent().find('input'); // Find the input field
@@ -477,15 +476,14 @@
         var cartId = $input.data('cart-id'); // Get the cart_id from the data attribute
         var quantity;
 
+        // Determine the new quantity based on the button clicked
         if ($button.hasClass('inc')) {
             quantity = oldValue + 1; // Increment quantity
         } else {
             quantity = oldValue > 1 ? oldValue - 1 : 1; // Decrement quantity, but not below 1
         }
 
-        $input.val(quantity); // Update the input field with the new quantity
-
-        // AJAX call to update the cart
+        // Send an AJAX request to check stock and update the quantity
         $.ajax({
             type: 'POST',
             url: '/calistobaby/proccess/update_cart_quantity.php',
@@ -497,6 +495,9 @@
             dataType: 'json',
             success: function (response) {
                 if (response.success) {
+                    // Update the input field with the new quantity
+                    $input.val(quantity);
+
                     // Format the subtotal and total with commas
                     var formattedSubtotal = response.subtotal.toLocaleString();
                     var formattedTotal = response.total.toLocaleString();
@@ -511,16 +512,18 @@
 
                     console.log("Cart updated successfully");
                 } else {
+                    // Show error message to the user
+                    alert(response.message);
                     console.error("Cart update failed:", response.message);
-                    // Optionally display an error message to the user
                 }
             },
             error: function (error) {
                 console.error("Error updating cart:", error);
-                // Optionally display an error message to the user
+                alert("An error occurred while updating the cart. Please try again.");
             }
         });
     });
+
     /*----- 
         Shipping Form Toggle
     --------------------------------*/
@@ -769,7 +772,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    
+
     // Helper function to convert RGB to Hex
     function rgbToHex(rgb) {
         // Extract RGB values from the string

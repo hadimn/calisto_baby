@@ -1,6 +1,7 @@
 <?php
 include 'classes/database.php';
 include 'classes/product.php';
+include 'classes/cart.php';
 
 if (isset($_GET['product_id'])) {
     $database = new Database();
@@ -11,6 +12,12 @@ if (isset($_GET['product_id'])) {
     $prodSizesAndColors = $product->getSizesAndColors();
     $prodTags = $product->getTags();
     $relatedProducts = $product->getRelatedProducts();
+
+    $stockData = [];
+    foreach ($prodSizesAndColors as $item) {
+        $stock = $product->getStockForSizeAndColor($item['size'], $item['color']);
+        $stockData[$item['color']][$item['size']] = $stock;
+    }
 }
 ?>
 
@@ -137,7 +144,7 @@ if (isset($_GET['product_id'])) {
                                     <span class="availability">Availability: <span>In Stock</span></span>
 
                                     <div class="quantity-colors">
-                                        <div class="quantity">
+                                        <div class="quantity hidden">
                                             <h5>Quantity:</h5>
                                             <div class="pro-qty"><input type="text" id="quantity-input" value="1"></div>
                                         </div>
@@ -161,6 +168,8 @@ if (isset($_GET['product_id'])) {
                                                 <?php endforeach; ?>
                                             </div>
                                         </div>
+
+                                        <div id="stock-display"></div>
                                     </div>
 
                                     <div class="actions">
@@ -375,17 +384,43 @@ if (isset($_GET['product_id'])) {
             let selectedSize = document.querySelector('.size-options button').getAttribute('data-size');
             let selectedQuantity = document.getElementById('quantity-input').value;
 
-            // Update selected color when a color button is clicked
+            // Get stock data from PHP
+            let stockData = <?php echo json_encode($stockData); ?>;
+
+            // Function to update the stock display
+            function updateStockDisplay() {
+                if (stockData[selectedColor] && stockData[selectedColor][selectedSize] !== undefined) {
+                    let availableStock = stockData[selectedColor][selectedSize];
+                    document.getElementById('stock-display').textContent = 'Stock: ' + availableStock;
+                    document.getElementById('quantity-input').max = availableStock;
+                    if (parseInt(document.getElementById('quantity-input').value) > availableStock) {
+                        document.getElementById('quantity-input').value = availableStock;
+                        selectedQuantity = availableStock;
+                    }
+                } else {
+                    document.getElementById('stock-display').textContent = 'Stock: Not available';
+                    document.getElementById('quantity-input').max = 0;
+                    document.getElementById('quantity-input').value = 1;
+                    selectedQuantity = 1;
+                }
+            }
+
+            // Initial stock display update
+            updateStockDisplay();
+
+            // Update selected color and stock when a color button is clicked
             document.querySelectorAll('.color-options button').forEach(button => {
                 button.addEventListener('click', function() {
                     selectedColor = this.getAttribute('data-color');
+                    updateStockDisplay();
                 });
             });
 
-            // Update selected size when a size button is clicked
+            // Update selected size and stock when a size button is clicked
             document.querySelectorAll('.size-options button').forEach(button => {
                 button.addEventListener('click', function() {
                     selectedSize = this.getAttribute('data-size');
+                    updateStockDisplay();
                 });
             });
 

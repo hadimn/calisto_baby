@@ -330,4 +330,19 @@ class Product
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ? $result['stock'] : 0;
     }
+
+    public function updateStockForSizeAndColor($size, $color, $new_stock)
+    {
+        $query = "UPDATE " . $this->size_table . " 
+              SET stock = :new_stock 
+              WHERE product_id = :product_id AND size = :size AND color = :color";
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindParam(":new_stock", $new_stock);
+        $stmt->bindParam(":product_id", $this->product_id);
+        $stmt->bindParam(":size", $size);
+        $stmt->bindParam(":color", $color);
+
+        return $stmt->execute();
+    }
 }

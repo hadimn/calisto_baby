@@ -20,22 +20,62 @@ class Cart
     // Add product to cart
     public function add()
     {
-        $query = "INSERT INTO " . $this->table_name . " (customer_id, product_id, quantity, color, size, added_at) 
-                    VALUES (:customer_id, :product_id, :quantity, :color, :size, :added_at)";
+        // Check if the product with the same size and color already exists in the cart
+        $query = "SELECT cart_id, quantity FROM " . $this->table_name . " 
+              WHERE customer_id = :customer_id 
+              AND product_id = :product_id 
+              AND size = :size 
+              AND color = :color";
         $stmt = $this->conn->prepare($query);
 
         // Bind parameters
         $stmt->bindParam(":customer_id", $this->customer_id);
         $stmt->bindParam(":product_id", $this->product_id);
-        $stmt->bindParam(":quantity", $this->quantity);
-        $stmt->bindParam(":color", $this->color);
         $stmt->bindParam(":size", $this->size);
-        $stmt->bindParam(":added_at", $this->added_at);
+        $stmt->bindParam(":color", $this->color);
+        $stmt->execute();
 
-        if ($stmt->execute()) {
-            return true;
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($row) {
+            // If the item already exists, update the quantity
+            $newQuantity = $row['quantity'] + $this->quantity;
+
+            // Check stock availability before updating
+            $product = new Product($this->conn);
+            $product->product_id = $this->product_id;
+            $stock = $product->getStockForSizeAndColor($this->size, $this->color);
+
+            if ($newQuantity > $stock) {
+                return false; // Not enough stock
+            }
+
+            // Update the quantity
+            $updateQuery = "UPDATE " . $this->table_name . " 
+                        SET quantity = :quantity 
+                        WHERE cart_id = :cart_id";
+            $updateStmt = $this->conn->prepare($updateQuery);
+            $updateStmt->bindParam(":quantity", $newQuantity);
+            $updateStmt->bindParam(":cart_id", $row['cart_id']);
+
+            return $updateStmt->execute();
+        } else {
+            // If the item does not exist, insert a new row
+            $insertQuery = "INSERT INTO " . $this->table_name . " 
+                        (customer_id, product_id, quantity, color, size, added_at) 
+                        VALUES (:customer_id, :product_id, :quantity, :color, :size, :added_at)";
+            $insertStmt = $this->conn->prepare($insertQuery);
+
+            // Bind parameters
+            $insertStmt->bindParam(":customer_id", $this->customer_id);
+            $insertStmt->bindParam(":product_id", $this->product_id);
+            $insertStmt->bindParam(":quantity", $this->quantity);
+            $insertStmt->bindParam(":color", $this->color);
+            $insertStmt->bindParam(":size", $this->size);
+            $insertStmt->bindParam(":added_at", $this->added_at);
+
+            return $insertStmt->execute();
         }
-        return false;
     }
 
     // Remove a single cart item
@@ -102,17 +142,56 @@ class Cart
     // Update quantity in cart
     public function updateQuantity()
     {
-        $query = "UPDATE " . $this->table_name . " SET quantity = :quantity WHERE cart_id = :cart_id";
-        $stmt = $this->conn->prepare($query);
+        try {
+            // First, get the product_id, size, and color from the cart item
+            $query = "SELECT product_id, size, color FROM " . $this->table_name . " WHERE cart_id = :cart_id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":cart_id", $this->cart_id);
+            $stmt->execute();
+            $cartItem = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Bind parameters
-        $stmt->bindParam(":quantity", $this->quantity);
-        $stmt->bindParam(":cart_id", $this->cart_id);
+            if (!$cartItem) {
+                throw new Exception("Cart item not found.");
+            }
 
-        if ($stmt->execute()) {
-            return true;
+            // Get the stock for the specific product, size, and color from the product_sizes table
+            $stockQuery = "SELECT stock FROM product_sizes 
+                       WHERE product_id = :product_id 
+                       AND size = :size 
+                       AND color = :color";
+            $stockStmt = $this->conn->prepare($stockQuery);
+            $stockStmt->bindParam(":product_id", $cartItem['product_id']);
+            $stockStmt->bindParam(":size", $cartItem['size']);
+            $stockStmt->bindParam(":color", $cartItem['color']);
+            $stockStmt->execute();
+            $stockData = $stockStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$stockData) {
+                throw new Exception("Product size or color not found in stock.");
+            }
+
+            $availableStock = $stockData['stock'];
+
+            // Check if the requested quantity exceeds the available stock
+            if ($this->quantity > $availableStock) {
+                throw new Exception("Requested quantity exceeds available stock.");
+            }
+
+            // If stock is sufficient, update the quantity in the cart
+            $updateQuery = "UPDATE " . $this->table_name . " SET quantity = :quantity WHERE cart_id = :cart_id";
+            $updateStmt = $this->conn->prepare($updateQuery);
+            $updateStmt->bindParam(":quantity", $this->quantity);
+            $updateStmt->bindParam(":cart_id", $this->cart_id);
+
+            if ($updateStmt->execute()) {
+                return true;
+            } else {
+                throw new Exception("Failed to update quantity in the database.");
+            }
+        } catch (Exception $e) {
+            error_log("Error in updateQuantity: " . $e->getMessage());
+            return false;
         }
-        return false;
     }
 
     // Calculate cart totals
@@ -202,5 +281,15 @@ class Cart
             error_log("Error in getCartItemSubtotal: " . $e->getMessage());
             return 0.00;
         }
+    }
+
+    public function getCartItemQuantity($cart_id)
+    {
+        $query = "SELECT quantity FROM cart_items WHERE cart_id = :cart_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":cart_id", $cart_id);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? $result['quantity'] : 0;
     }
 }

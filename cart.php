@@ -186,7 +186,7 @@ session_abort();
                                     </tbody>
                                 </table>
                                 <div class="proceed-to-checkout section mt-30">
-                                    <a href="checkout.php">Proceed to Checkout</a>
+                                    <a href="checkout.php?cart_id=<?= htmlspecialchars($item['cart_id']) ?>">Proceed to Checkout</a>
                                 </div>
                             </div>
                         </div>
