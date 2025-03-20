@@ -6,18 +6,17 @@ include 'classes/cart.php';
 $database = new Database();
 $db = $database->getConnection();
 
-if (isset($_GET['cart_id'])) {
-    $cart = new Cart($db);
-    $cart->customer_id = $_SESSION['customer_id'];
+$cart = new Cart($db);
+$cart->customer_id = $_SESSION['customer_id'];
 
-    $cartItems = $cart->getItems()->fetchAll(PDO::FETCH_ASSOC);
+$cartItems = $cart->getItems()->fetchAll(PDO::FETCH_ASSOC);
 
-    $Itemsubtotal = $cart->getCartItemSubtotal($_GET['cart_id']);
+// $Itemsubtotal = $cart->getCartItemSubtotal($_GET['cart_id']);
+// print_r($Itemsubtotal);
 
-    $totals = $cart->calculateCartTotals($_SESSION['customer_id']);
-    $subtotal = $totals['subtotal'];
-    $total = $totals['total'];
-}
+$totals = $cart->calculateCartTotals($_SESSION['customer_id']);
+$subtotal = $totals['subtotal'];
+$total = $totals['total'];
 session_abort();
 
 ?>
@@ -254,14 +253,14 @@ session_abort();
                                                     <tr>
                                                         <td><?= $cartItem['product_name'] ?></td>
                                                         <td>
-                                                            <?php if ($cartItem['new_price'] != null || $cartItem['new_price'] != 0): ?>
-                                                                $<?= $cartItem['new_price'] ?>
-                                                            <?php else: ?>
+                                                            <?php if ($cartItem['price'] != null || $cartItem['price'] != 0): ?>
                                                                 $<?= $cartItem['price'] ?>
+                                                            <?php else: ?>
+                                                                $<?= $cartItem['new_price'] ?>
                                                             <?php endif; ?>
                                                         </td>
                                                         <td><?= $cartItem['quantity'] ?> <?= $cartItem['size'] ?></td>
-                                                        <td>$<?= ($cartItem['quantity'] * ($cartItem['new_price'] ?? $cartItem['price'])) ?></td>
+                                                        <td>$<?=$cart->getCartItemSubtotal($cartItem['cart_id']);?></td>
                                                     </tr>
                                                 <?php endforeach; ?>
                                             </tbody>

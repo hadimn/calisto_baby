@@ -139,7 +139,7 @@ session_abort();
                                     <?php foreach ($prodSizesAndColors as $prodSizeAndColor): ?>
                                         <li class="flex-shrink-0">
                                             <a href="#" data-standard="admin-pages/<?= $prodSizeAndColor['color_image'] ?>" data-color="<?= $prodSizeAndColor['color'] ?>">
-                                                <img src="admin-pages/<?= $prodSizeAndColor['color_image'] ?>" alt="" class="img-thumbnail object-fit-cover" style="width: 200px; height: 80px;" />
+                                                <img data-color="<?= $prodSizeAndColor['color'] ?>" src="admin-pages/<?= $prodSizeAndColor['color_image'] ?>" alt="" class="img-thumbnail object-fit-cover" style="width: 200px; height: 80px;" />
                                             </a>
                                         </li>
                                     <?php endforeach; ?>
@@ -176,7 +176,7 @@ session_abort();
                                     <span class="availability">Availability: <span>In Stock</span></span>
 
                                     <div class="quantity-colors">
-                                        <div class="quantity hidden">
+                                        <div class="quantity">
                                             <h5>Quantity:</h5>
                                             <div class="pro-qty"><input type="text" id="quantity-input" value="1"></div>
                                         </div>
@@ -208,16 +208,7 @@ session_abort();
                                         </div>
 
                                         <table id="stock-display" class="table table-bordered">
-                                            <tr>
-                                                <td>Total Stock:</td>
-                                                <td>In Cart:</td>
-                                                <td>Remaining Stock:</td>
-                                            </tr>
-                                            <tr>
-                                                <td><span id="in-cart">0</span></td>
-                                                <td><span id="total-stock">0</span></td>
-                                                <td><span id="remaining-stock">0</span></td>
-                                            </tr>
+
                                         </table>
                                     </div>
 
@@ -430,8 +421,6 @@ session_abort();
         document.addEventListener('DOMContentLoaded', function() {
             let selectedColor = document.querySelector('.color-options button').getAttribute('data-color');
             let selectedSize = document.querySelector('.size-options button').getAttribute('data-size');
-            let selectedQuantity = document.getElementById('quantity-input').value;
-
             let stockData = <?php echo json_encode($stockData); ?>;
             let cartQuantities = <?php echo json_encode($cartQuantities); ?>;
 
@@ -442,44 +431,38 @@ session_abort();
                     let remainingStock = availableStock - cartQuantity;
 
                     document.getElementById('stock-display').innerHTML = `
-                <tr>
-                    <td>Total Stock:</td>
-                    <td>In Cart:</td>
-                    <td>Remaining Stock:</td>
-                </tr>
-                <tr>
-                    <td><span id="total-stock">${availableStock}</span></td>
-                    <td><span id="in-cart">${cartQuantity}</span></td>
-                    <td><span id="remaining-stock">${remainingStock}</span></td>
-                </tr>
-            `;
+                        <tr>
+                            <td>Total Stock:</td>
+                            <td>In Cart:</td>
+                            <td>Remaining Stock:</td>
+                        </tr>
+                        <tr>
+                            <td><span id="total-stock">${availableStock}</span></td>
+                            <td><span id="in-cart">${cartQuantity}</span></td>
+                            <td><span id="remaining-stock">${remainingStock}</span></td>
+                        </tr>
+                    `;
 
-                    document.getElementById('quantity-input').max = remainingStock;
-                    if (parseInt(document.getElementById('quantity-input').value) > remainingStock) {
-                        document.getElementById('quantity-input').value = remainingStock;
-                        selectedQuantity = remainingStock;
+                    // Ensure quantity input respects remaining stock
+                    let quantityInput = document.getElementById('quantity-input');
+                    quantityInput.max = remainingStock;
+                    if (parseInt(quantityInput.value) > remainingStock) {
+                        quantityInput.value = remainingStock;
                     }
                 } else {
                     document.getElementById('stock-display').innerHTML = `
-                <tr>
-                    <td>Total Stock:</td>
-                    <td>In Cart:</td>
-                    <td>Remaining Stock:</td>
-                </tr>
-                <tr>
-                    <td><span id="total-stock">Not Available</span></td>
-                    <td><span id="in-cart">--</span></td>
-                    <td><span id="remaining-stock">--</span></td>
-                </tr>
-            `;
-                    document.getElementById('quantity-input').max = 0;
+                        <tr>
+                            <td colspan="3" style="color: red; text-align: center;">Not Available</td>
+                        </tr>
+                    `;
                     document.getElementById('quantity-input').value = 1;
-                    selectedQuantity = 1;
+                    document.getElementById('quantity-input').max = 0;
                 }
             }
 
             updateStockDisplay();
 
+            // Event listeners for color and size selection
             document.querySelectorAll('.color-options button').forEach(button => {
                 button.addEventListener('click', function() {
                     selectedColor = this.getAttribute('data-color');
@@ -494,20 +477,31 @@ session_abort();
                 });
             });
 
-            document.getElementById('quantity-input').addEventListener('change', function() {
-                selectedQuantity = this.value;
+            document.querySelectorAll('.pro-thumb-img img').forEach(img => {
+                img.addEventListener('click', function() {
+                    selectedColor = this.getAttribute('data-color');
+                    updateStockDisplay();
+                });
             });
 
+            // Ensure quantity input doesn't exceed stock
+            document.getElementById('quantity-input').addEventListener('input', function() {
+                let maxStock = parseInt(this.max, 10) || Infinity;
+                let newValue = parseInt(this.value, 10) || 1;
+
+                if (newValue > maxStock) {
+                    this.value = maxStock;
+                } else if (newValue < 1) {
+                    this.value = 1;
+                }
+            });
+
+            // Handle add to cart button click
             document.getElementById('add-to-cart-button').addEventListener('click', function() {
                 const productId = <?= $prod['product_id'] ?>;
-                const quantity = parseInt(document.getElementById('quantity-input').value);
+                const quantity = parseInt(document.getElementById('quantity-input').value, 10);
                 const color = selectedColor;
                 const size = selectedSize;
-
-                console.log("Product ID:", productId);
-                console.log("Quantity:", quantity);
-                console.log("Color:", color);
-                console.log("Size:", size);
 
                 fetch('proccess/add_to_cart.php', {
                         method: 'POST',
@@ -523,8 +517,11 @@ session_abort();
                     })
                     .then(response => response.json())
                     .then(data => {
-                        if (data.success) {
-                            window.location.reload();
+                        if (!data.success && data.redirect) {
+                            window.location.href = data.redirect;
+                        } else if (data.success) {
+                            showSuccessMessage("Product added to cart successfully!");
+                            setTimeout(() => window.location.reload(), 5000);
                         } else {
                             alert('Failed to add product to cart: ' + data.message);
                         }
@@ -535,39 +532,34 @@ session_abort();
                     });
             });
 
-            document.querySelectorAll('#pro-thumb-img a').forEach(thumb => {
-                thumb.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    const newImageSrc = this.getAttribute('data-standard');
-                    const newColor = this.getAttribute('data-color');
+            function showSuccessMessage(message) {
+                let alertContainer = document.createElement("div");
+                let timerContainer = document.createElement("span");
+                let timer = 5; // 5 seconds countdown timer
 
-                    document.querySelector('.main-image').src = newImageSrc;
-                    document.querySelector('.pro-large-img a').href = newImageSrc;
+                alertContainer.innerHTML = `
+                    <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <div style="margin-top: 10px;">
+                            <span id="countdown-timer">Closing in ${timer} seconds...</span>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(alertContainer);
 
-                    document.querySelectorAll('.color-options button').forEach(button => {
-                        if (button.getAttribute('data-color') === newColor) {
-                            button.classList.add('active');
-                            selectedColor = newColor;
-                        } else {
-                            button.classList.remove('active');
-                        }
-                    });
+                // Function to update the countdown timer
+                let countdownInterval = setInterval(() => {
+                    timer--;
+                    document.getElementById('countdown-timer').innerText = `Closing in ${timer} seconds...`;
 
-                    updateStockDisplay();
-                });
-            });
-
-            document.querySelectorAll('.color-options button').forEach(button => {
-                button.addEventListener('click', function() {
-                    const color = this.getAttribute('data-color');
-                    const correspondingThumbnail = Array.from(document.querySelectorAll('#pro-thumb-img a')).find(thumb => thumb.getAttribute('data-color') === color);
-                    if (correspondingThumbnail) {
-                        const newImageSrc = correspondingThumbnail.getAttribute('data-standard');
-                        document.querySelector('.main-image').src = newImageSrc;
-                        document.querySelector('.pro-large-img a').href = newImageSrc;
+                    if (timer <= 0) {
+                        clearInterval(countdownInterval); // Stop the countdown
+                        alertContainer.remove(); // Remove the alert after 5 seconds
                     }
-                });
-            });
+                }, 1000); // Update every second
+            }
+
         });
     </script>
 

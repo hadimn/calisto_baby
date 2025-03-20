@@ -1,6 +1,7 @@
 <?php
 include "classes/database.php";
 include "classes/product.php";
+include "classes/cart.php";
 
 $database = new Database();
 $db = $database->getConnection();
@@ -322,7 +323,7 @@ $best_deal_products = $product->getPorductsBestDeal();
                                         <div class="content-top">
 
                                             <div class="content-top-left" style="width: 50%;">
-                                                <h4 class="title"><a href="#"><?= $best_deal_product['name'] ?></a></h4>
+                                                <h4 class="title"><a href="single-product.php?product_id=<?=$best_deal_product['product_id']?>"><?= $best_deal_product['name'] ?></a></h4>
                                                 <div class="ratting">
                                                     <i class="fa fa-star"></i>
                                                     <i class="fa fa-star"></i>

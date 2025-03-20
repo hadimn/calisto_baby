@@ -466,63 +466,90 @@
     /*----- 
     Quantity
 --------------------------------*/
-    $('.pro-qty').prepend('<span class="dec qtybtn"><i class="ti-minus"></i></span>');
-    $('.pro-qty').append('<span class="inc qtybtn"><i class="ti-plus"></i></span>');
+    $(document).ready(function () {
+        var currentPage = window.location.pathname; // Get the current page URL
 
-    $('.qtybtn').on('click', function () {
-        var $button = $(this);
-        var $input = $button.parent().find('input'); // Find the input field
-        var oldValue = parseFloat($input.val()); // Get the current quantity
-        var cartId = $input.data('cart-id'); // Get the cart_id from the data attribute
-        var quantity;
+        // Add quantity buttons
+        if ($('.pro-qty').length) {
+            $('.pro-qty').prepend('<span class="dec qtybtn"><i class="ti-minus"></i></span>');
+            $('.pro-qty').append('<span class="inc qtybtn"><i class="ti-plus"></i></span>');
 
-        // Determine the new quantity based on the button clicked
-        if ($button.hasClass('inc')) {
-            quantity = oldValue + 1; // Increment quantity
-        } else {
-            quantity = oldValue > 1 ? oldValue - 1 : 1; // Decrement quantity, but not below 1
-        }
+            $('.qtybtn').on('click', function () {
+                var $button = $(this);
+                var $input = $button.parent().find('input');
+                var oldValue = parseInt($input.val(), 10);
+                var quantity;
 
-        // Send an AJAX request to check stock and update the quantity
-        $.ajax({
-            type: 'POST',
-            url: 'proccess/update_cart_quantity.php',
-            data: JSON.stringify({
-                cart_id: cartId, // Use the cart_id from the data attribute
-                quantity: quantity
-            }),
-            contentType: 'application/json',
-            dataType: 'json',
-            success: function (response) {
-                if (response.success) {
-                    // Update the input field with the new quantity
-                    $input.val(quantity);
-
-                    // Format the subtotal and total with commas
-                    var formattedSubtotal = response.subtotal.toLocaleString();
-                    var formattedTotal = response.total.toLocaleString();
-                    var formattedItemSubtotal = response.item_subtotal.toLocaleString();
-
-                    // Update cart totals and display messages
-                    $('.cart-subtotal .amount').text('$' + formattedSubtotal);
-                    $('.order-total .amount').text('$' + formattedTotal);
-
-                    // Update the individual item subtotal
-                    $button.closest('tr').find('.pro-subtotal').text('$' + formattedItemSubtotal);
-
-                    console.log("Cart updated successfully");
+                // Determine the new quantity
+                if ($button.hasClass('inc')) {
+                    quantity = oldValue + 1;
                 } else {
-                    // Show error message to the user
-                    alert(response.message);
-                    console.error("Cart update failed:", response.message);
+                    quantity = oldValue > 1 ? oldValue - 1 : 1;
                 }
-            },
-            error: function (error) {
-                console.error("Error updating cart:", error);
-                alert("An error occurred while updating the cart. Please try again.");
-            }
-        });
+
+                // If on the cart page, validate with the database
+                if (currentPage.includes("cart")) {
+                    var cartId = $input.data('cart-id'); // Get the cart_id from the data attribute
+
+                    $.ajax({
+                        type: 'POST',
+                        url: 'proccess/update_cart_quantity.php',
+                        data: JSON.stringify({
+                            cart_id: cartId,
+                            quantity: quantity
+                        }),
+                        contentType: 'application/json',
+                        dataType: 'json',
+                        success: function (response) {
+                            if (response.success) {
+                                // Update UI only if stock allows
+                                $input.val(quantity);
+                                var formattedSubtotal = response.subtotal.toLocaleString();
+                                var formattedTotal = response.total.toLocaleString();
+                                var formattedItemSubtotal = response.item_subtotal.toLocaleString();
+
+                                $('.cart-subtotal .amount').text('$' + formattedSubtotal);
+                                $('.order-total .amount').text('$' + formattedTotal);
+                                $button.closest('tr').find('.pro-subtotal').text('$' + formattedItemSubtotal);
+
+                                console.log("Cart updated successfully");
+                            } else {
+                                alert(response.message); // Show stock limit warning
+                            }
+                        },
+                        error: function (error) {
+                            console.error("Error updating cart:", error);
+                            alert("An error occurred while updating the cart. Please try again.");
+                        }
+                    });
+                } else {
+                    // On the single product page
+                    var maxStock = parseInt($input.attr("max"), 10) || Infinity; // Max stock from input field
+                    var remainingStock = $('#remaining-stock').length ? parseInt($('#remaining-stock').text(), 10) : undefined;
+
+                    console.log(remainingStock);
+                    if (remainingStock == undefined) {
+                        alert("Not Available");
+                        return;
+                    }
+
+                    if (remainingStock <= 0) {
+                        alert("All items in stock are already in the cart!");
+                        return;
+                    }
+
+                    if (quantity <= maxStock) {
+                        $input.val(quantity);
+                    } else {
+                        alert("Stock limit reached!");
+                    }
+                }
+            });
+        }
     });
+
+
+
 
     /*----- 
         Shipping Form Toggle
@@ -549,6 +576,7 @@
 
 
 })(jQuery);
+
 
 document.addEventListener('DOMContentLoaded', function () {
     // Map of all CSS color names to their hex values
@@ -702,7 +730,6 @@ document.addEventListener('DOMContentLoaded', function () {
         "#ffff00": "yellow",
         "#9acd32": "yellowgreen"
     };
-
     // Handle thumbnail clicks
     $('#pro-thumb-img').on('click', 'a', function (e) {
         e.preventDefault();

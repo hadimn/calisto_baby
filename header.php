@@ -1,15 +1,17 @@
 <?php
 session_start();
 
-$database = new Database();
-$db = $database->getConnection();
+if (isset($_SESSION["customer_id"])) {
 
-$cart = new Cart($db);
-$cart->customer_id = $_SESSION['customer_id'];
-$cartCount = $cart->getCartCount();
-$totals = $cart->calculateCartTotals($cart->customer_id);
-$total = $totals['total'];
+    $database = new Database();
+    $db = $database->getConnection();
 
+    $cart = new Cart($db);
+    $cart->customer_id = $_SESSION['customer_id'];
+    $cartCount = $cart->getCartCount();
+    $totals = $cart->calculateCartTotals($cart->customer_id);
+    $total = $totals['total'];
+}
 ?>
 
 
@@ -111,8 +113,16 @@ $total = $totals['total'];
                         </div>
 
                         <div class="header-mini-cart">
-                            <a href="cart.php"><img src="assets/images/icons/cart.png" alt="Cart">
-                                <span><?= $cartCount ?>($<?= $total ?>)</span></a>
+                            <a href="<?= (isset($cartCount) && isset($totals)) ? 'cart.php' : 'login-register.php' ?>">
+                                <img src="assets/images/icons/cart.png" alt="Cart">
+                                <span>
+                                    <?php if (isset($cartCount) && isset($totals)): ?>
+                                        <?= $cartCount ?>($<?= $total ?>)
+                                    <?php else: ?>
+                                        00($0.00)
+                                    <?php endif; ?>
+                                </span>
+                            </a>
                         </div>
 
                     </div><!-- Header Advance Search End -->

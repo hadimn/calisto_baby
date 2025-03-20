@@ -2,6 +2,7 @@
 session_start();
 include "classes/database.php";
 include "classes/customer.php";
+include "classes/cart.php";
 
 $database = new Database();
 $db = $database->getConnection();

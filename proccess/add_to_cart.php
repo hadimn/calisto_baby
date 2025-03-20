@@ -10,6 +10,16 @@ error_reporting(E_ALL);
 header('Content-Type: application/json');
 
 try {
+    // Check if the user is logged in
+    if (!isset($_SESSION['customer_id'])) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'You need to log in before adding items to the cart.',
+            'redirect' => 'login-register.php' // Redirect URL
+        ]);
+        exit();
+    }
+
     // Check if the request is POST and JSON
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
         // Decode the JSON data
@@ -20,16 +30,12 @@ try {
             $quantity = $data['quantity'];
             $color = $data['color'];
             $size = $data['size'];
-
-            if (!isset($_SESSION['customer_id'])) {
-                throw new Exception("Customer ID not set in session.");
-            }
             $customer_id = $_SESSION['customer_id'];
 
             // Include database and cart class files
             include '../classes/database.php';
             include '../classes/cart.php';
-            include '../classes/product.php'; // Include the Product class to check stock
+            include '../classes/product.php';
 
             // Connect to the database
             $database = new Database();
@@ -64,8 +70,8 @@ try {
             if ($currentCartQuantity >= $availableStock) {
                 echo json_encode([
                     'success' => false,
-                    'message' => 'You have already added the whole stock to your cart. Do you want to go to the cart and proceed with your order?',
-                    'redirect' => true // Flag to indicate that the user should be redirected to the cart
+                    'message' => 'You have already added the whole stock to your cart.',
+                    // 'redirect' => 'cart.php' // Redirect user to cart
                 ]);
                 exit();
             }
