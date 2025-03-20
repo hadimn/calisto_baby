@@ -1,7 +1,9 @@
 <?php
+session_start();
 include 'classes/database.php';
 include 'classes/product.php';
 include 'classes/cart.php';
+
 
 if (isset($_GET['product_id'])) {
     $database = new Database();
@@ -13,12 +15,30 @@ if (isset($_GET['product_id'])) {
     $prodTags = $product->getTags();
     $relatedProducts = $product->getRelatedProducts();
 
+    // Fetch stock data for each size and color combination
     $stockData = [];
     foreach ($prodSizesAndColors as $item) {
         $stock = $product->getStockForSizeAndColor($item['size'], $item['color']);
         $stockData[$item['color']][$item['size']] = $stock;
     }
+
+    // Fetch cart quantities for the product, size, and color
+    $cartQuantities = [];
+    if (isset($_SESSION['customer_id'])) {
+        $cart = new Cart($db);
+        $cart->customer_id = $_SESSION['customer_id'];
+        foreach ($prodSizesAndColors as $item) {
+            $cartQuantity = $cart->getCartQuantityForProduct($prod['product_id'], $item['size'], $item['color']);
+            $cartQuantities[$item['color']][$item['size']] = $cartQuantity;
+        }
+    }
+} else {
+    // Redirect if no product ID is provided
+    header('Location: index.php');
+    exit();
 }
+
+session_abort();
 ?>
 
 
@@ -61,6 +81,18 @@ if (isset($_GET['product_id'])) {
 
     <!-- Modernizer JS -->
     <script src="assets/js/vendor/modernizr-3.11.2.min.js"></script>
+
+    <style>
+        #stock-display {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        #stock-display p {
+            margin: 5px 0;
+        }
+    </style>
 </head>
 
 <body>
@@ -152,8 +184,12 @@ if (isset($_GET['product_id'])) {
                                         <div class="colors">
                                             <h5>Color:</h5>
                                             <div class="color-options">
-                                                <?php foreach ($prodSizesAndColors as $prodSizeAndColor): ?>
-                                                    <button style="background-color: <?= $prodSizeAndColor['color'] ?>" data-color="<?= $prodSizeAndColor['color'] ?>"></button>
+                                                <?php $uniqueColors = array_unique(array_column($prodSizesAndColors, 'color'));
+                                                foreach ($uniqueColors as $color): ?>
+                                                    <button style="background-color: <?= $color ?>" data-color="<?= $color ?>" <?php if ($color === reset($uniqueColors)) {
+                                                                                                                                    echo 'class="active"';
+                                                                                                                                } ?>>
+                                                    </button>
                                                 <?php endforeach; ?>
                                             </div>
                                         </div>
@@ -163,13 +199,26 @@ if (isset($_GET['product_id'])) {
                                             <div class="size-options">
                                                 <?php
                                                 $sizes = array_unique(array_column($prodSizesAndColors, 'size'));
-                                                foreach ($sizes as $size): ?>
-                                                    <button value="<?= htmlspecialchars($size) ?>" data-size="<?= htmlspecialchars($size) ?>"><?= htmlspecialchars($size) ?></button>
+                                                foreach ($sizes as $key => $size): ?>
+                                                    <button value="<?= htmlspecialchars($size) ?>" data-size="<?= htmlspecialchars($size) ?>" <?php if ($key === 0) {
+                                                                                                                                                    echo 'class="active"';
+                                                                                                                                                } ?>><?= htmlspecialchars($size) ?></button>
                                                 <?php endforeach; ?>
                                             </div>
                                         </div>
 
-                                        <div id="stock-display"></div>
+                                        <table id="stock-display" class="table table-bordered">
+                                            <tr>
+                                                <td>Total Stock:</td>
+                                                <td>In Cart:</td>
+                                                <td>Remaining Stock:</td>
+                                            </tr>
+                                            <tr>
+                                                <td><span id="in-cart">0</span></td>
+                                                <td><span id="total-stock">0</span></td>
+                                                <td><span id="remaining-stock">0</span></td>
+                                            </tr>
+                                        </table>
                                     </div>
 
                                     <div class="actions">
@@ -379,36 +428,58 @@ if (isset($_GET['product_id'])) {
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize selected values
             let selectedColor = document.querySelector('.color-options button').getAttribute('data-color');
             let selectedSize = document.querySelector('.size-options button').getAttribute('data-size');
             let selectedQuantity = document.getElementById('quantity-input').value;
 
-            // Get stock data from PHP
             let stockData = <?php echo json_encode($stockData); ?>;
+            let cartQuantities = <?php echo json_encode($cartQuantities); ?>;
 
-            // Function to update the stock display
             function updateStockDisplay() {
                 if (stockData[selectedColor] && stockData[selectedColor][selectedSize] !== undefined) {
                     let availableStock = stockData[selectedColor][selectedSize];
-                    document.getElementById('stock-display').textContent = 'Stock: ' + availableStock;
-                    document.getElementById('quantity-input').max = availableStock;
-                    if (parseInt(document.getElementById('quantity-input').value) > availableStock) {
-                        document.getElementById('quantity-input').value = availableStock;
-                        selectedQuantity = availableStock;
+                    let cartQuantity = cartQuantities[selectedColor] && cartQuantities[selectedColor][selectedSize] ? cartQuantities[selectedColor][selectedSize] : 0;
+                    let remainingStock = availableStock - cartQuantity;
+
+                    document.getElementById('stock-display').innerHTML = `
+                <tr>
+                    <td>Total Stock:</td>
+                    <td>In Cart:</td>
+                    <td>Remaining Stock:</td>
+                </tr>
+                <tr>
+                    <td><span id="total-stock">${availableStock}</span></td>
+                    <td><span id="in-cart">${cartQuantity}</span></td>
+                    <td><span id="remaining-stock">${remainingStock}</span></td>
+                </tr>
+            `;
+
+                    document.getElementById('quantity-input').max = remainingStock;
+                    if (parseInt(document.getElementById('quantity-input').value) > remainingStock) {
+                        document.getElementById('quantity-input').value = remainingStock;
+                        selectedQuantity = remainingStock;
                     }
                 } else {
-                    document.getElementById('stock-display').textContent = 'Stock: Not available';
+                    document.getElementById('stock-display').innerHTML = `
+                <tr>
+                    <td>Total Stock:</td>
+                    <td>In Cart:</td>
+                    <td>Remaining Stock:</td>
+                </tr>
+                <tr>
+                    <td><span id="total-stock">Not Available</span></td>
+                    <td><span id="in-cart">--</span></td>
+                    <td><span id="remaining-stock">--</span></td>
+                </tr>
+            `;
                     document.getElementById('quantity-input').max = 0;
                     document.getElementById('quantity-input').value = 1;
                     selectedQuantity = 1;
                 }
             }
 
-            // Initial stock display update
             updateStockDisplay();
 
-            // Update selected color and stock when a color button is clicked
             document.querySelectorAll('.color-options button').forEach(button => {
                 button.addEventListener('click', function() {
                     selectedColor = this.getAttribute('data-color');
@@ -416,7 +487,6 @@ if (isset($_GET['product_id'])) {
                 });
             });
 
-            // Update selected size and stock when a size button is clicked
             document.querySelectorAll('.size-options button').forEach(button => {
                 button.addEventListener('click', function() {
                     selectedSize = this.getAttribute('data-size');
@@ -424,16 +494,21 @@ if (isset($_GET['product_id'])) {
                 });
             });
 
-            // Update selected quantity when the quantity input changes
             document.getElementById('quantity-input').addEventListener('change', function() {
                 selectedQuantity = this.value;
             });
 
-            // Handle the add to cart button click
             document.getElementById('add-to-cart-button').addEventListener('click', function() {
-                const productId = <?= $prod['product_id'] ?>; // Get the product ID from PHP
+                const productId = <?= $prod['product_id'] ?>;
+                const quantity = parseInt(document.getElementById('quantity-input').value);
+                const color = selectedColor;
+                const size = selectedSize;
 
-                // Send the data via AJAX
+                console.log("Product ID:", productId);
+                console.log("Quantity:", quantity);
+                console.log("Color:", color);
+                console.log("Size:", size);
+
                 fetch('proccess/add_to_cart.php', {
                         method: 'POST',
                         headers: {
@@ -441,22 +516,57 @@ if (isset($_GET['product_id'])) {
                         },
                         body: JSON.stringify({
                             product_id: productId,
-                            quantity: selectedQuantity,
-                            color: selectedColor,
-                            size: selectedSize
+                            quantity: quantity,
+                            color: color,
+                            size: size
                         })
                     })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            window.location.href = 'cart.php'; // Redirect to cart page
+                            window.location.reload();
                         } else {
                             alert('Failed to add product to cart: ' + data.message);
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
+                        alert('An error occurred while adding the product to the cart. Please try again.');
                     });
+            });
+
+            document.querySelectorAll('#pro-thumb-img a').forEach(thumb => {
+                thumb.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const newImageSrc = this.getAttribute('data-standard');
+                    const newColor = this.getAttribute('data-color');
+
+                    document.querySelector('.main-image').src = newImageSrc;
+                    document.querySelector('.pro-large-img a').href = newImageSrc;
+
+                    document.querySelectorAll('.color-options button').forEach(button => {
+                        if (button.getAttribute('data-color') === newColor) {
+                            button.classList.add('active');
+                            selectedColor = newColor;
+                        } else {
+                            button.classList.remove('active');
+                        }
+                    });
+
+                    updateStockDisplay();
+                });
+            });
+
+            document.querySelectorAll('.color-options button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const color = this.getAttribute('data-color');
+                    const correspondingThumbnail = Array.from(document.querySelectorAll('#pro-thumb-img a')).find(thumb => thumb.getAttribute('data-color') === color);
+                    if (correspondingThumbnail) {
+                        const newImageSrc = correspondingThumbnail.getAttribute('data-standard');
+                        document.querySelector('.main-image').src = newImageSrc;
+                        document.querySelector('.pro-large-img a').href = newImageSrc;
+                    }
+                });
             });
         });
     </script>

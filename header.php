@@ -1,5 +1,15 @@
 <?php
 session_start();
+
+$database = new Database();
+$db = $database->getConnection();
+
+$cart = new Cart($db);
+$cart->customer_id = $_SESSION['customer_id'];
+$cartCount = $cart->getCartCount();
+$totals = $cart->calculateCartTotals($cart->customer_id);
+$total = $totals['total'];
+
 ?>
 
 
@@ -50,7 +60,7 @@ session_start();
                     <div class="header-top-right">
                         <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == true): ?>
                             <div style="display: flex; align-items: center;">
-                                <p style="margin-right: 10px; <?php if(explode('/',$_SERVER['PHP_SELF'])[2] == 'my-account.php'): ?>color:#FF7B8D<?php endif?>"><a href="my-account.php">My Account</a></p>
+                                <p style="margin-right: 10px; <?php if (explode('/', $_SERVER['PHP_SELF'])[2] == 'my-account.php'): ?>color:#FF7B8D<?php endif ?>"><a href="my-account.php">My Account</a></p>
                                 <form action="proccess/logout-proccess.php" method="post">
                                     <button type="submit" class="btn btn-danger">Logout</button>
                                 </form>
@@ -102,7 +112,7 @@ session_start();
 
                         <div class="header-mini-cart">
                             <a href="cart.php"><img src="assets/images/icons/cart.png" alt="Cart">
-                                <span>02($250)</span></a>
+                                <span><?= $cartCount ?>($<?= $total ?>)</span></a>
                         </div>
 
                     </div><!-- Header Advance Search End -->
@@ -112,9 +122,9 @@ session_start();
                     <div class="main-menu">
                         <nav>
                             <ul>
-                                
-                                <li class="<?php if(explode('/',$_SERVER['PHP_SELF'])[2] == 'index.php'): ?>active<?php endif?>"><a href="index.php">HOME</a></li>
-                                <li <?php if(explode('/',$_SERVER['PHP_SELF'])[2] == 'shop.php'): ?>active<?php endif?>><a href="shop.php">SHOP</a>
+
+                                <li class="<?php if (explode('/', $_SERVER['PHP_SELF'])[2] == 'index.php'): ?>active<?php endif ?>"><a href="index.php">HOME</a></li>
+                                <li <?php if (explode('/', $_SERVER['PHP_SELF'])[2] == 'shop.php'): ?>active<?php endif ?>><a href="shop.php">SHOP</a>
                                     <ul class="sub-menu">
                                         <li><a href="shop.php">Shop</a></li>
                                         <li><a href="shop-left-sidebar.php">Shop Left Sidebar</a></li>
@@ -146,7 +156,7 @@ session_start();
                                         <li><a href="single-blog.php">Single Blog</a></li>
                                     </ul>
                                 </li>
-                                <li class="<?php if(explode('/',$_SERVER['PHP_SELF'])[2] == 'contact.php'): ?>active<?php endif?>"><a href="contact.php">CONTACT</a></li>
+                                <li class="<?php if (explode('/', $_SERVER['PHP_SELF'])[2] == 'contact.php'): ?>active<?php endif ?>"><a href="contact.php">CONTACT</a></li>
                             </ul>
                         </nav>
                     </div>

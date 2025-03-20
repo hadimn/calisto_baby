@@ -4944,7 +4944,7 @@ only screen and (max-width: 767px) {
 }
 
 .single-product-content .quantity-colors .sizes .size-options button.active {
-  border: 2px solid #94C7EB !important;
+  border: 3px solid #94C7EB !important;
   box-shadow: 0 0 2px #94C7EB;
   transition: box-shadow 0.3s ease;
 }
@@ -4987,7 +4987,7 @@ only screen and (max-width: 767px) {
 }
 
 .single-product-content .quantity-colors .colors .color-options button.active {
-  border: 2px solid #94C7EB !important;
+  border: 3px solid #94C7EB !important;
   box-shadow: 0 0 2px #94C7EB;
   transition: box-shadow 0.3s ease;
 }

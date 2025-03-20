@@ -37,7 +37,9 @@ try {
             $cart->cart_id = $cart_id;
             $cart->quantity = $quantity;
 
-            if ($cart->updateQuantity()) {
+            $updateResult = $cart->updateQuantity();
+
+            if ($updateResult === true) {
                 // Calculate totals.
                 $totals = $cart->calculateCartTotals($customer_id);
                 $item_subtotal = $cart->getCartItemSubtotal($cart_id);
@@ -49,7 +51,8 @@ try {
                     'item_subtotal' => $item_subtotal
                 ]);
             } else {
-                throw new Exception("Failed to update quantity in the database.");
+                // If updateResult is a string, it contains an error message
+                throw new Exception($updateResult);
             }
         } else {
             throw new Exception("Missing cart_id or quantity in request.");

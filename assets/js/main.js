@@ -486,7 +486,7 @@
         // Send an AJAX request to check stock and update the quantity
         $.ajax({
             type: 'POST',
-            url: '/calistobaby/proccess/update_cart_quantity.php',
+            url: 'proccess/update_cart_quantity.php',
             data: JSON.stringify({
                 cart_id: cartId, // Use the cart_id from the data attribute
                 quantity: quantity

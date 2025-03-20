@@ -20,61 +20,80 @@ class Cart
     // Add product to cart
     public function add()
     {
-        // Check if the product with the same size and color already exists in the cart
-        $query = "SELECT cart_id, quantity FROM " . $this->table_name . " 
-              WHERE customer_id = :customer_id 
-              AND product_id = :product_id 
-              AND size = :size 
-              AND color = :color";
-        $stmt = $this->conn->prepare($query);
-
-        // Bind parameters
-        $stmt->bindParam(":customer_id", $this->customer_id);
-        $stmt->bindParam(":product_id", $this->product_id);
-        $stmt->bindParam(":size", $this->size);
-        $stmt->bindParam(":color", $this->color);
-        $stmt->execute();
-
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($row) {
-            // If the item already exists, update the quantity
-            $newQuantity = $row['quantity'] + $this->quantity;
-
-            // Check stock availability before updating
-            $product = new Product($this->conn);
-            $product->product_id = $this->product_id;
-            $stock = $product->getStockForSizeAndColor($this->size, $this->color);
-
-            if ($newQuantity > $stock) {
-                return false; // Not enough stock
-            }
-
-            // Update the quantity
-            $updateQuery = "UPDATE " . $this->table_name . " 
-                        SET quantity = :quantity 
-                        WHERE cart_id = :cart_id";
-            $updateStmt = $this->conn->prepare($updateQuery);
-            $updateStmt->bindParam(":quantity", $newQuantity);
-            $updateStmt->bindParam(":cart_id", $row['cart_id']);
-
-            return $updateStmt->execute();
-        } else {
-            // If the item does not exist, insert a new row
-            $insertQuery = "INSERT INTO " . $this->table_name . " 
-                        (customer_id, product_id, quantity, color, size, added_at) 
-                        VALUES (:customer_id, :product_id, :quantity, :color, :size, :added_at)";
-            $insertStmt = $this->conn->prepare($insertQuery);
+        try {
+            // Check if the product with the same size and color already exists in the cart
+            $query = "SELECT cart_id, quantity FROM " . $this->table_name . " 
+                  WHERE customer_id = :customer_id 
+                  AND product_id = :product_id 
+                  AND size = :size 
+                  AND color = :color";
+            $stmt = $this->conn->prepare($query);
 
             // Bind parameters
-            $insertStmt->bindParam(":customer_id", $this->customer_id);
-            $insertStmt->bindParam(":product_id", $this->product_id);
-            $insertStmt->bindParam(":quantity", $this->quantity);
-            $insertStmt->bindParam(":color", $this->color);
-            $insertStmt->bindParam(":size", $this->size);
-            $insertStmt->bindParam(":added_at", $this->added_at);
+            $stmt->bindParam(":customer_id", $this->customer_id);
+            $stmt->bindParam(":product_id", $this->product_id);
+            $stmt->bindParam(":size", $this->size);
+            $stmt->bindParam(":color", $this->color);
+            $stmt->execute();
 
-            return $insertStmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($row) {
+                // If the item already exists, update the quantity
+                $newQuantity = $row['quantity'] + $this->quantity;
+
+                // Debugging: Log the current and new quantity
+                error_log("Current quantity: " . $row['quantity']);
+                error_log("Adding quantity: " . $this->quantity);
+                error_log("New quantity: " . $newQuantity);
+
+                // Check stock availability before updating
+                $product = new Product($this->conn);
+                $product->product_id = $this->product_id;
+                $stock = $product->getStockForSizeAndColor($this->size, $this->color);
+
+                if ($newQuantity > $stock) {
+                    throw new Exception("Requested quantity exceeds available stock.");
+                }
+
+                // Update the quantity
+                $updateQuery = "UPDATE " . $this->table_name . " 
+                            SET quantity = :quantity 
+                            WHERE cart_id = :cart_id";
+                $updateStmt = $this->conn->prepare($updateQuery);
+                $updateStmt->bindParam(":quantity", $newQuantity);
+                $updateStmt->bindParam(":cart_id", $row['cart_id']);
+
+                if ($updateStmt->execute()) {
+                    error_log("Quantity updated successfully.");
+                    return true;
+                } else {
+                    throw new Exception("Failed to update quantity in the database.");
+                }
+            } else {
+                // If the item does not exist, insert a new row
+                $insertQuery = "INSERT INTO " . $this->table_name . " 
+                            (customer_id, product_id, quantity, color, size, added_at) 
+                            VALUES (:customer_id, :product_id, :quantity, :color, :size, NOW())";
+                $insertStmt = $this->conn->prepare($insertQuery);
+
+                // Bind parameters
+                $insertStmt->bindParam(":customer_id", $this->customer_id);
+                $insertStmt->bindParam(":product_id", $this->product_id);
+                $insertStmt->bindParam(":quantity", $this->quantity);
+                $insertStmt->bindParam(":color", $this->color);
+                $insertStmt->bindParam(":size", $this->size);
+
+                if ($insertStmt->execute()) {
+                    error_log("New item added to cart successfully.");
+                    return true;
+                } else {
+                    throw new Exception("Failed to insert new item into the cart.");
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Error in add method: " . $e->getMessage());
+            return false;
         }
     }
 
@@ -190,7 +209,7 @@ class Cart
             }
         } catch (Exception $e) {
             error_log("Error in updateQuantity: " . $e->getMessage());
-            return false;
+            return $e->getMessage(); // Return the exception message
         }
     }
 
@@ -285,11 +304,48 @@ class Cart
 
     public function getCartItemQuantity($cart_id)
     {
-        $query = "SELECT quantity FROM cart_items WHERE cart_id = :cart_id";
+        $query = "SELECT quantity FROM cart WHERE cart_id = :cart_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":cart_id", $cart_id);
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ? $result['quantity'] : 0;
+    }
+
+    // In the Cart class
+    public function getCartQuantityForProduct($product_id, $size, $color)
+    {
+        $query = "SELECT SUM(quantity) AS total_quantity FROM " . $this->table_name . " 
+                  WHERE customer_id = :customer_id 
+                  AND product_id = :product_id 
+                  AND size = :size 
+                  AND color = :color";
+        $stmt = $this->conn->prepare($query);
+
+        // Bind parameters
+        $stmt->bindParam(":customer_id", $this->customer_id);
+        $stmt->bindParam(":product_id", $product_id);
+        $stmt->bindParam(":size", $size);
+        $stmt->bindParam(":color", $color);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ? (int)$row['total_quantity'] : 0;
+    }
+
+    public function getCartCount()
+    {
+        $query = "SELECT COUNT(cart_id) AS total_quantity FROM " . $this->table_name . " 
+                  WHERE customer_id = :customer_id";
+        $stmt = $this->conn->prepare($query);
+
+        // Bind parameters
+        $stmt->bindParam(":customer_id", $this->customer_id);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ? (int)$row['total_quantity'] : 0;
     }
 }
