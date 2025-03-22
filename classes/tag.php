@@ -84,4 +84,17 @@ class Tag
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getProductCountPerTag()
+    {
+        $query = "SELECT t.tag_id, t.name, COUNT(pt.product_id) as product_count 
+              FROM " . $this->table_name . " t 
+              LEFT JOIN product_tags pt ON t.tag_id = pt.tag_id 
+              GROUP BY t.tag_id, t.name";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

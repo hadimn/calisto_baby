@@ -1,3 +1,17 @@
+<?php
+include 'classes/database.php';
+include 'classes/cart.php';
+include 'classes/tag.php';
+
+$database = new Database();
+$db = $database->getConnection();
+$tag = new Tag($db);
+
+// Fetch tags from the database
+$tags = $tag->getProductCountPerTag();
+?>
+
+
 <!doctype html>
 <html class="no-js" lang="en">
 
@@ -36,164 +50,18 @@
 
 <div class="main-wrapper">
 
-    <!-- Header Section Start -->
-    <div class="header-section section">
-
-        <!-- Header Top Start -->
-        <div class="header-top header-top-one bg-theme-two">
-            <div class="container-fluid">
-                <div class="row align-items-center justify-content-center">
-
-                    <div class="col mt-10 mb-10 d-none d-md-flex">
-                        <!-- Header Top Left Start -->
-                        <div class="header-top-left">
-                            <p>Welcome to Jadusona</p>
-                            <p>Hotline: <a href="tel:0123456789">0123 456 789</a></p>
-                        </div><!-- Header Top Left End -->
-                    </div>
-
-                    <div class="col mt-10 mb-10">
-                        <!-- Header Language Currency Start -->
-                        <ul class="header-lan-curr">
-
-                            <li><a href="#">eng</a>
-                                <ul>
-                                    <li><a href="#">english</a></li>
-                                    <li><a href="#">spanish</a></li>
-                                    <li><a href="#">france</a></li>
-                                    <li><a href="#">russian</a></li>
-                                    <li><a href="#">chinese</a></li>
-                                </ul>
-                            </li>
-
-                            <li><a href="#">$usd</a>
-                                <ul>
-                                    <li><a href="#">pound</a></li>
-                                    <li><a href="#">dollar</a></li>
-                                    <li><a href="#">euro</a></li>
-                                    <li><a href="#">yen</a></li>
-                                </ul>
-                            </li>
-
-                        </ul><!-- Header Language Currency End -->
-                    </div>
-
-                    <div class="col mt-10 mb-10">
-                        <!-- Header Shop Links Start -->
-                        <div class="header-top-right">
-
-                            <p><a href="my-account.html">My Account</a></p>
-                            <p><a href="login-register.html">Register</a><a href="login-register.html">Login</a></p>
-
-                        </div><!-- Header Shop Links End -->
-                    </div>
-
-                </div>
-            </div>
-        </div><!-- Header Top End -->
-
-        <!-- Header Bottom Start -->
-        <div class="header-bottom header-bottom-one header-sticky">
-            <div class="container-fluid">
-                <div class="row menu-center align-items-center justify-content-between">
-
-                    <div class="col mt-15 mb-15">
-                        <!-- Logo Start -->
-                        <div class="header-logo">
-                            <a href="index.html">
-                                <img src="assets/images/logo.png" alt="Jadusona">
-                            </a>
-                        </div><!-- Logo End -->
-                    </div>
-
-                    <div class="col order-2 order-lg-3">
-                        <!-- Header Advance Search Start -->
-                        <div class="header-shop-links">
-
-                            <div class="header-search">
-                                <button class="search-toggle"><img src="assets/images/icons/search.png" alt="Search Toggle"><img class="toggle-close" src="assets/images/icons/close.png" alt="Search Toggle"></button>
-                                <div class="header-search-wrap">
-                                    <form action="#">
-                                        <input type="text" placeholder="Type and hit enter">
-                                        <button><img src="assets/images/icons/search.png" alt="Search"></button>
-                                    </form>
-                                </div>
-                            </div>
-
-                            <div class="header-wishlist">
-                                <a href="wishlist.html"><img src="assets/images/icons/wishlist.png" alt="Wishlist"> <span>02</span></a>
-                            </div>
-
-                            <div class="header-mini-cart">
-                                <a href="cart.html"><img src="assets/images/icons/cart.png" alt="Cart"> <span>02($250)</span></a>
-                            </div>
-
-                        </div><!-- Header Advance Search End -->
-                    </div>
-
-                    <div class="col order-3 order-lg-2">
-                        <div class="main-menu">
-                            <nav>
-                                <ul>
-                                    <li><a href="index.html">HOME</a>
-                                        <ul class="sub-menu">
-                                            <li><a href="index.html">Home One</a></li>
-                                            <li><a href="index-2.html">Home Two</a></li>
-                                            <li><a href="index-3.html">Home Three</a></li>
-                                            <li><a href="index-box.html">Home Box</a></li>
-                                        </ul>
-                                    </li>
-                                    <li class="active"><a href="shop.html">SHOP</a>
-                                        <ul class="sub-menu">
-                                            <li><a href="shop.html">Shop</a></li>
-                                            <li class="active"><a href="shop-left-sidebar.html">Shop Left Sidebar</a></li>
-                                            <li><a href="shop-right-sidebar.html">Shop Right Sidebar</a></li>
-                                            <li><a href="single-product.html">Single Product</a></li>
-                                            <li><a href="single-product-left-sidebar.html">Single Product Left Sidebar</a></li>
-                                            <li><a href="single-product-right-sidebar.html">Single Product Right Sidebar</a></li>
-                                        </ul>
-                                    </li>
-                                    <li><a href="#">PAGES</a>
-                                        <ul class="sub-menu">
-                                            <li><a href="cart.html">Cart</a></li>
-                                            <li><a href="checkout.html">Checkout</a></li>
-                                            <li><a href="login-register.html">Login & Register</a></li>
-                                            <li><a href="my-account.html">My Account</a></li>
-                                            <li><a href="wishlist.html">Wishlist</a></li>
-											<li><a href="404.html">404 Error</a></li>
-                                        </ul>
-                                    </li>
-                                    <li><a href="blog.html">BLOG</a>
-                                        <ul class="sub-menu">
-                                            <li><a href="blog.html">Blog</a></li>
-                                            <li><a href="single-blog.html">Single Blog</a></li>
-                                        </ul>
-                                    </li>
-                                    <li><a href="contact.html">CONTACT</a></li>
-                                </ul>
-                            </nav>
-                        </div>
-                    </div>
-                    
-                    <!-- Mobile Menu -->
-                    <div class="mobile-menu order-4 d-block d-lg-none col"></div>
-
-                </div>
-            </div>
-        </div><!-- Header BOttom End -->
-
-    </div><!-- Header Section End -->
+    <?php include 'header.php';?>
 
     <!-- Page Banner Section Start -->
-    <div class="page-banner-section section" style="background-image: url(assets/images/hero/hero-1.jpg)">
+    <div class="page-banner-section section" style="background-image: url(assets/images/feature/shopPage.jpg)">
         <div class="container">
             <div class="row">
                 <div class="page-banner-content col">
 
-                    <h1>Shop Left Sidebar</h1>
+                    <h1>Shop</h1>
                     <ul class="page-breadcrumb">
                         <li><a href="index.html">Home</a></li>
-                        <li><a href="shop-left-sidebar.html">Shop Left Sidebar</a></li>
+                        <li><a href="shop-left-sidebar.html">Shop</a></li>
                     </ul>
 
                 </div>
@@ -675,13 +543,9 @@
                     <div class="sidebar">
                         <h4 class="sidebar-title">Category</h4>
                         <ul class="sidebar-list">
-                            <li><a href="#">Shart <span class="num">18</span></a></li>
-                            <li><a href="#">Pants <span class="num">09</span></a></li>
-                            <li><a href="#">T-Shart <span class="num">05</span></a></li>
-                            <li><a href="#">Tops <span class="num">03</span></a></li>
-                            <li><a href="#">Kid's Clothes <span class="num">15</span></a></li>
-                            <li><a href="#">Watch <span class="num">07</span></a></li>
-                            <li><a href="#">Accessories <span class="num">02</span></a></li>
+                            <?php foreach($tags as $tag):?>x
+                            <li><a href="#"><?=$tag['name']?> <span class="num"><?=$tag['product_count']?></span></a></li>
+                            <?php endforeach;?>
                         </ul>
                     </div>
 
@@ -811,76 +675,7 @@
         </div>
     </div><!-- Brand Section End -->
 
-    <!-- Footer Top Section Start -->
-    <div class="footer-top-section section bg-theme-two-light section-padding">
-        <div class="container">
-            <div class="row mbn-40">
-
-                <div class="footer-widget col-lg-3 col-md-6 col-12 mb-40">
-                    <h4 class="title">CONTACT US</h4>
-                    <p>You address will be here<br/> Lorem Ipsum text</p>
-                    <p><a href="tel:01234567890">01234 567 890</a><a href="tel:01234567891">01234 567 891</a></p>
-                    <p><a href="mailto:info@example.com">info@example.com</a><a href="#">www.example.com</a></p>
-                </div>
-
-                <div class="footer-widget col-lg-3 col-md-6 col-12 mb-40">
-                    <h4 class="title">PRODUCTS</h4>
-                    <ul>
-                        <li><a href="#">New Arrivals</a></li>
-                        <li><a href="#">Best Seller</a></li>
-                        <li><a href="#">Trendy Items</a></li>
-                        <li><a href="#">Best Deals</a></li>
-                        <li><a href="#">On Sale Products</a></li>
-                        <li><a href="#">Featured Products</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-widget col-lg-3 col-md-6 col-12 mb-40">
-                    <h4 class="title">INFORMATION</h4>
-                    <ul>
-                        <li><a href="#">About us</a></li>
-                        <li><a href="#">Terms & Conditions</a></li>
-                        <li><a href="#">Payment Method</a></li>
-                        <li><a href="#">Product Warranty</a></li>
-                        <li><a href="#">Return Process</a></li>
-                        <li><a href="#">Payment Security</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-widget col-lg-3 col-md-6 col-12 mb-40">
-                    <h4 class="title">NEWSLETTER</h4>
-                    <p>Subscribe our newsletter and get all update of our product</p>
-
-                    <form id="mc-form" class="mc-form footer-subscribe-form">
-                        <input id="mc-email" autocomplete="off" placeholder="Enter your email here" name="EMAIL" type="email">
-                        <button id="mc-submit"><i class="fa fa-paper-plane-o"></i></button>
-                    </form>
-                    <!-- mailchimp-alerts Start -->
-                    <div class="mailchimp-alerts">
-                        <div class="mailchimp-submitting"></div><!-- mailchimp-submitting end -->
-                        <div class="mailchimp-success"></div><!-- mailchimp-success end -->
-                        <div class="mailchimp-error"></div><!-- mailchimp-error end -->
-                    </div><!-- mailchimp-alerts end -->
-
-                    <h5>FOLLOW US</h5> 
-                    <p class="footer-social"><a href="#">Facebook</a> - <a href="#">Twitter</a> - <a href="#">Google+</a></p>
-
-                </div>
-
-            </div>
-        </div>
-    </div><!-- Footer Top Section End -->
-
-    <!-- Footer Bottom Section Start -->
-    <div class="footer-bottom-section section bg-theme-two pt-15 pb-15">
-        <div class="container">
-            <div class="row">
-                <div class="col text-center">
-                    <p class="footer-copyright">© 2022 Jadusona. Made with <i class="fa fa-heart heart-icon"></i> By <a target="_blank" href="https://hasthemes.com">HasThemes</a></p>
-                </div>
-            </div>
-        </div>
-    </div><!-- Footer Bottom Section End -->
+    <?php include 'footer.php';?>
 
 </div>
 

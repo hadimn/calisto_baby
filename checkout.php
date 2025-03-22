@@ -2,6 +2,8 @@
 session_start();
 include 'classes/database.php';
 include 'classes/cart.php';
+include 'classes/discount.php'; // Include the Discount class
+@include('proccess/shipping_proccess.php');
 
 $database = new Database();
 $db = $database->getConnection();
@@ -11,14 +13,30 @@ $cart->customer_id = $_SESSION['customer_id'];
 
 $cartItems = $cart->getItems()->fetchAll(PDO::FETCH_ASSOC);
 
-// $Itemsubtotal = $cart->getCartItemSubtotal($_GET['cart_id']);
-// print_r($Itemsubtotal);
-
 $totals = $cart->calculateCartTotals($_SESSION['customer_id']);
 $subtotal = $totals['subtotal'];
 $total = $totals['total'];
-session_abort();
 
+// Fetch the current shipping fee from the database
+$query = "SELECT fee FROM shipping_fees LIMIT 1";
+$stmt = $db->prepare($query);
+$stmt->execute();
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+$current_fee = $row ? ($total < 99 ? $row['fee'] : '0.00') : '0.00';
+
+// Fetch active discount for the customer
+$discount = new Discount($db);
+$discount->customer_id = $_SESSION['customer_id'];
+$activeDiscount = $discount->getActiveDiscount();
+
+$discountAmount = 0;
+if ($activeDiscount) {
+    $discountAmount = ($subtotal * $activeDiscount['discount_percentage']) / 100;
+    $discountType = $activeDiscount['discount_type'];
+}
+
+$grandTotal = ($total - $discountAmount) + $current_fee;
+session_abort();
 ?>
 
 
@@ -149,14 +167,14 @@ session_abort();
                                     </div>
 
                                     <div class="col-12 mb-5">
-                                        <div class="check-box mb-15">
+                                        <!-- <div class="check-box mb-15">
                                             <input type="checkbox" id="create_account">
                                             <label for="create_account">Create an Acount?</label>
-                                        </div>
-                                        <div class="check-box mb-15">
+                                        </div> -->
+                                        <!-- <div class="check-box mb-15">
                                             <input type="checkbox" id="shiping_address" data-shipping>
                                             <label for="shiping_address">Ship to Different Address</label>
-                                        </div>
+                                        </div> -->
                                     </div>
 
                                 </div>
@@ -230,21 +248,17 @@ session_abort();
 
                         <div class="col-lg-5">
                             <div class="row">
-
                                 <!-- Cart Total -->
                                 <div class="col-12 mb-40">
-
                                     <h4 class="checkout-title">Cart Total</h4>
-
                                     <div class="checkout-cart-total">
-
                                         <h4>Product</h4>
                                         <table class="cart-table">
                                             <thead>
                                                 <tr>
                                                     <th>Name</th>
                                                     <th>Price</th>
-                                                    <th>Quantity</th>
+                                                    <th>Q-S-C</th>
                                                     <th>Total</th>
                                                 </tr>
                                             </thead>
@@ -253,26 +267,27 @@ session_abort();
                                                     <tr>
                                                         <td><?= $cartItem['product_name'] ?></td>
                                                         <td>
-                                                            <?php if ($cartItem['price'] != null || $cartItem['price'] != 0): ?>
-                                                                $<?= $cartItem['price'] ?>
-                                                            <?php else: ?>
+                                                            <?php if ($cartItem['new_price'] != null || $cartItem['new_price'] != 0): ?>
                                                                 $<?= $cartItem['new_price'] ?>
+                                                            <?php else: ?>
+                                                                $<?= $cartItem['price'] ?>
                                                             <?php endif; ?>
                                                         </td>
-                                                        <td><?= $cartItem['quantity'] ?> <?= $cartItem['size'] ?></td>
-                                                        <td>$<?=$cart->getCartItemSubtotal($cartItem['cart_id']);?></td>
+                                                        <td><?= $cartItem['quantity'] ?>-<?= $cartItem['size'] ?>-<?= $cartItem['color'] ?></td>
+                                                        <td>$<?= $cart->getCartItemSubtotal($cartItem['cart_id']); ?></td>
                                                     </tr>
                                                 <?php endforeach; ?>
                                             </tbody>
                                         </table>
 
                                         <p>Sub Total <span>$<?= $subtotal ?></span></p>
-                                        <p>Shipping Fee <span>$00.00</span></p>
+                                        <?php if ($discountAmount > 0): ?>
+                                            <p>Discount(<?= $discountType ?>) <span>-$<?= number_format($discountAmount, 2) ?></span></p>
+                                        <?php endif; ?>
+                                        <p>Shipping Fee <span>$<?= $current_fee ?></span></p>
 
-                                        <h4>Grand Total <span>$1250.00</span></h4>
-
+                                        <h4>Grand Total <span>$<?= number_format($grandTotal, 2) ?></span></h4>
                                     </div>
-
                                 </div>
 
                                 <!-- Payment Method -->

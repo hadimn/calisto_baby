@@ -1,4 +1,6 @@
 <?php
+include 'classes/discount.php';
+
 class Customer
 {
     private $conn;
@@ -17,10 +19,32 @@ class Customer
         $this->conn = $db;
     }
 
-    // Create a new customer
+    // // Create a new customer
+    // public function create()
+    // {
+    //     $query = "INSERT INTO " . $this->table_name . " (first_name, last_name, email, phone_number, address, password) VALUES (:first_name, :last_name, :email, :phone_number, :address, :password)";
+    //     $stmt = $this->conn->prepare($query);
+
+    //     // Bind parameters
+    //     $stmt->bindParam(":first_name", $this->first_name);
+    //     $stmt->bindParam(":last_name", $this->last_name);
+    //     $stmt->bindParam(":email", $this->email);
+    //     $stmt->bindParam(":phone_number", $this->phone_number);
+    //     $stmt->bindParam(":address", $this->address);
+    //     $stmt->bindParam(":password", $this->password);
+
+    //     if ($stmt->execute()) {
+    //         return true;
+    //     }
+    //     return false;
+    // }
+
+    // Create a new customer and add a discount (with email check)
     public function create()
     {
-        $query = "INSERT INTO " . $this->table_name . " (first_name, last_name, email, phone_number, address, password) VALUES (:first_name, :last_name, :email, :phone_number, :address, :password)";
+        // Insert the customer data into the database
+        $query = "INSERT INTO " . $this->table_name . " (first_name, last_name, email, phone_number, address, password) 
+                      VALUES (:first_name, :last_name, :email, :phone_number, :address, :password)";
         $stmt = $this->conn->prepare($query);
 
         // Bind parameters
@@ -32,8 +56,39 @@ class Customer
         $stmt->bindParam(":password", $this->password);
 
         if ($stmt->execute()) {
+            $this->customer_id = $this->conn->lastInsertId(); // Get the customer ID of the newly registered customer
+
+            // Add a discount after successful registration
+            $this->addDiscountOnRegistration();
             return true;
         }
+        return false;
+    }
+
+    // Check if the email already exists in the database
+    public function emailExists()
+    {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE email = :email LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":email", $this->email);
+        $stmt->execute();
+
+        // If a row is found, email exists
+        return $stmt->rowCount() > 0;
+    }
+
+    // Add a discount for the new customer (e.g., first-order discount)
+    public function addDiscountOnRegistration()
+    {
+        // Assuming Discount class is included and instantiable
+        $discount = new Discount($this->conn); // Create a Discount object
+        $discount->customer_id = $this->customer_id; // Set the customer ID
+
+        // Apply a first-order discount (10%) for new customers
+        if ($discount->applyFirstOrderDiscount()) {
+            return true;
+        }
+
         return false;
     }
 

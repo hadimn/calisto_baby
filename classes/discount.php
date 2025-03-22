@@ -1,44 +1,59 @@
 <?php
-namespace Classes;
-class Discount {
+
+class Discount
+{
     private $conn;
     private $table_name = "discounts";
+    private $orders_table = "orders"; // Assuming an orders table exists
 
     public $discount_id;
-    public $discount_code;
-    public $amount;
-    public $start_date;
-    public $end_date;
+    public $customer_id;
+    public $discount_type;
+    public $discount_percentage;  // Renamed from discount_value
+    public $status;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->conn = $db;
     }
 
-    // Apply discount
-    public function apply() {
-        $query = "INSERT INTO " . $this->table_name . " (discount_code, amount, start_date, end_date) VALUES (:discount_code, :amount, :start_date, :end_date)";
+    // Check if the customer is eligible for a first-order discount
+    public function isFirstOrderDiscountEligible()
+    {
+        $query = "SELECT COUNT(*) AS order_count FROM " . $this->orders_table . " WHERE customer_id = :customer_id";
         $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":customer_id", $this->customer_id);
+        $stmt->execute();
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        // Bind parameters
-        $stmt->bindParam(":discount_code", $this->discount_code);
-        $stmt->bindParam(":amount", $this->amount);
-        $stmt->bindParam(":start_date", $this->start_date);
-        $stmt->bindParam(":end_date", $this->end_date);
+        return $row['order_count'] == 0; // Eligible if user has no orders
+    }
 
-        if ($stmt->execute()) {
-            return true;
+    // Apply a first-order discount (10%)
+    public function applyFirstOrderDiscount()
+    {
+        if ($this->isFirstOrderDiscountEligible()) {
+            // Insert discount into database
+            $query = "INSERT INTO " . $this->table_name . " (customer_id, discount_type, discount_percentage, status) 
+                      VALUES (:customer_id, 'first_order', 10, 'active')";  // Updated to discount_percentage
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":customer_id", $this->customer_id);
+
+            return $stmt->execute();
         }
         return false;
     }
 
-    // Check if discount is valid
-    public function isValid() {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE discount_code = :discount_code AND start_date <= NOW() AND end_date >= NOW()";
+    // Get active discount for a customer
+    public function getActiveDiscount()
+    {
+        $query = "SELECT * FROM " . $this->table_name . " 
+                  WHERE customer_id = :customer_id AND status = 'active' 
+                  ORDER BY discount_id DESC LIMIT 1"; // Get latest active discount
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":discount_code", $this->discount_code);
+        $stmt->bindParam(":customer_id", $this->customer_id);
         $stmt->execute();
 
-        return $stmt;
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
     }
 }
-?>

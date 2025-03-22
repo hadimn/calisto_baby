@@ -45,19 +45,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register'])) {
         $errors[] = "Password must be at least 8 characters long and contain at least one uppercase letter, one number, and one special character.";
     }
 
-    if (empty($errors)) {
-        $customer->first_name = $first_name;
-        $customer->last_name = $last_name;
-        $customer->email = $email;
-        $customer->phone_number = $phone_number;
-        $customer->address = $address;
-        $customer->password = password_hash($password, PASSWORD_DEFAULT);
+    $customer->email = $email;
 
-        if ($customer->create()) {
-            $registration_success = "Registration successful! You can now login.";
-        } else {
-            $errors[] = "Registration failed. Please try again.";
+    if (!$customer->emailExists()) {
+        if (empty($errors)) {
+            $customer->first_name = $first_name;
+            $customer->last_name = $last_name;
+            $customer->email = $email;
+            $customer->phone_number = $phone_number;
+            $customer->address = $address;
+            $customer->password = password_hash($password, PASSWORD_DEFAULT);
+
+            if ($customer->create()) {
+                $registration_success = "Registration successful! You can now login.";
+            } else {
+                $errors[] = "Registration failed. Please try again.";
+            }
         }
+    } else {
+        $errors[] = "Email is already registered.";
     }
 }
 
@@ -91,4 +97,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
         }
     }
 }
-?>

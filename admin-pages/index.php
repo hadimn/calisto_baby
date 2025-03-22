@@ -14,7 +14,7 @@ if (isset($_GET['file'])) {
 // Get the last loaded file from session or default to homepage
 $last_loaded_file = isset($_SESSION['last_loaded_file']) ? $_SESSION['last_loaded_file'] : 'dashboard.php';
 
-if(!isset($_GET['file'])){
+if (!isset($_GET['file'])) {
   header("Location: index.php?file=$last_loaded_file");
 }
 ?>
@@ -89,6 +89,10 @@ if(!isset($_GET['file'])){
               echo 'class="active"'; ?>><a
             href="?file=socialMediaPage.php" data-file="socialMediaPage.php"><span
               class="fa fa-file-image-o mr-3"></span>Social Media</a></li>
+        <li <?php if ($last_loaded_file == 'shippingfeepage.php')
+              echo 'class="active"'; ?>><a
+            href="?file=shippingfeepage.php" data-file="shippingfeepage.php"><span
+              class="fa fa-truck mr-3"></span>Delivery Fee</a></li>
       </ul>
     </nav>
 
