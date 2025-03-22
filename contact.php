@@ -1,6 +1,7 @@
 <?php
 include 'classes/database.php';
 include 'classes/social-media.php';
+include 'classes/cart.php';
 
 $database = new Database();
 $db = $database->getConnection();

@@ -207,9 +207,8 @@ class Product
     // Get available colors
     public function getAvailableColors()
     {
-        $query = "SELECT DISTINCT color FROM " . $this->size_table . " WHERE product_id = :product_id AND stock > 0";
+        $query = "SELECT DISTINCT color FROM " . $this->size_table . " WHERE stock > 0";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":product_id", $this->product_id);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
