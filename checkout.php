@@ -2,11 +2,15 @@
 session_start();
 include 'classes/database.php';
 include 'classes/cart.php';
-include 'classes/discount.php'; // Include the Discount class
+include 'classes/customer.php';
 @include('proccess/shipping_proccess.php');
 
 $database = new Database();
 $db = $database->getConnection();
+
+$customer = new Customer($db);
+$customer->customer_id = $_SESSION['customer_id'];
+$customer->findById();
 
 $cart = new Cart($db);
 $cart->customer_id = $_SESSION['customer_id'];
@@ -115,33 +119,27 @@ session_abort();
 
                                     <div class="col-md-6 col-12 mb-5">
                                         <label>First Name*</label>
-                                        <input type="text" placeholder="First Name">
+                                        <input type="text" placeholder="First Name" value="<?= $customer->first_name ?>">
                                     </div>
 
                                     <div class="col-md-6 col-12 mb-5">
                                         <label>Last Name*</label>
-                                        <input type="text" placeholder="Last Name">
+                                        <input type="text" placeholder="Last Name" value="<?= $customer->last_name ?>">
                                     </div>
 
                                     <div class="col-md-6 col-12 mb-5">
                                         <label>Email Address*</label>
-                                        <input type="email" placeholder="Email Address">
+                                        <input type="email" placeholder="Email Address" value="<?= $customer->email ?>">
                                     </div>
 
                                     <div class="col-md-6 col-12 mb-5">
                                         <label>Phone no*</label>
-                                        <input type="text" placeholder="Phone number">
-                                    </div>
-
-                                    <div class="col-12 mb-5">
-                                        <label>Company Name</label>
-                                        <input type="text" placeholder="Company Name">
+                                        <input type="text" placeholder="Phone number" value="<?= $customer->phone_number ?>">
                                     </div>
 
                                     <div class="col-12 mb-5">
                                         <label>Address*</label>
-                                        <input type="text" placeholder="Address line 1">
-                                        <input type="text" placeholder="Address line 2">
+                                        <input type="text" placeholder="Address line" value="<?= $customer->address ?>">
                                     </div>
 
                                     <div class="col-md-6 col-12 mb-5">
@@ -156,17 +154,11 @@ session_abort();
                                         <input type="text" placeholder="Town/City">
                                     </div>
 
-                                    <div class="col-md-6 col-12 mb-5">
-                                        <label>State*</label>
-                                        <input type="text" placeholder="State">
+                                    <!-- Text Area Added Here -->
+                                    <div data-mdb-input-init class="form-outline mb-4">
+                                        <label class="form-label" for="textAreaExample6">additional address information*</label>
+                                        <textarea style="border: #666666 solid 1px;" placeholder="additional information" class="form-control" id="textAreaExample6" rows="3"></textarea>
                                     </div>
-
-                                    <div class="col-md-6 col-12 mb-5">
-                                        <label>Zip Code*</label>
-                                        <input type="text" placeholder="Zip Code">
-                                    </div>
-
-                                    
 
                                 </div>
 
@@ -225,22 +217,27 @@ session_abort();
                                     <div class="checkout-payment-method">
                                         <!-- Cash Payment -->
                                         <div class="single-method">
-                                            <input type="radio" id="payment_cash" name="payment-method" value="cash">
-                                            <label for="payment_cash">Cash Payment</label>
+                                            <input type="radio" id="payment_cash" name="payment-method" value="cash" checked>
+                                            <label for="payment_cash">Cash Payment <span class="fa fa-caret-down"></span></label>
                                             <p data-method="cash">Pay with cash upon delivery. Our representative will collect the payment when your order is delivered to your address.</p>
                                         </div>
 
                                         <!-- Whish Money -->
-                                        <div class="single-method">
+                                        <!-- <div class="single-method">
                                             <input type="radio" id="payment_whish" name="payment-method" value="whish">
                                             <label for="payment_whish">Whish Money</label>
                                             <p data-method="whish">Pay securely using Whish Money. Complete your payment through the Whish Money platform for a fast and hassle-free transaction.</p>
-                                        </div>
+                                        </div> -->
 
                                         <!-- Terms and Conditions -->
                                         <div class="single-method">
                                             <input type="checkbox" id="accept_terms">
-                                            <label for="accept_terms">I’ve read and accept the terms & conditions</label>
+                                            <label for="accept_terms">
+                                                I’ve read and accept the
+                                                <a href="assets/documents/terms-and-conditions.pdf" download style="color: blue;">
+                                                    terms & conditions <span class="fa fa-download"></span>
+                                                </a>
+                                            </label>
                                         </div>
                                     </div>
 

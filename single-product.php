@@ -128,18 +128,18 @@ session_abort();
 
                             <div class="col-lg-6 col-12 mb-40">
                                 <!-- Main Image Container -->
-                                <div class="pro-large-img mb-10 fix easyzoom easyzoom--with-thumbnails d-flex justify-content-center align-items-center" style="width: 400px; height: 400px; margin: 0 auto;">
+                                <div class="pro-large-img easyzoom easyzoom--with-thumbnails">
                                     <a href="admin-pages/<?= $prodSizesAndColors[0]['color_image'] ?>">
-                                        <img src="admin-pages/<?= $prod['image'] ?>" alt="" class="img-fluid main-image object-fit-contain" style="max-width: 100%; max-height: 100%;" />
+                                        <img src="admin-pages/<?= $prod['image'] ?>" alt="" />
                                     </a>
                                 </div>
 
                                 <!-- Thumbnail Slider -->
-                                <ul id="pro-thumb-img" class="pro-thumb-img list-unstyled d-flex gap-2 overflow-auto">
+                                <ul id="pro-thumb-img" class="pro-thumb-img">
                                     <?php foreach ($prodSizesAndColors as $prodSizeAndColor): ?>
-                                        <li class="flex-shrink-0">
+                                        <li>
                                             <a href="#" data-standard="admin-pages/<?= $prodSizeAndColor['color_image'] ?>" data-color="<?= $prodSizeAndColor['color'] ?>">
-                                                <img data-color="<?= $prodSizeAndColor['color'] ?>" src="admin-pages/<?= $prodSizeAndColor['color_image'] ?>" alt="" class="img-thumbnail object-fit-cover" style="width: 200px; height: 80px;" />
+                                                <img data-color="<?= $prodSizeAndColor['color'] ?>" src="admin-pages/<?= $prodSizeAndColor['color_image'] ?>" alt="" />
                                             </a>
                                         </li>
                                     <?php endforeach; ?>
@@ -306,7 +306,12 @@ session_abort();
 
                 <div class="related-product-slider related-product-slider-1 slick-space p-0">
 
-                    <?php foreach ($relatedProducts as $relatedProduct): ?>
+                    <?php foreach ($relatedProducts as $relatedProduct):
+                        // Fetch sizes and colors for the related product
+                        $relatedProductSizesAndColors = $product->getSizesAndColorsForProduct($relatedProduct['product_id']);
+                        $uniqueSizes = array_unique(array_column($relatedProductSizesAndColors, 'size'));
+                        $uniqueColors = array_unique(array_column($relatedProductSizesAndColors, 'color'));
+                    ?>
                         <div class="slick-slide">
 
                             <div class="product-item">
@@ -328,7 +333,7 @@ session_abort();
 
                                         <div class="content-left">
 
-                                            <h4 class="title"><a href="single-product.html">Tmart Baby Dress</a></h4>
+                                            <h4 class="title"><a href="single-product.php?product_id=<?= $relatedProduct['product_id'] ?>"><?= $relatedProduct['name'] ?></a></h4>
 
                                             <div class="ratting">
                                                 <i class="fa fa-star"></i>
@@ -339,17 +344,20 @@ session_abort();
                                             </div>
 
                                             <h5 class="size">Size:
-                                                <span>S</span><span>M</span><span>L</span><span>XL</span>
+                                                <?php foreach ($uniqueSizes as $size): ?>
+                                                    <span><?= htmlspecialchars($size) ?></span>
+                                                <?php endforeach; ?>
                                             </h5>
-                                            <h5 class="color">Color: <span style="background-color: #ffb2b0"></span><span
-                                                    style="background-color: #0271bc"></span><span
-                                                    style="background-color: #efc87c"></span><span
-                                                    style="background-color: #00c183"></span></h5>
+                                            <h5 class="color">Color:
+                                                <?php foreach ($uniqueColors as $color): ?>
+                                                    <span style="background-color: <?= $color ?>"></span>
+                                                <?php endforeach; ?>
+                                            </h5>
 
                                         </div>
 
                                         <div class="content-right">
-                                            <span class="price">$25</span>
+                                            <span class="price">$<?= $relatedProduct['price'] ?></span>
                                         </div>
 
                                     </div>

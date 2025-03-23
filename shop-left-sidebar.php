@@ -186,7 +186,7 @@ $total_pages = ceil($total_products / $limit);
                                             </div>
                                             <div class="content">
                                                 <div class="content-left">
-                                                    <h4 class="title"><a href="single-product.html"><?= $product['name'] ?></a></h4>
+                                                    <h4 class="title"><a href="single-product.php?product_id=<?= $product['product_id'] ?>"><?= $product['name'] ?></a></h4>
                                                     <div class="ratting">
                                                         <i class="fa fa-star"></i>
                                                         <i class="fa fa-star"></i>
@@ -199,7 +199,7 @@ $total_pages = ceil($total_products / $limit);
                                                     <h5 class="color">Color: <span style="background-color: #ffb2b0"></span><span style="background-color: #0271bc"></span><span style="background-color: #efc87c"></span><span style="background-color: #00c183"></span></h5>
                                                 </div>
                                                 <div class="content-right">
-                                                    <span class="price">$<?= $product['price'] ?> <span class="old">$<?= $product['new_price'] ?></span></span>
+                                                    <span class="price">$<?= $product['new_price'] ?> <span class="old">$<?= $product['price'] ?></span></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -285,7 +285,6 @@ $total_pages = ceil($total_products / $limit);
         // Handle limit and sort changes
         document.getElementById('limit-select').addEventListener('change', function() {
             const limit = this.value;
-            const sort = document.getElementById('sort-select').value;
             const url = new URL(window.location.href);
             url.searchParams.set('limit', limit);
             window.location.href = url.toString();
@@ -293,10 +292,29 @@ $total_pages = ceil($total_products / $limit);
 
         document.getElementById('sort-select').addEventListener('change', function() {
             const sort = this.value;
-            const limit = document.getElementById('limit-select').value;
             const url = new URL(window.location.href);
             url.searchParams.set('sort', sort);
             window.location.href = url.toString();
+        });
+
+        $(function() {
+            $("#price-range").slider({
+                range: true,
+                min: 0,
+                max: 1000, // Adjust max value as needed
+                values: [<?= $min_price !== null ? $min_price : 0 ?>, <?= $max_price !== null ? $max_price : 1000 ?>], // set the default values
+                slide: function(event, ui) {
+                    $("#price-amount").val("$" + ui.values[0] + " - $" + ui.values[1]);
+                },
+                stop: function(event, ui) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('min_price', ui.values[0]);
+                    url.searchParams.set('max_price', ui.values[1]);
+                    window.location.href = url.toString();
+                }
+            });
+            $("#price-amount").val("$" + $("#price-range").slider("values", 0) +
+                " - $" + $("#price-range").slider("values", 1));
         });
     </script>
 

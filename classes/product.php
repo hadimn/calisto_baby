@@ -344,4 +344,13 @@ class Product
 
         return $stmt->execute();
     }
+
+    public function getSizesAndColorsForProduct($product_id)
+    {
+        $query = "SELECT size, color FROM " . $this->size_table . " WHERE product_id = :product_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":product_id", $product_id);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
