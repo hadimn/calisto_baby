@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Mar 13, 2025 at 01:54 PM
+-- Generation Time: Mar 25, 2025 at 03:20 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -48,6 +48,35 @@ INSERT INTO `admin` (`admin_id`, `email`, `password`, `first_name`, `last_name`)
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `billing_addresses`
+--
+
+DROP TABLE IF EXISTS `billing_addresses`;
+CREATE TABLE IF NOT EXISTS `billing_addresses` (
+  `address_id` int NOT NULL AUTO_INCREMENT,
+  `customer_id` int NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `address` text NOT NULL,
+  `country` varchar(50) NOT NULL,
+  `city` varchar(50) NOT NULL,
+  `additional_info` text,
+  PRIMARY KEY (`address_id`),
+  KEY `customer_id` (`customer_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `billing_addresses`
+--
+
+INSERT INTO `billing_addresses` (`address_id`, `customer_id`, `first_name`, `last_name`, `email`, `phone_number`, `address`, `country`, `city`, `additional_info`) VALUES
+(2, 3, 'hadi', 'monzer', 'hadimonzer1999@gmail.com', '71337068', 'doha', 'Lebanon', 'mreijeh', 'mreijeh bank al mawared');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `cart`
 --
 
@@ -57,11 +86,13 @@ CREATE TABLE IF NOT EXISTS `cart` (
   `customer_id` int DEFAULT NULL,
   `product_id` int DEFAULT NULL,
   `quantity` int NOT NULL,
-  `added_at` datetime NOT NULL,
+  `added_at` timestamp NOT NULL,
+  `color` varchar(50) DEFAULT NULL,
+  `size` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`cart_id`),
   KEY `customer_id` (`customer_id`),
   KEY `product_id` (`product_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3;
+) ENGINE=MyISAM AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -80,7 +111,15 @@ CREATE TABLE IF NOT EXISTS `customers_accounts` (
   `password` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
   PRIMARY KEY (`customer_id`),
   UNIQUE KEY `email` (`email`(191))
-) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3;
+
+--
+-- Dumping data for table `customers_accounts`
+--
+
+INSERT INTO `customers_accounts` (`customer_id`, `first_name`, `last_name`, `email`, `phone_number`, `address`, `password`) VALUES
+(3, 'hadi', 'monzer', 'hadimonzer1999@gmail.com', '71337068', 'doha', '$2y$10$M3mIremUDzwt5PNocvQn6OVxjwHNvi7ysQX4OPtbswfEc8WqYqhzi'),
+(6, 'hadi', 'hadi', 'hadimn121@gmail.com', '76872332', 'doha,qatar', '$2y$10$23dVJ4xebFbLk3ClZhuEMO8aTmwNyYjxL.iX2IWOXxHCozBaBFzwa');
 
 -- --------------------------------------------------------
 
@@ -127,13 +166,21 @@ CREATE TABLE IF NOT EXISTS `customer_promo_usage` (
 DROP TABLE IF EXISTS `discounts`;
 CREATE TABLE IF NOT EXISTS `discounts` (
   `discount_id` int NOT NULL AUTO_INCREMENT,
-  `customer_id` int DEFAULT NULL,
+  `customer_id` int NOT NULL,
   `discount_type` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
-  `discount_value` decimal(10,2) NOT NULL,
+  `discount_percentage` decimal(10,2) NOT NULL,
   `status` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
   PRIMARY KEY (`discount_id`),
   KEY `customer_id` (`customer_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3;
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
+
+--
+-- Dumping data for table `discounts`
+--
+
+INSERT INTO `discounts` (`discount_id`, `customer_id`, `discount_type`, `discount_percentage`, `status`) VALUES
+(1, 6, 'first_order', 10.00, 'active'),
+(2, 3, 'first_order', 10.00, 'used');
 
 -- --------------------------------------------------------
 
@@ -151,7 +198,14 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `created_at` datetime NOT NULL,
   PRIMARY KEY (`order_id`),
   KEY `customer_id` (`customer_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3;
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb3;
+
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`order_id`, `customer_id`, `total_amount`, `currency`, `status`, `created_at`) VALUES
+(8, 3, 17.20, 'USD', 'pending', '2025-03-25 14:37:20');
 
 -- --------------------------------------------------------
 
@@ -169,7 +223,14 @@ CREATE TABLE IF NOT EXISTS `order_items` (
   PRIMARY KEY (`order_item_id`),
   KEY `order_id` (`order_id`),
   KEY `product_id` (`product_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3;
+) ENGINE=MyISAM AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb3;
+
+--
+-- Dumping data for table `order_items`
+--
+
+INSERT INTO `order_items` (`order_item_id`, `order_id`, `product_id`, `quantity`, `price_at_purchase`) VALUES
+(16, 8, 32, 4, 2.00);
 
 -- --------------------------------------------------------
 
@@ -212,21 +273,24 @@ CREATE TABLE IF NOT EXISTS `products` (
   `on_sale` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`product_id`),
   KEY `admin_id` (`admin_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb3;
+) ENGINE=MyISAM AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb3;
 
 --
 -- Dumping data for table `products`
 --
 
 INSERT INTO `products` (`product_id`, `admin_id`, `name`, `description`, `price`, `new_price`, `currency`, `image`, `popular`, `created_at`, `updated_at`, `best_deal`, `on_sale`) VALUES
-(31, 2, 'back bag', 'enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia res eos qui ratione voluptatem sequi Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora inform', 14.00, 0.00, 'USD', 'uploads/calisto_1.jpg', 1, '2025-03-07 16:21:15', '2025-03-11 15:38:22', 0, 1),
-(30, 2, 'pant shorts', 'enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia res eos qui ratione voluptatem sequi Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora inform', 14.00, 9.00, 'USD', 'uploads/calisto_1.jpg', 1, '2025-03-09 16:20:03', '2025-03-12 17:00:57', 1, 1),
+(31, 2, 'back bag', 'enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia res eos qui ratione voluptatem sequi Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora inform', 14.22, 11.33, 'USD', 'uploads/calisto_1.jpg', 1, '2025-03-07 16:21:15', '2025-03-23 06:41:40', 0, 1),
+(30, 2, 'pant shorts', 'enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia res eos qui ratione voluptatem sequi Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora inform', 800.00, 700.00, 'USD', 'uploads/calisto_1.jpg', 1, '2025-03-09 16:20:03', '2025-03-24 12:34:12', 1, 1),
 (27, 2, 'shorts', 'enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia res eos qui ratione voluptatem sequi Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora inform', 12.00, 0.00, 'USD', 'uploads/calisto_1.jpg', 1, '2025-03-08 14:00:08', '2025-03-11 13:55:30', 0, 0),
 (26, 2, 'pants', 'enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia res eos qui ratione voluptatem sequi Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora inform', 13.00, 11.00, 'USD', 'uploads/calisto_1.jpg', 1, '2025-03-10 13:51:22', '2025-03-12 17:00:30', 1, 1),
 (32, 2, 'test', 'enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia res eos qui ratione voluptatem sequi Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora inform', 13.00, 2.00, 'USD', 'uploads/calisto_1.jpg', 1, '2025-03-10 16:21:50', '2025-03-12 17:10:36', 1, 1),
-(33, 2, 'test 2', 'enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia res eos qui ratione voluptatem sequi Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora inform', 12.40, 0.00, 'USD', 'uploads/calisto_1.jpg', 1, '2025-03-11 15:00:36', '2025-03-12 14:36:37', 0, 0),
-(34, 2, 'test new price', 'test new price', 12.00, 8.00, 'USD', 'uploads/calisto_1.jpg', 0, '2025-03-12 16:31:15', NULL, 0, 1),
-(35, 2, 'new shirt', 'NEW shirt', 12.00, 0.00, 'USD', 'uploads/calisto_1.jpg', 0, '2025-03-13 16:33:18', NULL, 0, 0);
+(33, 2, 'test 2', 'enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia res eos qui ratione voluptatem sequi Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora inform', 12.40, 0.00, 'USD', 'uploads/calisto_1.jpg', 1, '2025-03-11 15:00:36', '2025-03-23 07:24:53', 0, 0),
+(34, 2, 'test new price', 'test new price', 12.00, 0.00, 'USD', 'uploads/calisto_1.jpg', 0, '2025-03-12 16:31:15', '2025-03-21 07:18:06', 0, 0),
+(35, 2, 'new shirt', 'NEW shirt', 12.00, 0.00, 'USD', 'uploads/calisto_1.jpg', 0, '2025-03-13 16:33:18', NULL, 0, 0),
+(36, 2, 'test image', 'test image', 123.00, 0.00, 'USD', 'uploads/calisto_1.jpg', 0, '2025-03-15 01:35:17', '2025-03-16 09:30:22', 0, 0),
+(37, 2, 'error test', 'error test', 1323.00, 0.00, 'USD', 'uploads/calisto_1.jpg', 0, '2025-03-15 01:39:09', NULL, 0, 0),
+(38, 2, 'test test', 'test test', 43.00, 0.00, 'USD', 'uploads/calisto_1.jpg', 0, '2025-03-15 01:40:15', NULL, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -238,30 +302,34 @@ DROP TABLE IF EXISTS `product_sizes`;
 CREATE TABLE IF NOT EXISTS `product_sizes` (
   `id` int NOT NULL AUTO_INCREMENT,
   `product_id` int NOT NULL,
-  `size` varchar(50) NOT NULL,
-  `color` varchar(50) NOT NULL,
+  `size` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `color` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `stock` int NOT NULL,
-  `color_image` varchar(255) DEFAULT NULL,
+  `color_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `product_id` (`product_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=105 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=183 DEFAULT CHARSET=utf8mb3;
 
 --
 -- Dumping data for table `product_sizes`
 --
 
 INSERT INTO `product_sizes` (`id`, `product_id`, `size`, `color`, `stock`, `color_image`) VALUES
-(95, 31, 'X', 'purple', 5, NULL),
-(99, 30, 'X', 'black', 3, NULL),
+(182, 30, 'X', 'black', 3, NULL),
 (83, 27, 'S', 'blue', 4, NULL),
 (98, 26, 'S', 'brown', 4, NULL),
 (102, 32, 'S', 'yellow', 4, NULL),
-(93, 31, 'S', 'brown', 3, NULL),
-(96, 33, 'S', 'yellow', 3, NULL),
-(94, 31, 'S', 'blue', 4, NULL),
-(97, 34, 'S', 'purple', 3, NULL),
+(151, 36, 'X', 'red', 4, 'uploads/calisto_1.jpg'),
+(181, 33, 'S', 'yellow', 3, 'uploads/calisto_1.jpg'),
+(171, 34, 'S', 'purple', 3, NULL),
 (103, 35, 'XL', 'blue', 3, 'uploads/calisto_1.jpg'),
-(104, 35, 'L', 'brown', 4, 'uploads/calisto_1.jpg');
+(104, 35, 'L', 'brown', 4, 'uploads/calisto_1.jpg'),
+(179, 31, 'S', 'brown', 3, 'uploads/calisto_1.jpg'),
+(178, 31, 'S', 'blue', 4, 'uploads/calisto_1.jpg'),
+(130, 37, 'S', 'blue', 3, 'uploads/calisto_1.jpg'),
+(131, 38, 'S', 'blue', 34, 'uploads/calisto_1.jpg'),
+(177, 31, 'X', 'purple', 5, 'uploads/calisto_1.jpg'),
+(176, 31, 'X', 'blue', 5, 'uploads/fffff(1).png');
 
 -- --------------------------------------------------------
 
@@ -275,7 +343,7 @@ CREATE TABLE IF NOT EXISTS `product_tags` (
   `tag_id` int NOT NULL,
   PRIMARY KEY (`product_id`,`tag_id`),
   KEY `fk_product_tags_tag_id` (`tag_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3;
 
 --
 -- Dumping data for table `product_tags`
@@ -295,15 +363,18 @@ INSERT INTO `product_tags` (`product_id`, `tag_id`) VALUES
 (31, 15),
 (32, 14),
 (32, 15),
-(33, 14),
-(33, 15),
-(33, 16),
+(33, 29),
 (34, 14),
 (34, 15),
 (34, 16),
 (35, 14),
 (35, 15),
-(35, 16);
+(35, 16),
+(36, 14),
+(36, 15),
+(36, 16),
+(37, 14),
+(38, 15);
 
 -- --------------------------------------------------------
 
@@ -346,6 +417,26 @@ CREATE TABLE IF NOT EXISTS `shipping` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `shipping_fees`
+--
+
+DROP TABLE IF EXISTS `shipping_fees`;
+CREATE TABLE IF NOT EXISTS `shipping_fees` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `fee` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `shipping_fees`
+--
+
+INSERT INTO `shipping_fees` (`id`, `fee`) VALUES
+(1, 10.00);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `social_media`
 --
 
@@ -368,8 +459,8 @@ INSERT INTO `social_media` (`social_id`, `platform`, `link`, `icon_class`, `bg_c
 (1, 'Facebook', 'https://www.facebook.com/profile.php?id=100077276937756', 'fa fa-facebook', 'background-color: #0d6efd; border-color: #0d6efd;', 1),
 (2, 'Twitter', 'https://twitter.com', 'fa fa-twitter', 'background-color: #0dcaf0; border-color: #0dcaf0;', 1),
 (3, 'Instagram', 'https://instagram.com', 'fa fa-instagram', 'background-color: #dc3545; border-color: #dc3545;', 1),
-(4, 'LinkedIn', 'https://linkedin.com', 'fa fa-linkedin', 'background-color: #0077b5; border-color: #0077b5;', 1),
-(5, 'YouTube', 'https://youtube.com', 'fa fa-youtube', 'background-color: #ff0000; border-color: #ff0000;', 1);
+(4, 'LinkedIn', 'https://linkedin.com', 'fa fa-linkedin', 'background-color: #0077b5; border-color: #0077b5;', 0),
+(5, 'YouTube', 'https://youtube.com', 'fa fa-youtube', 'background-color: #ff0000; border-color: #ff0000;', 0);
 
 -- --------------------------------------------------------
 
@@ -385,7 +476,7 @@ CREATE TABLE IF NOT EXISTS `tags` (
   `image` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`tag_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb3;
+) ENGINE=MyISAM AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb3;
 
 --
 -- Dumping data for table `tags`
@@ -394,7 +485,47 @@ CREATE TABLE IF NOT EXISTS `tags` (
 INSERT INTO `tags` (`tag_id`, `name`, `description`, `image`, `created_at`) VALUES
 (14, 'new born', 'new born clothes', 'uploads/tags/calisto_1.jpg', '2025-03-10 11:51:54'),
 (15, 'underwear', 'underwear', 'uploads/tags/calisto_1.jpg', '2025-03-10 11:53:04'),
-(16, 'jackets', 'jackets', 'uploads/tags/calisto_1.jpg', '2025-03-10 14:22:48');
+(21, 'footwear', 'footwear', 'uploads/tags/calisto_1.jpg', '2025-03-21 05:32:28'),
+(17, 'girl clothing', 'girl clothing', 'uploads/tags/calisto_1.jpg', '2025-03-21 05:28:57'),
+(18, 'boy clothing', 'boy clothing', 'uploads/tags/calisto_1.jpg', '2025-03-21 05:29:19'),
+(19, 'Must have basics', 'Must have basics', 'uploads/tags/calisto_1.jpg', '2025-03-21 05:29:36'),
+(20, 'Blankets', 'Blankets', 'uploads/tags/calisto_1.jpg', '2025-03-21 05:30:20'),
+(22, 'Bags', 'Bags', 'uploads/tags/calisto_1.jpg', '2025-03-21 05:32:42'),
+(23, 'Meal Time', 'Meal Time', 'uploads/tags/calisto_1.jpg', '2025-03-21 05:32:57'),
+(24, 'Bath and Care', 'Bath and Care', 'uploads/tags/calisto_1.jpg', '2025-03-21 05:33:24'),
+(25, 'Accessories and More', 'Accessories and More', 'uploads/tags/calisto_1.jpg', '2025-03-21 05:33:47'),
+(26, 'Baby Items', 'Baby Items', 'uploads/tags/calisto_1.jpg', '2025-03-21 05:34:03'),
+(27, 'new born books', 'new born books', 'uploads/tags/calisto_1.jpg', '2025-03-21 05:35:49'),
+(28, 'Toys and playtime', 'Toys and playtime', 'uploads/tags/calisto_1.jpg', '2025-03-21 05:36:14'),
+(29, 'baby room', 'baby room', 'uploads/tags/calisto_1.jpg', '2025-03-21 05:36:30');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `wishlist`
+--
+
+DROP TABLE IF EXISTS `wishlist`;
+CREATE TABLE IF NOT EXISTS `wishlist` (
+  `whishlist_id` int NOT NULL AUTO_INCREMENT,
+  `customer_id` int NOT NULL,
+  `product_id` int NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`whishlist_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `product_id` (`product_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `wishlist`
+--
+
+INSERT INTO `wishlist` (`whishlist_id`, `customer_id`, `product_id`, `created_at`) VALUES
+(12, 3, 30, '2025-03-25 14:28:51'),
+(2, 3, 32, '2025-03-25 11:46:27'),
+(3, 3, 31, '2025-03-25 11:46:32'),
+(4, 3, 27, '2025-03-25 11:46:34'),
+(5, 3, 26, '2025-03-25 11:46:39');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -1,6 +1,9 @@
 <?php
+
 namespace Classes;
-class OrderItem {
+
+class OrderItem
+{
     private $conn;
     private $table_name = "order_items";
 
@@ -10,12 +13,14 @@ class OrderItem {
     public $quantity;
     public $price_at_purchase;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->conn = $db;
     }
 
     // Create a new order item
-    public function create() {
+    public function create()
+    {
         $query = "INSERT INTO " . $this->table_name . " (order_id, product_id, quantity, price_at_purchase) VALUES (:order_id, :product_id, :quantity, :price_at_purchase)";
         $stmt = $this->conn->prepare($query);
 
@@ -30,5 +35,17 @@ class OrderItem {
         }
         return false;
     }
+
+    // Fetch order items by order_id
+    public function getOrderItems($order_id)
+    {
+        $query = "SELECT oi.*, p.name, p.image
+                      FROM " . $this->table_name . " oi
+                      JOIN products p ON oi.product_id = p.product_id
+                      WHERE oi.order_id = :order_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":order_id", $order_id);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }
-?>

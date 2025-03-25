@@ -1,8 +1,10 @@
 <?php
+// checkout.php
 session_start();
 include 'classes/database.php';
 include 'classes/cart.php';
 include 'classes/customer.php';
+include 'classes/billing_address.php';
 @include('proccess/shipping_proccess.php');
 
 $database = new Database();
@@ -11,6 +13,11 @@ $db = $database->getConnection();
 $customer = new Customer($db);
 $customer->customer_id = $_SESSION['customer_id'];
 $customer->findById();
+
+// Check for existing billing address
+$billingAddress = new BillingAddress($db);
+$billingAddress->customer_id = $_SESSION['customer_id'];
+$existingAddress = $billingAddress->getByCustomer();
 
 $cart = new Cart($db);
 $cart->customer_id = $_SESSION['customer_id'];
@@ -40,6 +47,17 @@ if ($activeDiscount) {
 }
 
 $grandTotal = ($total - $discountAmount) + $current_fee;
+
+// Display error messages if any
+$error = isset($_GET['error']) ? $_GET['error'] : '';
+$errorMessages = [
+    'invalid_request' => 'Invalid request. Please try again.',
+    'terms_not_accepted' => 'You must accept the terms and conditions to place an order.',
+    'empty_cart' => 'Your cart is empty. Please add items before checking out.',
+    'address_error' => 'There was an error saving your billing address.',
+    'order_error' => 'There was an error creating your order.'
+];
+
 session_abort();
 ?>
 
@@ -106,64 +124,65 @@ session_abort();
             <div class="container">
 
                 <!-- Checkout Form s-->
-                <form action="#" class="checkout-form">
+                <form action="proccess/place_order.php" method="POST" class="checkout-form">
                     <div class="row row-50 mbn-40">
 
                         <div class="col-lg-7">
-
                             <!-- Billing Address -->
                             <div id="billing-form" class="mb-20">
                                 <h4 class="checkout-title">Billing Address</h4>
-
                                 <div class="row">
-
                                     <div class="col-md-6 col-12 mb-5">
                                         <label>First Name*</label>
-                                        <input type="text" placeholder="First Name" value="<?= $customer->first_name ?>">
+                                        <input type="text" name="first_name" placeholder="First Name"
+                                            value="<?= $existingAddress ? $existingAddress['first_name'] : $customer->first_name ?>" required>
                                     </div>
 
                                     <div class="col-md-6 col-12 mb-5">
                                         <label>Last Name*</label>
-                                        <input type="text" placeholder="Last Name" value="<?= $customer->last_name ?>">
+                                        <input type="text" name="last_name" placeholder="Last Name"
+                                            value="<?= $existingAddress ? $existingAddress['last_name'] : $customer->last_name ?>" required>
                                     </div>
 
                                     <div class="col-md-6 col-12 mb-5">
                                         <label>Email Address*</label>
-                                        <input type="email" placeholder="Email Address" value="<?= $customer->email ?>">
+                                        <input type="email" name="email" placeholder="Email Address"
+                                            value="<?= $existingAddress ? $existingAddress['email'] : $customer->email ?>" required>
                                     </div>
 
                                     <div class="col-md-6 col-12 mb-5">
                                         <label>Phone no*</label>
-                                        <input type="text" placeholder="Phone number" value="<?= $customer->phone_number ?>">
+                                        <input type="text" name="phone_number" placeholder="Phone number"
+                                            value="<?= $existingAddress ? $existingAddress['phone_number'] : $customer->phone_number ?>" required>
                                     </div>
 
                                     <div class="col-12 mb-5">
                                         <label>Address*</label>
-                                        <input type="text" placeholder="Address line" value="<?= $customer->address ?>">
+                                        <input type="text" name="address" placeholder="Address line"
+                                            value="<?= $existingAddress ? $existingAddress['address'] : $customer->address ?>" required>
                                     </div>
 
                                     <div class="col-md-6 col-12 mb-5">
                                         <label>Country*</label>
-                                        <select class="nice-select">
-                                            <option>Lebanon</option>
+                                        <select class="nice-select" name="country" required>
+                                            <option value="Lebanon" <?= ($existingAddress && $existingAddress['country'] == 'Lebanon') || !$existingAddress ? 'selected' : '' ?>>Lebanon</option>
+                                            <!-- Add more countries if needed -->
                                         </select>
                                     </div>
 
                                     <div class="col-md-6 col-12 mb-5">
                                         <label>Town/City*</label>
-                                        <input type="text" placeholder="Town/City">
+                                        <input type="text" name="city" placeholder="Town/City"
+                                            value="<?= $existingAddress ? $existingAddress['city'] : '' ?>" required>
                                     </div>
 
-                                    <!-- Text Area Added Here -->
                                     <div data-mdb-input-init class="form-outline mb-4">
-                                        <label class="form-label" for="textAreaExample6">additional address information*</label>
-                                        <textarea style="border: #666666 solid 1px;" placeholder="additional information" class="form-control" id="textAreaExample6" rows="3"></textarea>
+                                        <label class="form-label" for="textAreaExample6">Additional address information</label>
+                                        <textarea style="border: #666666 solid 1px;" name="additional_info"
+                                            placeholder="Additional information" class="form-control" id="textAreaExample6" rows="3"><?= $existingAddress ? $existingAddress['additional_info'] : '' ?></textarea>
                                     </div>
-
                                 </div>
-
                             </div>
-
                         </div>
 
                         <div class="col-lg-5">
@@ -231,7 +250,7 @@ session_abort();
 
                                         <!-- Terms and Conditions -->
                                         <div class="single-method">
-                                            <input type="checkbox" id="accept_terms">
+                                            <input type="checkbox" id="accept_terms" name="accept_terms" required>
                                             <label for="accept_terms">
                                                 I’ve read and accept the
                                                 <a href="assets/documents/terms-and-conditions.pdf" download style="color: blue;">
@@ -241,7 +260,7 @@ session_abort();
                                         </div>
                                     </div>
 
-                                    <button class="place-order">Place order</button>
+                                    <button type="submit" name="place_order" class="place-order">Place order</button>
                                 </div>
 
                             </div>

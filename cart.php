@@ -157,7 +157,7 @@ session_abort();
                             <div class="cart-buttons mb-30">
                                 <input type="submit" value="Update Cart" />
                                 <a href="#" id="clear-cart-button">Clear Cart</a>
-                                <a href="#">Continue Shopping</a>
+                                <a href="shop-left-sidebar.php">Continue Shopping</a>
                             </div>
                             <div class="cart-coupon">
                                 <h4>Coupon</h4>

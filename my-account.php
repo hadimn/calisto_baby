@@ -1,14 +1,22 @@
 <?php
+
+use Classes\Order;
+
 session_start();
 include "classes/database.php";
 include "classes/customer.php";
 include "classes/cart.php";
+include "classes/order.php";
 
 $database = new Database();
 $db = $database->getConnection();
 $customer = new Customer($db);
 $customer->customer_id = $_SESSION['customer_id'];
 $customer->findById();
+
+$order = new Order($db);
+$order->customer_id = $customer->customer_id;
+$orders = $order->getByCustomer();
 
 session_abort();
 
@@ -139,39 +147,25 @@ session_abort();
                                             <thead class="thead-light">
                                                 <tr>
                                                     <th>No</th>
-                                                    <th>Name</th>
                                                     <th>Date</th>
                                                     <th>Status</th>
                                                     <th>Total</th>
+                                                    <th>Currency</th>
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
-
                                             <tbody>
-                                                <tr>
-                                                    <td>1</td>
-                                                    <td>Moisturizing Oil</td>
-                                                    <td>Aug 22, 2022</td>
-                                                    <td>Pending</td>
-                                                    <td>$45</td>
-                                                    <td><a href="cart.php" class="btn btn-dark btn-round">View</a></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>2</td>
-                                                    <td>Katopeno Altuni</td>
-                                                    <td>July 22, 2022</td>
-                                                    <td>Approved</td>
-                                                    <td>$100</td>
-                                                    <td><a href="cart.php" class="btn btn-dark btn-round">View</a></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>3</td>
-                                                    <td>Murikhete Paris</td>
-                                                    <td>June 12, 2022</td>
-                                                    <td>On Hold</td>
-                                                    <td>$99</td>
-                                                    <td><a href="cart.php" class="btn btn-dark btn-round">View</a></td>
-                                                </tr>
+                                                <?php $index = 1; ?>
+                                                <?php while ($row = $orders->fetch(PDO::FETCH_ASSOC)) : ?>
+                                                    <tr>
+                                                        <td><?php echo $index++; ?></td>
+                                                        <td><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
+                                                        <td><?php echo htmlspecialchars($row['status']); ?></td>
+                                                        <td><?php echo htmlspecialchars($row['total_amount']); ?></td>
+                                                        <td><?php echo htmlspecialchars($row['currency']); ?></td>
+                                                        <td><a href="single-order.php?order_id=<?php echo $row['order_id']; ?>" class="btn btn-dark btn-round">View</a></td>
+                                                    </tr>
+                                                <?php endwhile; ?>
                                             </tbody>
                                         </table>
                                     </div>

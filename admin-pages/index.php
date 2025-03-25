@@ -93,6 +93,10 @@ if (!isset($_GET['file'])) {
               echo 'class="active"'; ?>><a
             href="?file=shippingfeepage.php" data-file="shippingfeepage.php"><span
               class="fa fa-truck mr-3"></span>Delivery Fee</a></li>
+        <li <?php if ($last_loaded_file == 'orderspage.php')
+              echo 'class="active"'; ?>><a
+            href="?file=orderspage.php&status=all" data-file="orderspage.php"><span
+              class="fa fa-shopping-bag mr-3"></span>Orders</a></li>
       </ul>
     </nav>
 

@@ -184,8 +184,8 @@ $best_deal_products = $product->getPorductsBestDeal();
 
                                         <div class="image-overlay">
                                             <div class="action-buttons">
-                                                <button>add to cart</button>
-                                                <button>add to wishlist</button>
+                                                <button><a href="single-product.php?product_id=<?= $popular_product['product_id'] ?>">Add To Cart</a></button>
+                                                <button class="wishlist-btn" data-product-id="<?= $popular_product['product_id'] ?>">Add to Wishlist</button>
                                             </div>
                                         </div>
 
@@ -323,7 +323,7 @@ $best_deal_products = $product->getPorductsBestDeal();
                                         <div class="content-top">
 
                                             <div class="content-top-left" style="width: 50%;">
-                                                <h4 class="title"><a href="single-product.php?product_id=<?=$best_deal_product['product_id']?>"><?= $best_deal_product['name'] ?></a></h4>
+                                                <h4 class="title"><a href="single-product.php?product_id=<?= $best_deal_product['product_id'] ?>"><?= $best_deal_product['name'] ?></a></h4>
                                                 <div class="ratting">
                                                     <i class="fa fa-star"></i>
                                                     <i class="fa fa-star"></i>
@@ -611,6 +611,32 @@ $best_deal_products = $product->getPorductsBestDeal();
             setTimeout(function() {
                 $('#floatingAlert').alert('close');
             }, 5000); // 5000 milliseconds = 5 seconds
+        });
+
+        $(document).ready(function() {
+            $(".wishlist-btn").click(function() {
+                var productId = $(this).data("product-id");
+                var button = $(this);
+
+                $.ajax({
+                    url: "proccess/add_to_wishlist.php",
+                    type: "POST",
+                    data: {
+                        product_id: productId
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.status === "success") {
+                            button.text("Added to Wishlist").prop("disabled", true);
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function() {
+                        alert("Something went wrong. Please try again.");
+                    }
+                });
+            });
         });
     </script>
 </body>

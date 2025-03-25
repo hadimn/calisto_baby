@@ -3,7 +3,7 @@ session_start();
 include 'classes/database.php';
 include 'classes/product.php';
 include 'classes/cart.php';
-
+include 'classes/wishlist.php';
 
 if (isset($_GET['product_id'])) {
     $database = new Database();
@@ -14,6 +14,10 @@ if (isset($_GET['product_id'])) {
     $prodSizesAndColors = $product->getSizesAndColors();
     $prodTags = $product->getTags();
     $relatedProducts = $product->getRelatedProducts();
+    $wishlist = new Wishlist($db);
+    // check if prouct is in wishlisht
+    $wishlist->product_id = $_GET['product_id'];
+    $isInWishlist = $wishlist->isProductInWishlist();
 
     // Fetch stock data for each size and color combination
     $stockData = [];
@@ -92,6 +96,31 @@ session_abort();
         #stock-display p {
             margin: 5px 0;
         }
+
+        .wishlist-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .wishlist-btn i {
+            color: #333;
+            /* Default color */
+            transition: all 0.3s ease;
+        }
+
+        .wishlist-btn.active i,
+        .wishlist-btn:hover i {
+            color: #FF7891;
+            /* Red color for active/hover */
+        }
+
+        .wishlist-btn:focus {
+            outline: none;
+        }
     </style>
 </head>
 
@@ -165,7 +194,18 @@ session_abort();
                                         </div>
 
                                         <div class="head-right">
-                                            <span class="price">$25</span>
+                                            <span class="price">
+                                                <div class="content-right">
+                                                    <?php if (!empty($prod['new_price'])): ?>
+                                                        <span class="price" style="color: #FF708A;">$<?= number_format($prod['new_price'], 2) ?></span>
+                                                        <span class="old-price" style="color: #94C7EB; text-decoration: line-through;">
+                                                            $<?= number_format($prod['price'], 2) ?>
+                                                        </span>
+                                                    <?php else: ?>
+                                                        <span class="price">$<?= number_format($prod['price'], 2) ?></span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </span>
                                         </div>
                                     </div>
 
@@ -215,7 +255,7 @@ session_abort();
                                     <div class="actions">
                                         <button id="add-to-cart-button"><i class="ti-shopping-cart"></i><span>ADD TO CART</span></button>
                                         <button class="box" data-tooltip="Compare"><i class="ti-control-shuffle"></i></button>
-                                        <button class="box" data-tooltip="Wishlist"><i class="ti-heart"></i></button>
+                                        <button class="wishlist-btn box" data-product-id="<?= $prod['product_id'] ?>"><i class="ti-heart"></i></button>
                                     </div>
 
                                     <div class="tags">
@@ -322,8 +362,8 @@ session_abort();
 
                                         <div class="image-overlay">
                                             <div class="action-buttons">
-                                                <button>add to cart</button>
-                                                <button>add to wishlist</button>
+                                                <button><a href="single-product.php?product_id=<?= $relatedProduct['product_id'] ?>">Add To Cart</a></button>
+                                                <button class="wishlist-btn" data-product-id="<?= $relatedProduct['product_id'] ?>">Add to Wishlist</button>
                                             </div>
                                         </div>
 
@@ -529,7 +569,7 @@ session_abort();
                             window.location.href = data.redirect;
                         } else if (data.success) {
                             showSuccessMessage("Product added to cart successfully!");
-                            setTimeout(() => window.location.reload(), 5000);
+                            setTimeout(() => window.location.reload(), 2000);
                         } else {
                             alert('Failed to add product to cart: ' + data.message);
                         }
@@ -543,31 +583,53 @@ session_abort();
             function showSuccessMessage(message) {
                 let alertContainer = document.createElement("div");
                 let timerContainer = document.createElement("span");
-                let timer = 5; // 5 seconds countdown timer
+                let timer = 2; // 5 seconds countdown timer
 
                 alertContainer.innerHTML = `
                     <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
                         ${message}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        <div style="margin-top: 10px;">
-                            <span id="countdown-timer">Closing in ${timer} seconds...</span>
-                        </div>
                     </div>
                 `;
                 document.body.appendChild(alertContainer);
 
-                // Function to update the countdown timer
-                let countdownInterval = setInterval(() => {
-                    timer--;
-                    document.getElementById('countdown-timer').innerText = `Closing in ${timer} seconds...`;
 
-                    if (timer <= 0) {
-                        clearInterval(countdownInterval); // Stop the countdown
-                        alertContainer.remove(); // Remove the alert after 5 seconds
-                    }
-                }, 1000); // Update every second
             }
 
+        });
+
+        $(document).ready(function() {
+            $(".wishlist-btn").click(function(e) {
+                e.preventDefault();
+                var productId = $(this).data("product-id");
+                var button = $(this);
+                var icon = button.find('i');
+
+                $.ajax({
+                    url: "proccess/add_to_wishlist.php",
+                    type: "POST",
+                    data: {
+                        product_id: productId
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.status === "success") {
+                            // Toggle active class and change icon color
+                            button.toggleClass("active");
+                            if (button.hasClass("active")) {
+                                icon.css("color", "#ff0000"); // Red color for active
+                            } else {
+                                icon.css("color", ""); // Default color
+                            }
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function() {
+                        alert("Something went wrong. Please try again.");
+                    }
+                });
+            });
         });
     </script>
 

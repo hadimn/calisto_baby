@@ -522,7 +522,8 @@
                             alert("An error occurred while updating the cart. Please try again.");
                         }
                     });
-                } else {
+                }
+                else {
                     // On the single product page
                     var maxStock = parseInt($input.attr("max"), 10) || Infinity; // Max stock from input field
                     var remainingStock = $('#remaining-stock').length ? parseInt($('#remaining-stock').text(), 10) : undefined;

@@ -7,93 +7,19 @@ include 'classes/product.php';
 $database = new Database();
 $db = $database->getConnection();
 $tag = new Tag($db);
-
-// Fetch tags from the database
 $tags = $tag->getProductCountPerTag();
 
 $product = new Product($db);
 $colors = $product->getAvailableColors();
 
-// Handle filters, pagination, and sorting
+// Initial values for filters
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 8;
 $sort = isset($_GET['sort']) ? $_GET['sort'] : 'created_at DESC';
-$color_filter = isset($_GET['color']) ? $_GET['color'] : null;
-$tag_filter = isset($_GET['tag']) ? (int)$_GET['tag'] : null;
+$color_filter = isset($_GET['color']) ? (array)$_GET['color'] : [];
+$tag_filter = isset($_GET['tag']) ? (array)$_GET['tag'] : [];
 $min_price = isset($_GET['min_price']) ? (float)$_GET['min_price'] : null;
 $max_price = isset($_GET['max_price']) ? (float)$_GET['max_price'] : null;
-
-// Calculate offset for pagination
-$offset = ($page - 1) * $limit;
-
-// Build the base query
-$query = "SELECT * FROM products WHERE 1=1";
-
-// Apply filters
-if ($color_filter) {
-    $query .= " AND product_id IN (SELECT product_id FROM product_sizes WHERE color = :color)";
-}
-if ($tag_filter) {
-    $query .= " AND product_id IN (SELECT product_id FROM product_tags WHERE tag_id = :tag_id)";
-}
-if ($min_price !== null && $max_price !== null) {
-    $query .= " AND (price BETWEEN :min_price AND :max_price)";
-}
-
-// Apply sorting
-$query .= " ORDER BY " . $sort;
-
-// Add pagination
-$query .= " LIMIT :limit OFFSET :offset";
-
-// Prepare and execute the query
-$stmt = $db->prepare($query);
-
-if ($color_filter) {
-    $stmt->bindParam(":color", $color_filter);
-}
-if ($tag_filter) {
-    $stmt->bindParam(":tag_id", $tag_filter, PDO::PARAM_INT);
-}
-if ($min_price !== null && $max_price !== null) {
-    $stmt->bindParam(":min_price", $min_price);
-    $stmt->bindParam(":max_price", $max_price);
-}
-
-$stmt->bindParam(":limit", $limit, PDO::PARAM_INT);
-$stmt->bindParam(":offset", $offset, PDO::PARAM_INT);
-$stmt->execute();
-
-$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Get total number of products for pagination
-$total_query = "SELECT COUNT(*) as total FROM products WHERE 1=1";
-if ($color_filter) {
-    $total_query .= " AND product_id IN (SELECT product_id FROM product_sizes WHERE color = :color)";
-}
-if ($tag_filter) {
-    $total_query .= " AND product_id IN (SELECT product_id FROM product_tags WHERE tag_id = :tag_id)";
-}
-if ($min_price !== null && $max_price !== null) {
-    $total_query .= " AND (price BETWEEN :min_price AND :max_price)";
-}
-
-$total_stmt = $db->prepare($total_query);
-
-if ($color_filter) {
-    $total_stmt->bindParam(":color", $color_filter);
-}
-if ($tag_filter) {
-    $total_stmt->bindParam(":tag_id", $tag_filter, PDO::PARAM_INT);
-}
-if ($min_price !== null && $max_price !== null) {
-    $total_stmt->bindParam(":min_price", $min_price);
-    $total_stmt->bindParam(":max_price", $max_price);
-}
-
-$total_stmt->execute();
-$total_products = $total_stmt->fetch(PDO::FETCH_ASSOC)['total'];
-$total_pages = ceil($total_products / $limit);
 ?>
 
 <!doctype html>
@@ -117,6 +43,74 @@ $total_pages = ceil($total_products / $limit);
 
     <!-- Modernizer JS -->
     <script src="assets/js/vendor/modernizr-3.11.2.min.js"></script>
+
+    <style>
+        /* Checkbox list styles */
+        .checkbox-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .checkbox-list li {
+            margin-bottom: 8px;
+        }
+
+        .checkbox-list label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .checkbox-list input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .checkbox-list .color {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        /* Filter buttons */
+        .apply-filters-btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            width: 100%;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .apply-filters-btn:hover {
+            background: #555;
+        }
+
+        .clear-filters-btn {
+            display: block;
+            text-align: center;
+            color: #333;
+            text-decoration: underline;
+        }
+
+        .clear-filters-btn:hover {
+            color: #555;
+        }
+
+        /* Add loading spinner style */
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading-spinner img {
+            width: 50px;
+        }
+    </style>
 </head>
 
 <body>
@@ -171,83 +165,87 @@ $total_pages = ceil($total_products / $limit);
                                 </div>
                             </div>
 
-                            <?php foreach ($products as $product): ?>
-                                <div class="col-xl-4 col-md-6 col-12 mb-40">
-                                    <div class="product-item">
-                                        <div class="product-inner">
-                                            <div class="image">
-                                                <img src="admin-pages/<?= $product['image'] ?>" alt="<?= $product['name'] ?>">
-                                                <div class="image-overlay">
-                                                    <div class="action-buttons">
-                                                        <button>add to cart</button>
-                                                        <button>add to wishlist</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="content">
-                                                <div class="content-left">
-                                                    <h4 class="title"><a href="single-product.php?product_id=<?= $product['product_id'] ?>"><?= $product['name'] ?></a></h4>
-                                                    <div class="ratting">
-                                                        <i class="fa fa-star"></i>
-                                                        <i class="fa fa-star"></i>
-                                                        <i class="fa fa-star"></i>
-                                                        <i class="fa fa-star"></i>
-                                                        <i class="fa fa-star-half-o"></i>
-                                                        <i class="fa fa-star-o"></i>
-                                                    </div>
-                                                    <h5 class="size">Size: <span>S</span><span>M</span><span>L</span><span>XL</span></h5>
-                                                    <h5 class="color">Color: <span style="background-color: #ffb2b0"></span><span style="background-color: #0271bc"></span><span style="background-color: #efc87c"></span><span style="background-color: #00c183"></span></h5>
-                                                </div>
-                                                <div class="content-right">
-                                                    <span class="price">$<?= $product['new_price'] ?> <span class="old">$<?= $product['price'] ?></span></span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                            <!-- Products container -->
+                            <div class="col-12" id="products-container">
+                                <div class="loading-spinner">
+                                    <img src="assets/images/icons/loading.gif" alt="Loading...">
                                 </div>
-                            <?php endforeach; ?>
+                                <div class="row" id="products-row">
+                                    <!-- Products will be loaded here via AJAX -->
+                                </div>
+                            </div>
 
-                            <div class="col-12">
-                                <ul class="page-pagination">
-                                    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                                        <li class="<?= $i == $page ? 'active' : '' ?>">
-                                            <a href="?page=<?= $i ?>&limit=<?= $limit ?>&sort=<?= $sort ?>&color=<?= $color_filter ?>&tag=<?= $tag_filter ?>&min_price=<?= $min_price ?>&max_price=<?= $max_price ?>"><?= $i ?></a>
-                                        </li>
-                                    <?php endfor; ?>
-                                </ul>
+                            <!-- Pagination container -->
+                            <div class="col-12" id="pagination-container">
+                                <!-- Pagination will be loaded here via AJAX -->
                             </div>
 
                         </div>
                     </div>
 
                     <div class="col-xl-3 col-lg-4 col-12 order-2 order-lg-1 mb-40">
+                        <form id="filter-form" method="get">
+                            <!-- Hidden fields to maintain pagination and sorting -->
+                            <input type="hidden" name="page" value="1">
+                            <input type="hidden" name="limit" value="<?= htmlspecialchars($limit) ?>">
+                            <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
 
-                        <div class="sidebar">
-                            <h4 class="sidebar-title">Category</h4>
-                            <ul class="sidebar-list">
-                                <?php foreach ($tags as $tag): ?>
-                                    <li><a href="?tag=<?= $tag['tag_id'] ?>"><?= $tag['name'] ?> <span class="num"><?= $tag['product_count'] ?></span></a></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-
-                        <div class="sidebar">
-                            <h4 class="sidebar-title">Colors</h4>
-                            <ul class="sidebar-list">
-                                <?php foreach ($colors as $color): ?>
-                                    <li><a href="?color=<?= $color ?>"><span class="color" style="background-color: <?= $color ?>"></span> <?= $color ?></a></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-
-                        <div class="sidebar">
-                            <h3 class="sidebar-title">Price</h3>
-                            <div class="sidebar-price">
-                                <div id="price-range"></div>
-                                <input type="text" id="price-amount" readonly>
+                            <!-- Category Filter -->
+                            <div class="sidebar">
+                                <h4 class="sidebar-title">Category</h4>
+                                <ul class="list-group">
+                                    <?php foreach ($tags as $tag): ?>
+                                        <li class="list-group-item border-0 py-2 px-0">
+                                            <div class="form-check d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <input class="form-check-input" type="checkbox" name="tag[]" value="<?= $tag['tag_id'] ?>"
+                                                        <?= in_array($tag['tag_id'], $tag_filter) ? 'checked' : '' ?> id="tag-<?= $tag['tag_id'] ?>">
+                                                    <label class="form-check-label" for="tag-<?= $tag['tag_id'] ?>">
+                                                        <?= $tag['name'] ?>
+                                                    </label>
+                                                </div>
+                                                <span class="badge rounded-pill ms-2" style="background-color: #94c7eb;"><?= $tag['product_count'] ?></span>
+                                            </div>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
                             </div>
-                        </div>
 
+                            <!-- Color Filter -->
+                            <div class="sidebar">
+                                <h4 class="sidebar-title">Colors</h4>
+                                <ul class="sidebar-list checkbox-list">
+                                    <?php foreach ($colors as $color): ?>
+                                        <li>
+                                            <label>
+                                                <input type="checkbox" name="color[]" value="<?= $color ?>"
+                                                    <?= in_array($color, $color_filter) ? 'checked' : '' ?>>
+                                                <span class="color" style="background-color: <?= $color ?>"></span> <?= $color ?>
+                                            </label>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+
+                            <!-- Price Filter -->
+                            <div class="sidebar">
+                                <h3 class="sidebar-title">Price</h3>
+                                <div class="sidebar-price">
+                                    <div id="price-range"></div>
+                                    <input type="text" id="price-amount" readonly>
+                                    <input type="hidden" id="min-price" name="min_price" value="<?= $min_price ?>">
+                                    <input type="hidden" id="max-price" name="max_price" value="<?= $max_price ?>">
+                                </div>
+                            </div>
+
+                            <!-- Apply Filters Button -->
+                            <div class="sidebar">
+                                <button type="submit" class="apply-filters-btn">Apply Filters</button>
+                                <?php if (!empty($color_filter) || !empty($tag_filter) || $min_price !== null || $max_price !== null): ?>
+                                    <a href="?" class="clear-filters-btn">Clear All Filters</a>
+                                <?php endif; ?>
+                            </div>
+                        </form>
                     </div>
 
                 </div>
@@ -282,39 +280,170 @@ $total_pages = ceil($total_products / $limit);
     <script src="assets/js/main.js"></script>
 
     <script>
-        // Handle limit and sort changes
-        document.getElementById('limit-select').addEventListener('change', function() {
-            const limit = this.value;
-            const url = new URL(window.location.href);
-            url.searchParams.set('limit', limit);
-            window.location.href = url.toString();
-        });
-
-        document.getElementById('sort-select').addEventListener('change', function() {
-            const sort = this.value;
-            const url = new URL(window.location.href);
-            url.searchParams.set('sort', sort);
-            window.location.href = url.toString();
-        });
-
-        $(function() {
+        $(document).ready(function() {
+            // Initialize price slider
             $("#price-range").slider({
                 range: true,
                 min: 0,
-                max: 1000, // Adjust max value as needed
-                values: [<?= $min_price !== null ? $min_price : 0 ?>, <?= $max_price !== null ? $max_price : 1000 ?>], // set the default values
+                max: 1000,
+                values: [<?= $min_price !== null ? $min_price : 0 ?>, <?= $max_price !== null ? $max_price : 1000 ?>],
                 slide: function(event, ui) {
                     $("#price-amount").val("$" + ui.values[0] + " - $" + ui.values[1]);
-                },
-                stop: function(event, ui) {
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('min_price', ui.values[0]);
-                    url.searchParams.set('max_price', ui.values[1]);
-                    window.location.href = url.toString();
+                    $("#min-price").val(ui.values[0]);
+                    $("#max-price").val(ui.values[1]);
                 }
             });
             $("#price-amount").val("$" + $("#price-range").slider("values", 0) +
                 " - $" + $("#price-range").slider("values", 1));
+
+            // Function to load products via AJAX
+            function loadProducts() {
+                const formData = $('#filter-form').serialize();
+                const urlParams = new URLSearchParams(window.location.search);
+
+                // Show loading spinner
+                $('#products-row').hide();
+                $('.loading-spinner').show();
+
+                $.ajax({
+                    url: 'proccess/ajax_filter.php?' + formData,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        // Update URL without reloading
+                        const newUrl = window.location.pathname + '?' + formData;
+                        window.history.pushState({
+                            path: newUrl
+                        }, '', newUrl);
+
+                        // Render products
+                        renderProducts(response.products);
+
+                        // Render pagination
+                        renderPagination(response.pagination);
+
+                        // Hide loading spinner
+                        $('.loading-spinner').hide();
+                        $('#products-row').show();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(error);
+                        $('.loading-spinner').hide();
+                        $('#products-row').html('<div class="col-12 text-center"><p>Error loading products. Please try again.</p></div>').show();
+                    }
+                });
+            }
+
+            // Function to render products
+            function renderProducts(products) {
+                let html = '';
+
+                if (products.length === 0) {
+                    html = '<div class="col-12 text-center"><p>No products found matching your criteria.</p></div>';
+                } else {
+                    products.forEach(product => {
+                        html += `
+                <div class="col-xl-4 col-md-6 col-12 mb-40">
+                    <div class="product-item">
+                        <div class="product-inner">
+                            <div class="image">
+                                <img src="admin-pages/${product.image}" alt="${product.name}">
+                                <div class="image-overlay">
+                                    <div class="action-buttons">
+                                        <button class="add-to-cart" data-id="${product.product_id}">add to cart</button>
+                                        <button>add to wishlist</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="content">
+                                <div class="content-left">
+                                    <h4 class="title"><a href="single-product.php?product_id=${product.product_id}">${product.name}</a></h4>
+                                    <div class="ratting">
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star"></i>
+                                        <i class="fa fa-star-half-o"></i>
+                                        <i class="fa fa-star-o"></i>
+                                    </div>
+                                    <h5 class="size">Size: <span>S</span><span>M</span><span>L</span><span>XL</span></h5>
+                                    <h5 class="color">Color: <span style="background-color: #ffb2b0"></span><span style="background-color: #0271bc"></span><span style="background-color: #efc87c"></span><span style="background-color: #00c183"></span></h5>
+                                </div>
+                                <div class="content-right">
+                                    <span class="price">$${product.new_price} <span class="old">$${product.price}</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                    });
+                }
+
+                $('#products-row').html(html);
+            }
+
+            // Function to render pagination
+            function renderPagination(pagination) {
+                let html = '';
+                const currentPage = pagination.current_page;
+                const totalPages = pagination.total_pages;
+
+                if (totalPages > 1) {
+                    html = '<ul class="page-pagination">';
+
+                    // Previous button
+                    if (currentPage > 1) {
+                        html += `<li><a href="#" data-page="${currentPage - 1}">«</a></li>`;
+                    }
+
+                    // Page numbers
+                    for (let i = 1; i <= totalPages; i++) {
+                        html += `<li class="${i == currentPage ? 'active' : ''}"><a href="#" data-page="${i}">${i}</a></li>`;
+                    }
+
+                    // Next button
+                    if (currentPage < totalPages) {
+                        html += `<li><a href="#" data-page="${currentPage + 1}">»</a></li>`;
+                    }
+
+                    html += '</ul>';
+                }
+
+                $('#pagination-container').html(html);
+            }
+
+            // Initial load
+            loadProducts();
+
+            // Handle form submission
+            $('#filter-form').on('submit', function(e) {
+                e.preventDefault();
+                // Reset to page 1 when filters change
+                $('input[name="page"]').val(1);
+                loadProducts();
+            });
+
+            // Handle pagination clicks
+            $(document).on('click', '.page-pagination a', function(e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                $('input[name="page"]').val(page);
+                loadProducts();
+            });
+
+            // Handle limit change
+            $('#limit-select').change(function() {
+                $('input[name="limit"]').val($(this).val());
+                $('input[name="page"]').val(1); // Reset to page 1
+                loadProducts();
+            });
+
+            // Handle sort change
+            $('#sort-select').change(function() {
+                $('input[name="sort"]').val($(this).val());
+                $('input[name="page"]').val(1); // Reset to page 1
+                loadProducts();
+            });
         });
     </script>
 

@@ -1290,6 +1290,36 @@ only screen and (min-width: 768px) and (max-width: 991px) {
   }
 }
 
+/* profile logo dropdown style */
+/* Ensure all elements are aligned in a row */
+.header-shop-links {
+  display: flex;
+  align-items: center;
+}
+
+/* Optional: Adjust spacing between the icons and profile button */
+.header-shop-links .header-search {
+  margin-right: 20px;
+}
+
+.header-shop-links .header-mini-cart {
+  margin-right: 20px;
+}
+
+.header-shop-links .header-wishlist {
+  margin-right: 20px;
+}
+
+.header-shop-links .dropdown {
+  margin-left: 10px; /* You can adjust this to add space if needed */
+}
+
+/* Adjust the profile dropdown for better visibility */
+.dropdown-menu {
+  min-width: 150px; /* Optional: Set a minimum width for the dropdown */
+}
+/* profile logo end */
+
 /*-- Header Wishlist --*/
 .header-wishlist {
   margin-right: 35px;

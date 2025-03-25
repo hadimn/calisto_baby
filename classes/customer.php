@@ -1,5 +1,5 @@
 <?php
-include 'classes/discount.php';
+include 'discount.php';
 
 class Customer
 {

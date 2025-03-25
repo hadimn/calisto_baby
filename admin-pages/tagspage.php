@@ -58,7 +58,7 @@ $tags = $tag->getAll(); // Assuming the `getAll` method fetches all the tags fro
                 <a href="index.php?file=edittagspage.php&id=<?php echo $tag_item['tag_id']; ?>" class="btn btn-warning btn-sm">Edit</a>
                 <a href="proccess/delete_tag.php?id=<?php echo $tag_item['tag_id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this tag?')">Delete</a>
             </div>
-        </div>  
+        </div>
     <?php endforeach; ?>
 </div>
 
