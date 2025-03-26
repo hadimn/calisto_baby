@@ -183,8 +183,6 @@
                     <?php if (empty($orders)): ?>
                         <div class="no-orders text-center">
                             <h3>No orders found</h3>
-                            <p>You haven't placed any orders yet.</p>
-                            <a href="shop.php" class="btn btn-dark">Continue Shopping</a>
                         </div>
                     <?php else: ?>
                         <div class="order-list">

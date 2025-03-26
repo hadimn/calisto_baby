@@ -139,6 +139,17 @@ $max_price = isset($_GET['max_price']) ? (float)$_GET['max_price'] : null;
             <div class="container">
                 <div class="row row-30 mbn-40">
 
+                    <?php if (isset($_SESSION['error'])): ?>
+                        <div id="message" class="position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 1050; width: 50%;">
+                            <div class="alert alert-danger alert-dismissible fade show text-center shadow-lg" role="alert">
+                                <p class="mb-0"><?= $_SESSION['error'] ?></p>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    <?php unset($_SESSION['error']);
+                    endif; ?>
+                    
+
                     <div class="col-xl-9 col-lg-8 col-12 order-1 order-lg-2 mb-40">
                         <div class="row">
 
@@ -335,6 +346,7 @@ $max_price = isset($_GET['max_price']) ? (float)$_GET['max_price'] : null;
             }
 
             // Function to render products
+            // Function to render products
             function renderProducts(products) {
                 let html = '';
 
@@ -342,40 +354,57 @@ $max_price = isset($_GET['max_price']) ? (float)$_GET['max_price'] : null;
                     html = '<div class="col-12 text-center"><p>No products found matching your criteria.</p></div>';
                 } else {
                     products.forEach(product => {
+                        // Prepare tags HTML
+                        // let tagsHtml = '';
+                        // if (product.tags && product.tags.length > 0) {
+                        //     product.tags.forEach(tag => {
+                        //         tagsHtml += `<span class="product-tag" style="background-color: #94c7eb; padding: 2px 5px; border-radius: 3px; font-size: 12px; margin-right: 5px;">${tag.name}</span>`;
+                        //     });
+                        // }
+
+                        // Prepare colors HTML
+                        let colorsHtml = '';
+                        if (product.colors && product.colors.length > 0) {
+                            product.colors.forEach(color => {
+                                colorsHtml += `<span style="background-color: ${color}; width: 15px; height: 15px; display: inline-block; border-radius: 50%; margin-right: 5px; border: 1px solid #ddd;"></span>`;
+                            });
+                        }
+
                         html += `
-                <div class="col-xl-4 col-md-6 col-12 mb-40">
-                    <div class="product-item">
-                        <div class="product-inner">
-                            <div class="image">
-                                <img src="admin-pages/${product.image}" alt="${product.name}">
-                                <div class="image-overlay">
-                                    <div class="action-buttons">
-                                        <button class="add-to-cart" data-id="${product.product_id}">add to cart</button>
-                                        <button>add to wishlist</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="content">
-                                <div class="content-left">
-                                    <h4 class="title"><a href="single-product.php?product_id=${product.product_id}">${product.name}</a></h4>
-                                    <div class="ratting">
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star-half-o"></i>
-                                        <i class="fa fa-star-o"></i>
-                                    </div>
-                                    <h5 class="size">Size: <span>S</span><span>M</span><span>L</span><span>XL</span></h5>
-                                    <h5 class="color">Color: <span style="background-color: #ffb2b0"></span><span style="background-color: #0271bc"></span><span style="background-color: #efc87c"></span><span style="background-color: #00c183"></span></h5>
-                                </div>
-                                <div class="content-right">
-                                    <span class="price">$${product.new_price} <span class="old">$${product.price}</span></span>
+            <div class="col-xl-4 col-md-6 col-12 mb-40">
+                <div class="product-item">
+                    <div class="product-inner">
+                        <div class="image">
+                            <img src="admin-pages/${product.image}" alt="${product.name}">
+                            <div class="image-overlay">
+                                <div class="action-buttons">
+                                    <button class="add-to-cart" data-id="${product.product_id}">add to cart</button>
+                                    <button>add to wishlist</button>
                                 </div>
                             </div>
                         </div>
+                        <div class="content">
+                            <div class="content-left">
+                                <h4 class="title"><a href="single-product.php?product_id=${product.product_id}">${product.name}</a></h4>
+                                
+                                <div class="ratting">
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star-half-o"></i>
+                                    <i class="fa fa-star-o"></i>
+                                </div>
+                                <h5 class="size">Size: <span>S</span><span>M</span><span>L</span><span>XL</span></h5>
+                                <h5 class="color">Colors: ${colorsHtml}</h5>
+                            </div>
+                            <div class="content-right">
+                                <span class="price">$${product.new_price} <span class="old">$${product.price}</span></span>
+                            </div>
+                        </div>
                     </div>
-                </div>`;
+                </div>
+            </div>`;
                     });
                 }
 

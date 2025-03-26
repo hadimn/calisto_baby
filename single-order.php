@@ -35,9 +35,10 @@ $order_details = $order->getOrderDetails();
 if (!$order_details) {
     $_SESSION['error'] = 'Order not found.';
     error_log('order not found!');
-    header('Location: orders.php');
+    header('Location: shop-left-sidebar.php');
     exit();
 }
+
 
 $order_items = new OrderItem($db);
 $order_items->order_id = $order_id;
@@ -87,24 +88,27 @@ session_abort();
                         <h1>Orders</h1>
                         <ul class="page-breadcrumb">
                             <li><a href="index.php">Home</a></li>
-                            <li><a href="my-account.php">Orders </a></li>
+                            <li><a href="#">Order Details </a></li>
                         </ul>
 
                     </div>
                 </div>
             </div>
         </div><!-- Page Banner Section End -->
-        <div class="container order-details">
-            <div class="col-12 mb-40">
-                <div class="cart-table table-responsive">
-                    <table class="table text-center align-middle">
+        <div class="page-section section section-padding">
+            <div class="container">
+
+                <div class="myaccount-table table-responsive text-center">
+                    <table class="table table-bordered">
                         <thead class="thead-light">
                             <tr>
-                                <th class="pro-thumbnail">Image</th>
-                                <th class="pro-title">Product</th>
-                                <th class="pro-price">Price</th>
-                                <th class="pro-quantity">Quantity</th>
-                                <th class="pro-subtotal">Total</th>
+                                <th>Image</th>
+                                <th>Product</th>
+                                <th>Size</th>
+                                <th>Color</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -112,29 +116,34 @@ session_abort();
                                 <tr>
                                     <td class="pro-thumbnail">
                                         <a href="#">
-                                            <img src="admin-pages/<?= htmlspecialchars($item['image']) ?>"
-                                                alt="<?= htmlspecialchars($item['name']) ?>" height="100"  class="mx-auto d-block" />
+                                            <img src="admin-pages/<?= htmlspecialchars($item['color_image']) ?>"
+                                                alt="<?= htmlspecialchars($item['name']) ?>" height="100" class="mx-auto d-block" />
                                         </a>
                                     </td>
-                                    <td class="pro-title text-center">
+                                    <td>
                                         <a href="single-product.php?product_id=<?= htmlspecialchars($item['product_id']) ?>">
                                             <?= htmlspecialchars($item['name']) ?>
                                         </a>
                                     </td>
-                                    <td class="pro-price text-center">
+                                    <td>
+                                        <?=htmlspecialchars($item['size'])?>
+                                    </td>
+                                    <td>
+                                        <?=htmlspecialchars($item['color'])?>
+                                    </td>
+                                    <td>
                                         <span class="amount">$<?= htmlspecialchars($item['price_at_purchase']) ?></span>
                                     </td>
-                                    <td class="pro-quantity text-center">
+                                    <td>
                                         <?= htmlspecialchars($item['quantity']) ?>
                                     </td>
-                                    <td class="pro-subtotal text-center">
+                                    <td>
                                         $<?= number_format($item['price_at_purchase'] * $item['quantity'], 2) ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
-
                 </div>
             </div>
         </div>

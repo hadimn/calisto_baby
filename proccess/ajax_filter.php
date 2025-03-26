@@ -62,6 +62,21 @@ foreach ($params as $key => $value) {
 $stmt->execute();
 $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Get additional product details (tags and colors) for each product
+foreach ($products as &$product_item) {
+    $product_obj = new Product($db);
+    $product_obj->product_id = $product_item['product_id'];
+    
+    // Get tags for the product
+    // $product_item['tags'] = $product_obj->getTags();
+    
+    // Get available colors for the product
+    $product_item['colors'] = $product_obj->getAvailableColorsById($product_item['product_id']);
+    
+    // Get available sizes for the product (optional)
+    $product_item['sizes'] = $product_obj->getAvailableSizesById($product_item['product_id']);
+}
+
 // Get total number of products for pagination
 $total_query = "SELECT COUNT(*) as total FROM products WHERE 1=1";
 $total_params = [];

@@ -10,6 +10,8 @@ class Order
     public $order_id;
     public $customer_id;
     public $total_amount;
+    public $discount_amount = 0; // Default to 0
+    public $shipping_fee = 0;    // Default to 0
     public $currency;
     public $status;
     public $created_at;
@@ -22,12 +24,17 @@ class Order
     // Create a new order
     public function create()
     {
-        $query = "INSERT INTO " . $this->table_name . " (customer_id, total_amount, currency, status, created_at) VALUES (:customer_id, :total_amount, :currency, :status, :created_at)";
+        $query = "INSERT INTO " . $this->table_name . " 
+                 (customer_id, total_amount, discount_amount, shipping_fee, currency, status, created_at) 
+                 VALUES (:customer_id, :total_amount, :discount_amount, :shipping_fee, :currency, :status, :created_at)";
+
         $stmt = $this->conn->prepare($query);
 
         // Bind parameters
         $stmt->bindParam(":customer_id", $this->customer_id);
         $stmt->bindParam(":total_amount", $this->total_amount);
+        $stmt->bindParam(":discount_amount", $this->discount_amount);
+        $stmt->bindParam(":shipping_fee", $this->shipping_fee);
         $stmt->bindParam(":currency", $this->currency);
         $stmt->bindParam(":status", $this->status);
         $stmt->bindParam(":created_at", $this->created_at);
@@ -48,7 +55,6 @@ class Order
         return $stmt;
     }
 
-    // Add this method to your Order class
     public function delete()
     {
         // First delete all order items
@@ -75,5 +81,11 @@ class Order
         $stmt->bindParam(":order_id", $this->order_id);
         $stmt->execute();
         return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    // Add this method to calculate the grand total
+    public function calculateGrandTotal()
+    {
+        return ($this->total_amount - $this->discount_amount) + $this->shipping_fee;
     }
 }

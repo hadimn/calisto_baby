@@ -84,10 +84,21 @@ if (!$billingAddress->save()) {
     exit();
 }
 
+
+// Fetch the current shipping fee from the database
+$query = "SELECT fee FROM shipping_fees LIMIT 1";
+$stmt = $db->prepare($query);
+$stmt->execute();
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+$shipping_fee = isset($row) ? ($total < 99 ? $row['fee'] : '0.00') : '0.00';
+
 // Create order
 $order = new Order($db);
 $order->customer_id = $_SESSION['customer_id'];
-$order->total_amount = $grandTotal;
+$order->total_amount = $total;
+$order->discount_amount = $discountAmount;
+$order->shipping_fee = $shipping_fee;
 $order->currency = 'USD';
 $order->status = 'pending';
 $order->created_at = date('Y-m-d H:i:s');
@@ -101,7 +112,7 @@ if ($order->create()) {
         $orderItem->order_id = $order_id;
         $orderItem->product_id = $item['product_id'];
         $orderItem->quantity = $item['quantity'];
-        $orderItem->price_at_purchase = ($item['new_price'] > 0 || $item != null) ? $item['new_price'] : $item['price'];
+        $orderItem->price_at_purchase = ($item['new_price'] > 0) ? $item['new_price'] : $item['price'];
 
         if (!$orderItem->create()) {
             error_log("Error creating order item for order: $order_id");

@@ -11,6 +11,7 @@ if (isset($_SESSION['customer_id'])) {
     $totals = $cart->calculateCartTotals($cart->customer_id);
     $total = $totals['total'];
 }
+
 ?>
 
 <div class="header-section section">

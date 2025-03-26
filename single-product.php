@@ -18,6 +18,7 @@ if (isset($_GET['product_id'])) {
     // check if prouct is in wishlisht
     $wishlist->product_id = $_GET['product_id'];
     $isInWishlist = $wishlist->isProductInWishlist();
+    $tags = $product->getTags();
 
     // Fetch stock data for each size and color combination
     $stockData = [];
@@ -196,7 +197,7 @@ session_abort();
                                         <div class="head-right">
                                             <span class="price">
                                                 <div class="content-right">
-                                                    <?php if (!empty($prod['new_price'])): ?>
+                                                    <?php if ($prod['new_price'] > 0): ?>
                                                         <span class="price" style="color: #FF708A;">$<?= number_format($prod['new_price'], 2) ?></span>
                                                         <span class="old-price" style="color: #94C7EB; text-decoration: line-through;">
                                                             $<?= number_format($prod['price'], 2) ?>
@@ -211,6 +212,16 @@ session_abort();
 
                                     <div class="description">
                                         <?= $prod['description'] ?>
+                                    </div>
+
+                                    <div class="tags">
+                                        <div class="tags" style="margin-bottom: 5px;">
+                                            <?php foreach ($tags as $tag): ?>
+                                                <span class="product-tag" style="background-color: #94c7eb; padding: 2px 5px; border-radius: 3px; font-size: 12px; margin-right: 5px;">
+                                                    <a href="shop-left-sidebar.php?tag=<?= $tag['tag_id'] ?>"><?= $tag['name'] ?></a>
+                                                </span>
+                                            <?php endforeach; ?>
+                                        </div>
                                     </div>
 
                                     <span class="availability">Availability: <span>In Stock</span></span>

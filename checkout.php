@@ -24,6 +24,12 @@ $cart->customer_id = $_SESSION['customer_id'];
 
 $cartItems = $cart->getItems()->fetchAll(PDO::FETCH_ASSOC);
 
+if(!$cartItems){
+    $_SESSION['error'] = "please add products to your cart before proceeding";
+    header("Location: shop-left-sidebar.php");
+    exit();
+}
+
 $totals = $cart->calculateCartTotals($_SESSION['customer_id']);
 $subtotal = $totals['subtotal'];
 $total = $totals['total'];
@@ -33,7 +39,8 @@ $query = "SELECT fee FROM shipping_fees LIMIT 1";
 $stmt = $db->prepare($query);
 $stmt->execute();
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
-$current_fee = $row ? ($total < 99 ? $row['fee'] : '0.00') : '0.00';
+
+$current_fee = isset($row) ? ($total < 99 ? $row['fee'] : '0.00') : '0.00';
 
 // Fetch active discount for the customer
 $discount = new Discount($db);
@@ -221,7 +228,7 @@ session_abort();
 
                                         <p>Sub Total <span>$<?= $subtotal ?></span></p>
                                         <?php if ($discountAmount > 0): ?>
-                                            <p>Discount(<?= $discountType ?>) <span>-$<?= number_format($discountAmount, 2) ?></span></p>
+                                            <p>Discount(<?= $discountType ?>  " <?=$activeDiscount['discount_percentage']?>% ") <span>-$<?= number_format($discountAmount, 2) ?></span></p>
                                         <?php endif; ?>
                                         <p>Shipping Fee <span>$<?= $current_fee ?></span></p>
 

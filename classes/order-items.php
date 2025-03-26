@@ -39,10 +39,12 @@ class OrderItem
     // Fetch order items by order_id
     public function getOrderItems($order_id)
     {
-        $query = "SELECT oi.*, p.name, p.image
-                      FROM " . $this->table_name . " oi
-                      JOIN products p ON oi.product_id = p.product_id
-                      WHERE oi.order_id = :order_id";
+        $query = "SELECT oi.*, p.name, p.image, ps.size, ps.color, ps.color_image
+                  FROM " . $this->table_name . " oi
+                  JOIN products p ON oi.product_id = p.product_id
+                  JOIN product_sizes ps ON oi.product_size_id = ps.id
+                  WHERE oi.order_id = :order_id";
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":order_id", $order_id);
         $stmt->execute();
