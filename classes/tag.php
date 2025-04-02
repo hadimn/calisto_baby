@@ -97,4 +97,30 @@ class Tag
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getNewBabyToysTag()
+    {
+        $query = "SELECT tag_id FROM " . $this->table_name . " 
+              WHERE name LIKE '%Toys and playtime%'
+              ORDER BY tag_id DESC
+              LIMIT 1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getMustHaveBasicsTag()
+    {
+        $query = "SELECT tag_id FROM " . $this->table_name . " 
+              WHERE name LIKE '%Must have basics%'
+              ORDER BY tag_id DESC
+              LIMIT 1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

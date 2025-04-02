@@ -116,7 +116,7 @@ session_abort();
                                 <tr>
                                     <td class="pro-thumbnail">
                                         <a href="#">
-                                            <img src="admin-pages/<?= htmlspecialchars($item['color_image']) ?>"
+                                            <img src="admin-pages/<?= htmlspecialchars($item['image']) ?>"
                                                 alt="<?= htmlspecialchars($item['name']) ?>" height="100" class="mx-auto d-block" />
                                         </a>
                                     </td>

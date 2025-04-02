@@ -111,6 +111,7 @@ if ($order->create()) {
         $orderItem = new OrderItem($db);
         $orderItem->order_id = $order_id;
         $orderItem->product_id = $item['product_id'];
+        $orderItem->product_size_id = $item['product_size_id'];
         $orderItem->quantity = $item['quantity'];
         $orderItem->price_at_purchase = ($item['new_price'] > 0) ? $item['new_price'] : $item['price'];
 

@@ -18,8 +18,8 @@ $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 8;
 $sort = isset($_GET['sort']) ? $_GET['sort'] : 'created_at DESC';
 $color_filter = isset($_GET['color']) ? (array)$_GET['color'] : [];
 $tag_filter = isset($_GET['tag']) ? (array)$_GET['tag'] : [];
-$min_price = isset($_GET['min_price']) ? (float)$_GET['min_price'] : null;
-$max_price = isset($_GET['max_price']) ? (float)$_GET['max_price'] : null;
+$min_price = isset($_GET['min_price']) && $_GET['min_price'] !== '' ? (float)$_GET['min_price'] : 0;
+$max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_GET['max_price'] : 1000;
 ?>
 
 <!doctype html>
@@ -179,7 +179,7 @@ $max_price = isset($_GET['max_price']) ? (float)$_GET['max_price'] : null;
                             <!-- Products container -->
                             <div class="col-12" id="products-container">
                                 <div class="loading-spinner">
-                                    <img src="assets/images/icons/loading.gif" alt="Loading...">
+                                    <img src="https://loading.io/asset/780798" alt="Loading...">
                                 </div>
                                 <div class="row" id="products-row">
                                     <!-- Products will be loaded here via AJAX -->

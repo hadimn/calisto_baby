@@ -705,6 +705,21 @@ only screen and (min-width: 768px) and (max-width: 991px) {
   }
 }
 
+/* Default style for all screen sizes */
+.banner-section img {
+  height: 200px;
+  width: 100%;
+  object-fit: cover;
+  /* This ensures the image covers the area without distortion */
+}
+
+/* Style for screens wider than 700px */
+@media (min-width: 701px) {
+  .banner-section img {
+    height: 300px;
+  }
+}
+
 /*--
     - 404 Error
 ------------------------------------------*/
@@ -1311,13 +1326,16 @@ only screen and (min-width: 768px) and (max-width: 991px) {
 }
 
 .header-shop-links .dropdown {
-  margin-left: 10px; /* You can adjust this to add space if needed */
+  margin-left: 10px;
+  /* You can adjust this to add space if needed */
 }
 
 /* Adjust the profile dropdown for better visibility */
 .dropdown-menu {
-  min-width: 150px; /* Optional: Set a minimum width for the dropdown */
+  min-width: 150px;
+  /* Optional: Set a minimum width for the dropdown */
 }
+
 /* profile logo end */
 
 /*-- Header Wishlist --*/
@@ -1967,7 +1985,7 @@ only screen and (min-width: 768px) and (max-width: 991px) {
 
 /*-- Hero Item --*/
 .hero-item {
-  background-size: cover;
+  background-size: contain;
   background-repeat: no-repeat;
   background-position: center center;
   padding: 190px 30px;
@@ -3915,12 +3933,15 @@ only screen and (max-width: 767px) {
 
 .product-item .product-inner .image {
   position: relative;
+
   /*-- Image Overlay --*/
 }
 
 .product-item .product-inner .image img {
   display: block;
   width: 100%;
+  height: 300px;
+  object-fit: cover;
 }
 
 .product-item .product-inner .image .image-overlay {
@@ -4684,8 +4705,10 @@ only screen and (max-width: 767px) {
   overflow: hidden;
   width: 100%;
   height: 500px;
-  position: relative; /* Needed for centering */
-  padding-bottom: 75%; /* Adjust this percentage for desired aspect ratio (e.g., 100% for square, 56.25% for 16:9) */
+  position: relative;
+  /* Needed for centering */
+  padding-bottom: 75%;
+  /* Adjust this percentage for desired aspect ratio (e.g., 100% for square, 56.25% for 16:9) */
   border: #000000 solid 1px;
 }
 
@@ -4693,7 +4716,8 @@ only screen and (max-width: 767px) {
   border: #000000 solid 1px;
 
   display: block;
-  position: absolute; /* Needed for centering */
+  position: absolute;
+  /* Needed for centering */
   top: 0;
   left: 0;
   width: 100%;
@@ -4703,12 +4727,18 @@ only screen and (max-width: 767px) {
 .pro-large-img a img {
   border: #000000 solid 1px;
   width: 100%;
-  height: 100%; /* Ensures the image fills its container */
-  position: absolute; /* Needed for centering */
-  top: 50%; /* Center vertically */
-  left: 50%; /* Center horizontally */
-  transform: translate(-50%, -50%); /* Adjust for the image's own dimensions */
-  object-fit: fill; /* Prevent stretching, keep aspect ratio */
+  height: 100%;
+  /* Ensures the image fills its container */
+  position: absolute;
+  /* Needed for centering */
+  top: 50%;
+  /* Center vertically */
+  left: 50%;
+  /* Center horizontally */
+  transform: translate(-50%, -50%);
+  /* Adjust for the image's own dimensions */
+  object-fit: fill;
+  /* Prevent stretching, keep aspect ratio */
 }
 
 .pro-large-img img {
@@ -4717,7 +4747,7 @@ only screen and (max-width: 767px) {
 }
 
 @media only screen and (max-width: 700px) {
-  .pro-large-img{
+  .pro-large-img {
     height: 340px;
   }
 }
@@ -4732,8 +4762,10 @@ only screen and (max-width: 767px) {
 
 .pro-thumb-img li {
   padding: 5px;
-  width: 150px; /* Fixed width for all images */
-  height: 150px; /* Fixed height for all images */
+  width: 150px;
+  /* Fixed width for all images */
+  height: 150px;
+  /* Fixed height for all images */
   box-sizing: border-box;
 }
 
@@ -4747,7 +4779,8 @@ only screen and (max-width: 767px) {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: fill; /* Crop to fill, maintaining aspect ratio */
+  object-fit: fill;
+  /* Crop to fill, maintaining aspect ratio */
 }
 
 /* Optional: Add spacing between rows if needed */

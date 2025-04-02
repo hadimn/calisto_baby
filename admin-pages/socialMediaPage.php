@@ -38,7 +38,7 @@
                     echo '
                     <div class="row mb-3 align-items-center">
                         <div class="col-sm-2">
-                            <i class="' . htmlspecialchars($platform['icon_class']) . ' fa-2x"></i>
+                            <i class="' . htmlspecialchars($platform['icon_class']) . ' fa-2x mr-3"></i>
                             <span class="fw-bold ms-2">' . htmlspecialchars($platform['platform']) . '</span>
                         </div>
                         <div class="col-sm-6">

@@ -128,30 +128,34 @@ class Cart
     }
 
     // Get items in cart with product details
+    // Get items in cart with product details including product_size_id
     public function getItems()
     {
         $query = "
-            SELECT 
-                c.cart_id, 
-                c.customer_id, 
-                c.product_id, 
-                c.quantity, 
-                c.color, 
-                c.size, 
-                c.added_at, 
-                p.name AS product_name, 
-                p.price, 
-                p.new_price, 
-                p.image AS product_image 
-            FROM 
-                " . $this->table_name . " c 
-            INNER JOIN 
-                products p 
-            ON 
-                c.product_id = p.product_id 
-            WHERE 
-                c.customer_id = :customer_id
-        ";
+        SELECT 
+            c.cart_id, 
+            c.customer_id, 
+            c.product_id, 
+            c.quantity, 
+            c.color, 
+            c.size, 
+            c.added_at, 
+            p.name AS product_name, 
+            p.price, 
+            p.new_price, 
+            p.image AS product_image,
+            ps.id AS product_size_id
+        FROM 
+            " . $this->table_name . " c 
+        INNER JOIN 
+            products p ON c.product_id = p.product_id 
+        LEFT JOIN
+            product_sizes ps ON c.product_id = ps.product_id 
+            AND c.size = ps.size 
+            AND c.color = ps.color
+        WHERE 
+            c.customer_id = :customer_id
+    ";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":customer_id", $this->customer_id);
         $stmt->execute();

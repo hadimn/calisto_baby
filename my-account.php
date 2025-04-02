@@ -142,6 +142,8 @@ session_abort();
                                 <div class="myaccount-content">
                                     <h3>Orders</h3>
 
+                                    <!-- Pending Orders Table -->
+                                    <h4 class="mt-4">Pending Orders</h4>
                                     <div class="myaccount-table table-responsive text-center">
                                         <table class="table table-bordered">
                                             <thead class="thead-light">
@@ -155,17 +157,65 @@ session_abort();
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php $index = 1; ?>
-                                                <?php while ($row = $orders->fetch(PDO::FETCH_ASSOC)) : ?>
-                                                    <tr>
-                                                        <td><?php echo $index++; ?></td>
-                                                        <td><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
-                                                        <td><?php echo htmlspecialchars($row['status']); ?></td>
-                                                        <td><?php echo htmlspecialchars($row['total_amount']); ?></td>
-                                                        <td><?php echo htmlspecialchars($row['currency']); ?></td>
-                                                        <td><a href="single-order.php?order_id=<?php echo $row['order_id']; ?>" class="btn btn-dark btn-round">View</a></td>
-                                                    </tr>
+                                                <?php
+                                                $indexPending = 1;
+                                                $orders->execute(); // Reset the cursor if needed
+                                                while ($row = $orders->fetch(PDO::FETCH_ASSOC)) :
+                                                    if (strtolower($row['status']) == 'pending') : ?>
+                                                        <tr>
+                                                            <td><?php echo $indexPending++; ?></td>
+                                                            <td><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
+                                                            <td><?php echo htmlspecialchars($row['status']); ?></td>
+                                                            <td><?php echo htmlspecialchars($row['total_amount']); ?></td>
+                                                            <td><?php echo htmlspecialchars($row['currency']); ?></td>
+                                                            <td><a href="single-order.php?order_id=<?php echo $row['order_id']; ?>" class="btn btn-dark btn-round">View</a></td>
+                                                        </tr>
+                                                    <?php endif; ?>
                                                 <?php endwhile; ?>
+                                                <?php if ($indexPending == 1) : ?>
+                                                    <tr>
+                                                        <td colspan="6">No pending orders found</td>
+                                                    </tr>
+                                                <?php endif; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Other Orders Table -->
+                                    <h4 class="mt-5">Other Orders</h4>
+                                    <div class="myaccount-table table-responsive text-center">
+                                        <table class="table table-bordered">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>No</th>
+                                                    <th>Date</th>
+                                                    <th>Status</th>
+                                                    <th>Total</th>
+                                                    <th>Currency</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php
+                                                $indexOther = 1;
+                                                $orders->execute(); // Reset the cursor if needed
+                                                while ($row = $orders->fetch(PDO::FETCH_ASSOC)) :
+                                                    if (strtolower($row['status']) != 'pending') : ?>
+                                                        <tr>
+                                                            <td><?php echo $indexOther++; ?></td>
+                                                            <td><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
+                                                            <td><?php echo htmlspecialchars($row['status']); ?></td>
+                                                            <td><?php echo htmlspecialchars($row['total_amount']); ?></td>
+                                                            <td><?php echo htmlspecialchars($row['currency']); ?></td>
+                                                            <td><a href="single-order.php?order_id=<?php echo $row['order_id']; ?>" class="btn btn-dark btn-round">View</a></td>
+                                                        </tr>
+                                                    <?php endif; ?>
+                                                <?php endwhile; ?>
+                                                <?php if ($indexOther == 1) : ?>
+                                                    <tr>
+                                                        <td colspan="6">No other orders found</td>
+                                                    </tr>
+                                                <?php endif; ?>
                                             </tbody>
                                         </table>
                                     </div>

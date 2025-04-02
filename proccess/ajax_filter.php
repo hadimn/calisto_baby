@@ -14,8 +14,8 @@ $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 8;
 $sort = isset($_GET['sort']) ? $_GET['sort'] : 'created_at DESC';
 $color_filter = isset($_GET['color']) ? (array)$_GET['color'] : [];
 $tag_filter = isset($_GET['tag']) ? (array)$_GET['tag'] : [];
-$min_price = isset($_GET['min_price']) ? (float)$_GET['min_price'] : null;
-$max_price = isset($_GET['max_price']) ? (float)$_GET['max_price'] : null;
+$min_price = isset($_GET['min_price']) && $_GET['min_price'] !== '' ? (float)$_GET['min_price'] : 0;
+$max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_GET['max_price'] : 1000;
 $search_term = isset($_GET['search']) ? $_GET['search'] : null;
 
 // Calculate offset for pagination
@@ -66,13 +66,13 @@ $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 foreach ($products as &$product_item) {
     $product_obj = new Product($db);
     $product_obj->product_id = $product_item['product_id'];
-    
+
     // Get tags for the product
     // $product_item['tags'] = $product_obj->getTags();
-    
+
     // Get available colors for the product
     $product_item['colors'] = $product_obj->getAvailableColorsById($product_item['product_id']);
-    
+
     // Get available sizes for the product (optional)
     $product_item['sizes'] = $product_obj->getAvailableSizesById($product_item['product_id']);
 }

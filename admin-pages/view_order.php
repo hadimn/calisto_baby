@@ -223,7 +223,7 @@ if (isset($_SESSION['admin_id'])) {
 
                             <?php foreach ($items as $item): ?>
                                 <div class="product-card">
-                                    <img src="<?= $item['color_image'] ?>" alt="<?= $item['name'] ?>" class="product-img">
+                                    <img src="<?= $item['image'] ?>" alt="<?= $item['name'] ?>" class="product-img">
                                     <div class="product-info">
                                         <h5><?= $item['name'] ?></h5>
                                         <div class="d-flex justify-content-between">

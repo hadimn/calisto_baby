@@ -2,10 +2,12 @@
 include "classes/database.php";
 include "classes/product.php";
 include "classes/cart.php";
+include "classes/tag.php";
 
 $database = new Database();
 $db = $database->getConnection();
 $product = new Product($db);
+$tag = new Tag($db);
 
 // on sale products
 $productsOnSale = $product->getPorductsOnSale();
@@ -15,6 +17,11 @@ $productLastthree = $product->getLastByLimit(3);
 $popular_products = $product->getPorductsPopular();
 // best_deal products
 $best_deal_products = $product->getPorductsBestDeal();
+// bab new toys tag id
+$babyNewToys_tagId = $tag->getNewBabyToysTag()['tag_id'];
+// must have basics tag id
+$MustHaveBasics_tagId = $tag->getMustHaveBasicsTag()['tag_id'];
+
 
 ?>
 
@@ -119,8 +126,8 @@ $best_deal_products = $product->getPorductsBestDeal();
                     <div class="col-lg-4 col-md-6 col-12 mb-20">
                         <div class="banner banner-1 content-left content-middle">
 
-                            <a href="#" class="image"><img src="assets/images/feature/newArrival.jpg" alt="Banner Image" style="height: 210px;"></a>
-
+                            <a href="shop-left-sidebar.php?tag=" class="image"><img src="assets/images/feature/newArrival.jpg" alt="Banner Image"></a>
+ 
                             <div class="content">
                                 <h1 style="color: #FF7790;">New Arrival <br>Baby’s clothes <br>GET ALL YOU WANT</h1>
                                 <a href="#" data-hover="SHOP NOW">SHOP NOW</a>
@@ -130,12 +137,12 @@ $best_deal_products = $product->getPorductsBestDeal();
                     </div>
 
                     <div class="col-lg-4 col-md-6 col-12 mb-20">
-                        <a href="#" class="banner banner-2">
+                        <a href="shop-left-sidebar.php?tag=<?= $babyNewToys_tagId?>" class="banner banner-2">
 
-                            <img src="assets/images/feature/newBorn.jpg" alt="Banner Image" style="height: 210px;">
+                            <img src="assets/images/feature/newBorn.jpg" alt="Banner Image">
 
                             <div class="content bg-theme-one">
-                                <h1>New Toy’s for your Baby</h1>
+                                <h1>New Baby Toy’s</h1>
                             </div>
 
                             <!-- <span class="banner-offer">25% off</span> -->
@@ -146,7 +153,7 @@ $best_deal_products = $product->getPorductsBestDeal();
                     <div class="col-lg-4 col-md-6 col-12 mb-20">
                         <div class="banner banner-1 content-left content-top">
 
-                            <a href="#" class="image"><img src="assets/images/feature/mustHave.jpg" alt="Banner Image" style="height: 210px;"></a>
+                            <a href="shop-left-sidebar.php?tag=<?= $MustHaveBasics_tagId?>" class="image"><img src="assets/images/feature/mustHave.jpg" alt="Banner Image"></a>
 
                             <div class="content">
                                 <h1 style="color: #FF7790;">Must <br>Have Basics</h1>

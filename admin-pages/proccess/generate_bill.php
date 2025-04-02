@@ -7,6 +7,7 @@ require_once '../../classes/database.php';
 require_once '../../classes/order.php';
 require_once '../../classes/order-items.php';
 require_once '../../classes/customer.php';
+require_once '../../classes/billing_address.php';
 include '../../fpdf/fpdf.php';
 
 // Get the order ID from the URL
@@ -27,9 +28,17 @@ $order->order_id = $order_id;
 $orderDetails = $order->getOrderDetails();
 
 // Fetch customer details
-$customer = new Customer($db);
-$customer->customer_id = $orderDetails['customer_id'];
-$customer->findById();
+$customerBillingAddress = new BillingAddress($db);
+$customerBillingAddress->customer_id = $orderDetails['customer_id'];
+$billingAddress = $customerBillingAddress->getByCustomer();
+
+$customerBillingAddress->first_name = $billingAddress['first_name'];
+$customerBillingAddress->last_name = $billingAddress['last_name'];
+$customerBillingAddress->address = $billingAddress['address'];
+$customerBillingAddress->country = $billingAddress['country'];
+$customerBillingAddress->city = $billingAddress['city'];
+$customerBillingAddress->additional_info = $billingAddress['additional_info'];
+$customerBillingAddress->email = $billingAddress['email'];
 
 // Fetch order items
 $orderItem = new OrderItem($db);
@@ -58,10 +67,11 @@ $pdf->Ln(10);
 $pdf->SetFont('Arial', 'B', 12);
 $pdf->Cell(0, 10, 'Bill To:', 0, 1);
 $pdf->SetFont('Arial', '', 12);
-$pdf->Cell(0, 10, 'Name: ' . $customer->first_name . ' ' . $customer->last_name, 0, 1);
-$pdf->Cell(0, 10, 'Address: ' . $customer->address, 0, 1);
-$pdf->Cell(0, 10, 'Phone: ' . $customer->phone_number, 0, 1);
-$pdf->Cell(0, 10, 'Email: ' . $customer->email, 0, 1);
+$pdf->Cell(0, 10, 'Name: ' . $customerBillingAddress->first_name . ' ' . $customerBillingAddress->last_name, 0, 1);
+$pdf->Cell(0, 10, 'Address: ' . $customerBillingAddress->address, 0, 1);
+$pdf->Cell(0, 10, 'additional info: ' . $customerBillingAddress->additional_info, 0, 1);
+$pdf->Cell(0, 10, 'Phone: ' . $customerBillingAddress->phone_number, 0, 1);
+$pdf->Cell(0, 10, 'Email: ' . $customerBillingAddress->email, 0, 1);
 $pdf->Ln(10);
 
 // Order Details Table
