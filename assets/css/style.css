@@ -707,7 +707,7 @@ only screen and (min-width: 768px) and (max-width: 991px) {
 
 /* Default style for all screen sizes */
 .banner-section img {
-  height: 200px;
+  height: 100px;
   width: 100%;
   object-fit: cover;
   /* This ensures the image covers the area without distortion */

@@ -1,4 +1,4 @@
-<?php include 'proccess/login-register-proccess.php'?>
+<?php include 'proccess/login-register-proccess.php' ?>
 
 <!doctype html>
 <html class="no-js" lang="en">
@@ -38,14 +38,41 @@
 
     <!-- twilio phone number input api -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
+
+    <style>
+        .floating-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            max-width: 300px;
+            width: auto;
+            cursor: pointer;
+            /* Show pointer cursor to indicate clickability */
+            transition: opacity 0.3s ease;
+            /* Smooth fade transition */
+            padding: 15px;
+            /* Slightly larger padding for better click area */
+            border-radius: 4px;
+            /* Rounded corners */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            /* Subtle shadow */
+        }
+
+        .floating-alert:hover {
+            opacity: 0.9;
+            /* Slight visual feedback on hover */
+        }
+    </style>
 </head>
 
 <body>
 
     <div class="main-wrapper">
         <!-- header Start -->
-        <?php include 'header.php'?>
+        <?php include 'header.php' ?>
         <!-- header End -->
+
         <!-- Page Banner Section Start -->
         <div class="page-banner-section section" style="background-image: url(assets/images/hero/hero-1.jpg)">
             <div class="container">
@@ -67,6 +94,19 @@
         <div class="page-section section section-padding">
             <div class="container">
                 <div class="row mbn-40">
+                    <?php if (isset($_SESSION['error'])): ?>
+                        <div class="alert alert-danger floating-alert" id="floatingAlert" role="alert">
+                            <span aria-hidden="true">&times;</span>
+                            <?php echo $_SESSION['error'];
+                            unset($_SESSION['error']); ?>
+                        </div>
+                    <?php elseif (isset($_SESSION['success'])): ?>
+                        <div class="alert alert-success floating-alert" id="floatingAlert" role="alert">
+                            <?php echo $_SESSION['success'];
+                            unset($_SESSION['success']); ?>
+                        </div>
+                    <?php endif; ?>
+
 
                     <div class="col-lg-4 col-12 mb-40">
                         <div class="login-register-form-wrap">
@@ -122,11 +162,11 @@
                                     <?php endforeach; ?>
                                 </div>
                             <?php endif; ?>
-                            <?php if( isset($registration_success) && isset($_POST['register'])): ?>
+                            <?php if (isset($registration_success) && isset($_POST['register'])): ?>
                                 <div class="alert alert-success">
-                                    <p><?=$registration_success?></p>
+                                    <p><?= $registration_success ?></p>
                                 </div>
-                            <?php endif?>
+                            <?php endif ?>
                             <form method="post">
                                 <div class="row">
                                     <div class="col-md-6 col-12 mb-15"><input type="text" name="first_name"
@@ -314,6 +354,22 @@
                 toggleIcon.classList.add("fa-eye");
             }
         }
+
+        $(document).ready(function() {
+            // Auto-dismiss floating alerts after 5 seconds
+            setTimeout(function() {
+                $(".floating-alert").fadeOut('slow', function() {
+                    $(this).remove();
+                });
+            }, 5000);
+
+            // Click anywhere on alert to dismiss it
+            $(".floating-alert").click(function() {
+                $(this).fadeOut('fast', function() {
+                    $(this).remove();
+                });
+            });
+        });
     </script>
 
 </body>

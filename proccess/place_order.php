@@ -118,7 +118,20 @@ if ($order->create()) {
         if (!$orderItem->create()) {
             error_log("Error creating order item for order: $order_id");
         }
+
+        // 🔽 Add this to reduce stock
+        $stockUpdateQuery = "UPDATE product_sizes SET stock = stock - :quantity 
+                             WHERE id = :product_size_id AND stock >= :quantity";
+        $stockStmt = $db->prepare($stockUpdateQuery);
+        $stockStmt->bindParam(':quantity', $item['quantity'], PDO::PARAM_INT);
+        $stockStmt->bindParam(':product_size_id', $item['product_size_id'], PDO::PARAM_INT);
+
+        if (!$stockStmt->execute() || $stockStmt->rowCount() === 0) {
+            error_log("Stock update failed or insufficient stock for size ID: " . $item['product_size_id']);
+            // Optionally: Roll back the order creation here
+        }
     }
+
 
     // Deactivate first-order discount if it was used
     if ($activeDiscount && $activeDiscount['discount_type'] === 'first_order') {

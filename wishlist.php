@@ -6,7 +6,8 @@ include 'classes/wishlist.php';
 session_start();
 // Check if the user is logged in (modify this as per your authentication system)
 if (!isset($_SESSION['customer_id'])) {
-    echo "<p style='text-align: center; font-size: 18px; color: red;'>Please log in to view your wishlist.</p>";
+    $_SESSION['error'] = "login please!";
+    header("Location: login-register.php");
     exit();
 }
 

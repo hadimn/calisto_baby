@@ -267,41 +267,45 @@ if (isset($_SESSION['admin_id'])) {
 
                     <div class="col-lg-4">
                         <div class="order-details-card">
-                            <h4 class="mb-4">Order Summary</h4>
+                            <h1 class="mb-4">Order Summary</h1>
 
                             <table class="summary-table mb-4">
                                 <tr>
-                                    <td class="summary-label">Subtotal</td>
+                                    <td class="summary-label"><strong>Subtotal</strong></td>
                                     <td class="summary-value">$<?= number_format($orderDetails['total_amount'], 2) ?></td>
                                 </tr>
                                 <?php if ($orderDetails['discount_amount'] > 0): ?>
                                     <tr>
-                                        <td class="summary-label">Discount</td>
+                                        <td class="summary-label"><strong>Discount</strong></td>
                                         <td class="summary-value">-$<?= number_format($orderDetails['discount_amount'], 2) ?></td>
                                     </tr>
                                 <?php endif; ?>
                                 <tr>
-                                    <td class="summary-label">Shipping Fee</td>
+                                    <td class="summary-label"><strong>Shipping Fee</strong></td>
                                     <td class="summary-value">$<?= number_format($orderDetails['shipping_fee'], 2) ?></td>
                                 </tr>
                                 <tr>
-                                    <td class="summary-label grand-total">Total</td>
+                                    <td class="summary-label grand-total"><strong>Total</strong></td>
                                     <td class="summary-value grand-total">
                                         $<?= number_format(($orderDetails['total_amount'] - $orderDetails['discount_amount'] + $orderDetails['shipping_fee']), 2) ?>
                                     </td>
                                 </tr>
                             </table>
 
-                            <h4 class="mb-3">Shipping Address</h4>
+                            <div class="border-top my-3"></div>
+
+                            <h3 class="mb-3">Shipping Address</h3>
                             <address>
-                                <p><strong><?= htmlspecialchars($customer->first_name) ?> <?= htmlspecialchars($customer->last_name) ?></strong></p>
-                                <p><?= htmlspecialchars($customer->address) ?></p>
-                                <p>Phone: <?= htmlspecialchars($customer->phone_number) ?></p>
-                                <p>Email: <?= htmlspecialchars($customer->email) ?></p>
+                                <p><strong>Name: </strong><?= htmlspecialchars($customer->first_name) ?> <?= htmlspecialchars($customer->last_name) ?></p>
+                                <p><strong>Address: </strong><?= htmlspecialchars($customer->address) ?></p>
+                                <p><strong>Phone: </strong> <?= htmlspecialchars($customer->phone_number) ?></p>
+                                <p><strong>Email: </strong> <?= htmlspecialchars($customer->email) ?></p>
                             </address>
 
-                            <h4 class="mb-3">Payment Method</h4>
-                            <p>Cash on Delivery</p>
+                            <div class="border-top my-3"></div>
+
+                            <h3 class="mb-3">Payment Method</h3>
+                            <p><strong>Cash on Delivery</strong></p>
 
                             <a href="proccess/generate_bill.php?order_id=<?= $order_id ?>" class="btn btn-primary">Download Invoice</a>
 

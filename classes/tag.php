@@ -116,6 +116,19 @@ class Tag
         $query = "SELECT tag_id FROM " . $this->table_name . " 
               WHERE name LIKE '%Must have basics%'
               ORDER BY tag_id DESC
+              LIMIT 1";     
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getBabyItemsTag()
+    {
+        $query = "SELECT tag_id FROM " . $this->table_name . " 
+              WHERE name LIKE '%Baby Items%'
+              ORDER BY tag_id DESC
               LIMIT 1";
 
         $stmt = $this->conn->prepare($query);

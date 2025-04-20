@@ -1,4 +1,6 @@
 <?php
+include_once 'classes/wishlist.php';
+
 session_start();
 
 if (isset($_SESSION['customer_id'])) {
@@ -10,6 +12,10 @@ if (isset($_SESSION['customer_id'])) {
     $cartCount = $cart->getCartCount();
     $totals = $cart->calculateCartTotals($cart->customer_id);
     $total = $totals['total'];
+
+    $wishlist = new Wishlist($db);
+    $wishlist->customer_id = $_SESSION['customer_id'];
+    $wishlist_count = $wishlist->countWishlistItems();
 }
 
 ?>
@@ -46,12 +52,19 @@ if (isset($_SESSION['customer_id'])) {
                         </div>
 
                         <div class="header-wishlist">
-                            <a href="wishlist.php"><img src="assets/images/icons/wishlist.png"
-                                    alt="Wishlist"><span>02</span></a>
+                            <a href="wishlist.php"><img src="assets/images/icons/wishlist.png" alt="Wishlist">
+                                <span>
+                                    <?php if(isset($wishlist_count)):?>
+                                    <?= $wishlist_count ?>
+                                    <?php else:?>
+                                    00
+                                    <?php endif;?>  
+                                </span>
+                            </a>
                         </div>
 
                         <div class="header-mini-cart">
-                            <a href="<?= isset($cartCount) && isset($totals) ? 'cart.php' : 'login-register.php' ?>">
+                            <a href="cart.php">
                                 <img src="assets/images/icons/cart.png" alt="Cart">
                                 <span>
                                     <?php if (isset($cartCount) && isset($totals)): ?>
@@ -71,7 +84,7 @@ if (isset($_SESSION['customer_id'])) {
                                     style="width: 30px; height: 30px;">
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="profileDropdown">
-                                <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == true): ?>
+                                <?php if (isset($_SESSION['customer_id']) && $_SESSION['logged_in'] == true): ?>
                                     <li><a class="dropdown-item" href="my-account.php">My Account</a></li>
                                     <li><a class="dropdown-item" href="wishlist.php">Wishlist</a></li>
                                     <li><a class="dropdown-item" href="proccess/logout-proccess.php">Logout</a></li>

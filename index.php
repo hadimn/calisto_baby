@@ -21,7 +21,8 @@ $best_deal_products = $product->getPorductsBestDeal();
 $babyNewToys_tagId = $tag->getNewBabyToysTag()['tag_id'];
 // must have basics tag id
 $MustHaveBasics_tagId = $tag->getMustHaveBasicsTag()['tag_id'];
-
+// baby items tag id
+$babyItems_tagId = $tag->getBabyItemsTag()['tag_id'];
 
 ?>
 
@@ -108,7 +109,7 @@ $MustHaveBasics_tagId = $tag->getMustHaveBasicsTag()['tag_id'];
                         <!-- Hero Content -->
                         <div class="hero-content">
                             <h1><?= $productOS['name'] ?> <br><?php echo htmlspecialchars(substr($productOS['description'], 0, 50)); ?>...</h1>
-                            <a href="#">SHOP NOW</a>
+                            <a href="single-product.php?product_id=<?=$productOS['product_id']?>">SHOP NOW</a>
                         </div>
 
                     </div><!-- Hero Item End -->
@@ -126,10 +127,10 @@ $MustHaveBasics_tagId = $tag->getMustHaveBasicsTag()['tag_id'];
                     <div class="col-lg-4 col-md-6 col-12 mb-20">
                         <div class="banner banner-1 content-left content-middle">
 
-                            <a href="shop-left-sidebar.php?tag=" class="image"><img src="assets/images/feature/newArrival.jpg" alt="Banner Image"></a>
+                            <a href="shop-left-sidebar.php?tag=<?=$babyItems_tagId?>" class="image"><img src="assets/images/feature/newArrival.jpg" alt="Banner Image"></a>
  
                             <div class="content">
-                                <h1 style="color: #FF7790;">New Arrival <br>Baby’s clothes <br>GET ALL YOU WANT</h1>
+                                <h1 style="color: #FF7790;">New Arrival <br>Baby’s items <br>GET ALL YOU WANT</h1>
                                 <a href="#" data-hover="SHOP NOW">SHOP NOW</a>
                             </div>
 
@@ -156,7 +157,7 @@ $MustHaveBasics_tagId = $tag->getMustHaveBasicsTag()['tag_id'];
                             <a href="shop-left-sidebar.php?tag=<?= $MustHaveBasics_tagId?>" class="image"><img src="assets/images/feature/mustHave.jpg" alt="Banner Image"></a>
 
                             <div class="content">
-                                <h1 style="color: #FF7790;">Must <br>Have Basics</h1>
+                                <h1 style="color: #FF7790;">Must <br>Have Basics <br> products</h1>
                                 <a href="#" data-hover="SHOP NOW">SHOP NOW</a>
                             </div>
 
@@ -232,7 +233,7 @@ $MustHaveBasics_tagId = $tag->getMustHaveBasicsTag()['tag_id'];
                                         </div>
 
                                         <div class="content-right">
-                                            <span class="price">$<?= explode(".", $popular_product['price'])[0] ?><?php if (explode(".", $popular_product['price'])[1] != "00") {
+                                            <span class="price">$<?= explode(".", $popular_product['new_price'])[0] ?><?php if (explode(".", $popular_product['price'])[1] != "00") {
                                                                                                                         echo ("." . explode(".", $popular_product['price'])[1]);
                                                                                                                     } ?></span>
                                         </div>
@@ -257,7 +258,7 @@ $MustHaveBasics_tagId = $tag->getMustHaveBasicsTag()['tag_id'];
                 <div class="col-lg-4 col-md-6 col-12 mb-10">
                     <div class="banner banner-3">
 
-                        <a href="#" class="image"><img src="assets/images/feature/boyClothes.jpg" alt="Banner Image" height="280"></a>
+                        <a href="#" class="image"><img src="assets/images/feature/boyClothes.jpg" alt="Banner Image" height="500"></a>
 
                         <div class="content" style="background-image: url(assets/images/banner/banner-3-shape.png)">
                             <h1>Boy Clothing</h1>
@@ -411,7 +412,7 @@ $MustHaveBasics_tagId = $tag->getMustHaveBasicsTag()['tag_id'];
         </div><!-- Product Section End -->
 
         <!-- Feature Section Start -->
-        <div class="feature-section bg-theme-two section section-padding fix" style="background-image: url(assets/images/pattern/pattern-dot.png);">
+        <div class="feature-section bg-theme-two section section-padding fix mb-5" style="background-image: url(assets/images/pattern/pattern-dot.png);">
             <div class="container">
                 <div class="feature-wrap row justify-content-between mbn-30">
 
@@ -456,7 +457,7 @@ $MustHaveBasics_tagId = $tag->getMustHaveBasicsTag()['tag_id'];
         </div><!-- Feature Section End -->
 
         <!-- Blog Section Start -->
-        <div class="blog-section section section-padding">
+        <!-- <div class="blog-section section section-padding">
             <div class="container">
                 <div class="row mbn-40">
 
@@ -558,10 +559,11 @@ $MustHaveBasics_tagId = $tag->getMustHaveBasicsTag()['tag_id'];
 
                 </div>
             </div>
-        </div><!-- Blog Section End -->
+        </div> -->
+        <!-- Blog Section End -->
 
         <!-- Brand Section Start -->
-        <div class="brand-section section section-padding pt-0">
+        <!-- <div class="brand-section section section-padding pt-0">
             <div class="container-fluid">
                 <div class="row">
                     <div class="brand-slider">
@@ -593,7 +595,8 @@ $MustHaveBasics_tagId = $tag->getMustHaveBasicsTag()['tag_id'];
                     </div>
                 </div>
             </div>
-        </div><!-- Brand Section End -->
+        </div> -->
+        <!-- Brand Section End -->
 
         <?php include 'footer.php' ?>
 

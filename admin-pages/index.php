@@ -30,7 +30,11 @@ if (!isset($_GET['file'])) {
   <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
 
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="../assets/css/icon-font.min.css">
   <link rel="stylesheet" href="css/style.css">
+
+
   <style>
     .floating-alert {
       position: fixed;
@@ -68,33 +72,33 @@ if (!isset($_GET['file'])) {
       <h1><a href="" class="logo">administration</a></h1>
       <ul class="list-unstyled components mb-5">
         <li <?php if ($last_loaded_file == 'dashboard.php')
-              echo 'class="active"'; ?>><a href="?file=dashboard.php"
+              echo 'class="active"'; ?>><a class="text-decoration-none" href="?file=dashboard.php"
             data-file="dashboard.php"><span class="fa fa-home mr-3"></span> Dashboard</a></li>
         <li <?php if ($last_loaded_file == 'createproductpage.php')
-              echo 'class="active"'; ?>><a
+              echo 'class="active"'; ?>><a class="text-decoration-none"
             href="?file=createproductpage.php" data-file="createproductpage.php"><span
               class="fa fa-cart-plus mr-3"></span>Create Products</a></li>
         <li <?php if ($last_loaded_file == 'productpage.php')
-              echo 'class="active"'; ?>><a href="?file=productpage.php"
+              echo 'class="active"'; ?>><a class="text-decoration-none" href="?file=productpage.php"
             data-file="productpage.php"><span class="fa fa-shopping-cart mr-3"></span>Products</a></li>
         <li <?php if ($last_loaded_file == 'createtagspage.php')
-              echo 'class="active"'; ?>><a
+              echo 'class="active"'; ?>><a class="text-decoration-none"
             href="?file=createtagspage.php" data-file="productpage.php"><span
               class="fa fa-user-plus mr-3"></span>create tag</a></li>
         <li <?php if ($last_loaded_file == 'tagspage.php')
-              echo 'class="active"'; ?>><a
+              echo 'class="active"'; ?>><a class="text-decoration-none"
             href="?file=tagspage.php" data-file="tagspage.php"><span
               class="fa fa-tag mr-3"></span>tags</a></li>
         <li <?php if ($last_loaded_file == 'socialMediaPage.php')
-              echo 'class="active"'; ?>><a
+              echo 'class="active"'; ?>><a class="text-decoration-none"
             href="?file=socialMediaPage.php" data-file="socialMediaPage.php"><span
               class="fa fa-file-image-o mr-3"></span>Social Media</a></li>
         <li <?php if ($last_loaded_file == 'shippingfeepage.php')
-              echo 'class="active"'; ?>><a
+              echo 'class="active"'; ?>><a class="text-decoration-none"
             href="?file=shippingfeepage.php" data-file="shippingfeepage.php"><span
               class="fa fa-truck mr-3"></span>Delivery Fee</a></li>
         <li <?php if ($last_loaded_file == 'orderspage.php')
-              echo 'class="active"'; ?>><a
+              echo 'class="active"'; ?>><a class="text-decoration-none"
             href="?file=orderspage.php&status=all" data-file="orderspage.php"><span
               class="fa fa-shopping-bag mr-3"></span>Orders</a></li>
       </ul>

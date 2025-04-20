@@ -68,4 +68,17 @@ class Wishlist
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row['count'] > 0;
     }
+
+    // Count the number of items in a customer's wishlist
+    public function countWishlistItems()
+    {
+        $query = "SELECT COUNT(*) as item_count FROM " . $this->table . " WHERE customer_id = :customer_id";
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindParam(":customer_id", $this->customer_id);
+        $stmt->execute();
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int)$row['item_count'];
+    }
 }

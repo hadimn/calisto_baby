@@ -9,8 +9,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Product Page</title>
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/icon-font.min.css">
+
 
     <style>
         ::placeholder {
@@ -81,6 +80,11 @@
                 <div class="col-sm-10">
                     <input type="file" name="image" class="form-control" required>
                 </div>
+            </div>
+
+            <div class="row mb-3">
+                <label for="formFile" class="form-label">Default file input example</label>
+                <input class="form-control" type="file" id="formFile">
             </div>
 
             <!-- Checkboxes for Popular, Best Deal, and On Sale -->
@@ -166,7 +170,6 @@
         </form>
     </div>
 
-    <script src="assets/js/bootstrap.bundle.min.js"></script>
     <script>
         // Toggle New Price Field Visibility
         document.getElementById('on-sale').addEventListener('change', function() {

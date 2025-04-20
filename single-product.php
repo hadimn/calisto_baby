@@ -109,18 +109,31 @@ session_abort();
 
         .wishlist-btn i {
             color: #333;
-            /* Default color */
             transition: all 0.3s ease;
         }
 
         .wishlist-btn.active i,
         .wishlist-btn:hover i {
             color: #FF7891;
-            /* Red color for active/hover */
         }
 
         .wishlist-btn:focus {
             outline: none;
+        }
+
+        /* Add these new styles */
+        .out-of-stock {
+            color: red !important;
+        }
+
+        .not-available {
+            color: red !important;
+        }
+
+        .disabled-button {
+            background-color: #cccccc !important;
+            cursor: not-allowed !important;
+            opacity: 0.6 !important;
         }
     </style>
 </head>
@@ -224,7 +237,19 @@ session_abort();
                                         </div>
                                     </div>
 
-                                    <span class="availability">Availability: <span>In Stock</span></span>
+                                    <span class="availability">Availability:
+                                        <span id="availability-status">
+                                            <?php
+                                            $totalStock = 0;
+                                            foreach ($stockData as $color => $sizes) {
+                                                foreach ($sizes as $size => $stock) {
+                                                    $totalStock += $stock;
+                                                }
+                                            }
+                                            echo ($totalStock > 0) ? 'In Stock' : 'Out of Stock';
+                                            ?>
+                                        </span>
+                                    </span>
 
                                     <div class="quantity-colors">
                                         <div class="quantity">
@@ -264,7 +289,9 @@ session_abort();
                                     </div>
 
                                     <div class="actions">
-                                        <button id="add-to-cart-button"><i class="ti-shopping-cart"></i><span>ADD TO CART</span></button>
+                                        <button id="add-to-cart-button" <?php echo ($totalStock <= 0) ? 'disabled class="disabled-button"' : ''; ?>>
+                                            <i class="ti-shopping-cart"></i><span><?php echo ($totalStock <= 0) ? 'OUT OF STOCK' : 'ADD TO CART'; ?></span>
+                                        </button>
                                         <button class="box" data-tooltip="Compare"><i class="ti-control-shuffle"></i></button>
                                         <button class="wishlist-btn box" data-product-id="<?= $prod['product_id'] ?>"><i class="ti-heart"></i></button>
                                     </div>

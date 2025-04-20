@@ -4,8 +4,9 @@ include 'classes/database.php';
 include 'classes/cart.php';
 
 if (!isset($_SESSION['customer_id'])) {
-    $_SESSION['error'] = 'you need to be logged in.';
-    header('Location: index.php');
+    $_SESSION['error'] = 'login please!';
+    header('Location: login-register.php');
+    exit();
 }
 
 $customer_id = $_SESSION['customer_id'];
