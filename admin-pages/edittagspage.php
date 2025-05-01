@@ -1,4 +1,8 @@
 <?php
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: loginpage.php");
+    exit();
+}
 include 'proccess/edit_tag_proccess.php';
 
 // Check if the tag ID exists in the URL

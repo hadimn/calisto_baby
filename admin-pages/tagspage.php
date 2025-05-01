@@ -1,4 +1,9 @@
 <?php
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: loginpage.php");
+    exit();
+}
+
 include_once '../classes/database.php';
 include_once '../classes/tag.php';
 

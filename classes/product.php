@@ -159,11 +159,12 @@ class Product
     // Get all products
     public function getAll()
     {
-        $query = "SELECT * FROM " . $this->table_name;
+        $query = "SELECT * FROM " . $this->table_name . " ORDER BY created_at DESC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;
     }
+
 
     // get the new arrived products
     public function newArrival()
@@ -352,5 +353,15 @@ class Product
         $stmt->bindParam(":product_id", $product_id);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function searchByName($searchTerm)
+    {
+        $query = "SELECT * FROM products WHERE name LIKE :searchTerm ORDER BY name";
+        $stmt = $this->conn->prepare($query);
+        $searchTerm = "%" . $searchTerm . "%";
+        $stmt->bindParam(':searchTerm', $searchTerm);
+        $stmt->execute();
+        return $stmt;
     }
 }

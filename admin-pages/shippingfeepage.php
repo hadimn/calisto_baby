@@ -1,4 +1,9 @@
 <?php
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: loginpage.php");
+    exit();
+}
+
 @include('../classes/database.php');
 @include('proccess/shipping_proccess.php');
 

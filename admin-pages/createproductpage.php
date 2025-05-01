@@ -1,4 +1,8 @@
 <?php
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: loginpage.php");
+    exit();
+}
 @include('proccess/product_proccess.php');
 ?>
 
@@ -80,11 +84,6 @@
                 <div class="col-sm-10">
                     <input type="file" name="image" class="form-control" required>
                 </div>
-            </div>
-
-            <div class="row mb-3">
-                <label for="formFile" class="form-label">Default file input example</label>
-                <input class="form-control" type="file" id="formFile">
             </div>
 
             <!-- Checkboxes for Popular, Best Deal, and On Sale -->

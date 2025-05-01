@@ -9,6 +9,7 @@ $db = $database->getConnection();
 $product = new Product($db);
 $tag = new Tag($db);
 
+$latest_tags = $tag->getAll();
 // on sale products
 $productsOnSale = $product->getPorductsOnSale();
 // last three products
@@ -102,14 +103,14 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id'];
             <!-- Hero Slider Start -->
             <div class="hero-slider hero-slider-one fix">
 
-                <?php foreach ($productsOnSale as $productOS): ?>
+                <?php foreach ($latest_tags as $latest_tag): ?>
                     <!-- Hero Item Start -->
-                    <div class="hero-item" style="background-image: url(admin-pages/<?= $productOS['image'] ?>); background-size: cover">
+                    <div class="hero-item" style="background-image: url(admin-pages/<?= $latest_tag['image'] ?>); background-size: cover">
 
                         <!-- Hero Content -->
                         <div class="hero-content">
-                            <h1><?= $productOS['name'] ?> <br><?php echo htmlspecialchars(substr($productOS['description'], 0, 50)); ?>...</h1>
-                            <a href="single-product.php?product_id=<?=$productOS['product_id']?>">SHOP NOW</a>
+                            <h1><?= $latest_tag['name'] ?> <br><?php echo htmlspecialchars(substr($latest_tag['description'], 0, 50)); ?>...</h1>
+                            <a href="shop-left-sidebar.php?tag=<?= $latest_tag['tag_id'] ?>">SHOP NOW</a>
                         </div>
 
                     </div><!-- Hero Item End -->
@@ -127,8 +128,8 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id'];
                     <div class="col-lg-4 col-md-6 col-12 mb-20">
                         <div class="banner banner-1 content-left content-middle">
 
-                            <a href="shop-left-sidebar.php?tag=<?=$babyItems_tagId?>" class="image"><img src="assets/images/feature/newArrival.jpg" alt="Banner Image"></a>
- 
+                            <a href="shop-left-sidebar.php?tag=<?= $babyItems_tagId ?>" class="image"><img src="assets/images/feature/newArrival.jpg" alt="Banner Image"></a>
+
                             <div class="content">
                                 <h1 style="color: #FF7790;">New Arrival <br>Baby’s items <br>GET ALL YOU WANT</h1>
                                 <a href="#" data-hover="SHOP NOW">SHOP NOW</a>
@@ -138,7 +139,7 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id'];
                     </div>
 
                     <div class="col-lg-4 col-md-6 col-12 mb-20">
-                        <a href="shop-left-sidebar.php?tag=<?= $babyNewToys_tagId?>" class="banner banner-2">
+                        <a href="shop-left-sidebar.php?tag=<?= $babyNewToys_tagId ?>" class="banner banner-2">
 
                             <img src="assets/images/feature/newBorn.jpg" alt="Banner Image">
 
@@ -154,7 +155,7 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id'];
                     <div class="col-lg-4 col-md-6 col-12 mb-20">
                         <div class="banner banner-1 content-left content-top">
 
-                            <a href="shop-left-sidebar.php?tag=<?= $MustHaveBasics_tagId?>" class="image"><img src="assets/images/feature/mustHave.jpg" alt="Banner Image"></a>
+                            <a href="shop-left-sidebar.php?tag=<?= $MustHaveBasics_tagId ?>" class="image"><img src="assets/images/feature/mustHave.jpg" alt="Banner Image"></a>
 
                             <div class="content">
                                 <h1 style="color: #FF7790;">Must <br>Have Basics <br> products</h1>
@@ -234,8 +235,8 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id'];
 
                                         <div class="content-right">
                                             <span class="price">$<?= explode(".", $popular_product['new_price'])[0] ?><?php if (explode(".", $popular_product['price'])[1] != "00") {
-                                                                                                                        echo ("." . explode(".", $popular_product['price'])[1]);
-                                                                                                                    } ?></span>
+                                                                                                                            echo ("." . explode(".", $popular_product['price'])[1]);
+                                                                                                                        } ?></span>
                                         </div>
 
                                     </div>
@@ -253,56 +254,61 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id'];
 
         <!-- Banner Section Start -->
         <div class="banner-section section section-padding pt-0 fix">
-            <div class="row row-5 mbn-10">
+            <div class="row row-5 mbn-30"> <!-- Changed from mbn-10 to mbn-30 for more space -->
 
-                <div class="col-lg-4 col-md-6 col-12 mb-10">
+                <!-- Banner 1 - Boy Clothing -->
+                <div class="col-lg-4 col-md-6 col-12 mb-30"> <!-- Changed mb-10 to mb-30 -->
                     <div class="banner banner-3">
-
-                        <a href="#" class="image"><img src="assets/images/feature/boyClothes.jpg" alt="Banner Image" height="500"></a>
+                        <a href="#" class="image">
+                            <img src="assets/images/feature/boyClothes.jpg" alt="Boy Clothing" class="banner-img">
+                        </a>
 
                         <div class="content" style="background-image: url(assets/images/banner/banner-3-shape.png)">
                             <h1>Boy Clothing</h1>
-                            <h2>Calisto </h2>
+                            <h2>Calisto</h2>
                             <h4>2 - 5 Years</h4>
                         </div>
 
                         <a href="#" class="shop-link" data-hover="SHOP NOW">SHOP NOW</a>
-
                     </div>
                 </div>
 
-                <div class="col-lg-4 col-md-6 col-12 mb-10">
+                <!-- Banner 2 - Accessories -->
+                <div class="col-lg-4 col-md-6 col-12 mb-30"> <!-- Changed mb-10 to mb-30 -->
                     <div class="banner banner-4">
-
-                        <a href="#" class="image"><img src="assets/images/feature/accessoriesMore.jpg" height="280" alt="Banner Image"></a>
+                        <a href="#" class="image">
+                            <img src="assets/images/feature/accessoriesMore.jpg" alt="Accessories" class="banner-img">
+                        </a>
 
                         <div class="content">
                             <div class="content-inner">
                                 <h1>Accessories & More</h1>
                                 <h2>Adorable Picks <br>New Trend for <?= date("Y") ?></h2>
-                                <a href="#" data-hover="SHOP NOW">SHOP NOW</a>
+                                <a href="#" class="shop-link" data-hover="SHOP NOW">SHOP NOW</a>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-lg-4 col-md-6 col-12 mb-10">
+                <!-- Banner 3 - Girl Clothing -->
+                <div class="col-lg-4 col-md-6 col-12 mb-30"> <!-- Changed mb-10 to mb-30 -->
                     <div class="banner banner-5">
-
-                        <a href="#" class="image"><img src="assets/images/feature/girlClothes.jpg" alt="Banner Image" height="280"></a>
+                        <a href="#" class="image">
+                            <img src="assets/images/feature/girlClothes.jpg" alt="Girl Clothing" class="banner-img">
+                        </a>
 
                         <div class="content" style="background-image: url(assets/images/banner/banner-5-shape.png)">
-                            <h1>Girls Clothing <br>Baby Girl’s</h1>
+                            <h1>Girls Clothing <br>Baby Girl's</h1>
                             <h2>Trendy Styles</h2>
                         </div>
 
                         <a href="#" class="shop-link" data-hover="SHOP NOW">SHOP NOW</a>
-
                     </div>
                 </div>
 
             </div>
-        </div><!-- Banner Section End -->
+        </div>
+        <!-- Banner Section End -->
 
         <!-- best deal section -->
         <!-- Product Section Start -->
@@ -326,7 +332,7 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id'];
 
                                     <div class="best-deal-product">
 
-                                        <div class="image"><img src="admin-pages/<?= $best_deal_product['image'] ?>" height="540" alt="Image"></div>
+                                        <div class="image"><img src="admin-pages/<?= $best_deal_product['image'] ?>" class="deal-image" alt="Image"></div>
 
                                         <div class="content-top">
 
@@ -422,7 +428,7 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id'];
                             <div class="icon"><img src="assets/images/feature/feature-1.png" alt="Image"></div>
                             <div class="content">
                                 <h3>Free Shipping</h3>
-                                <p>Start from $100</p>
+                                <p>Start from $99</p>
                             </div>
 
                         </div>
@@ -455,112 +461,6 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id'];
                 </div>
             </div>
         </div><!-- Feature Section End -->
-
-        <!-- Blog Section Start -->
-        <!-- <div class="blog-section section section-padding">
-            <div class="container">
-                <div class="row mbn-40">
-
-                    <div class="col-xl-6 col-lg-5 col-12 mb-40">
-
-                        <div class="row">
-                            <div class="section-title text-start col mb-30">
-                                <h1>CLIENTS REVIEW</h1>
-                                <p>Clients says abot us</p>
-                            </div>
-                        </div>
-
-                        <div class="row mbn-40">
-
-                            <div class="col-12 mb-40">
-                                <div class="testimonial-item">
-                                    <p>Jadusona is one of the most exclusive Baby shop in the wold, where you can find all product for your baby that your want to buy for your baby. I recomanded this shop all of you</p>
-                                    <div class="testimonial-author">
-                                        <img src="assets/images/testimonial/testimonial-1.png" alt="Image">
-                                        <div class="content">
-                                            <h4>Zacquline Smith</h4>
-                                            <p>CEO, Momens Group</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-12 mb-40">
-                                <div class="testimonial-item">
-                                    <p>Jadusona is one of the most exclusive Baby shop in the wold, where you can find all product for your baby that your want to buy for your baby. I recomanded this shop all of you</p>
-                                    <div class="testimonial-author">
-                                        <img src="assets/images/testimonial/testimonial-2.png" alt="Image">
-                                        <div class="content">
-                                            <h4>Nusaha Williams</h4>
-                                            <p>CEO, Momens Group</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="col-xl-6 col-lg-7 col-12 mb-40">
-
-                        <div class="row">
-                            <div class="section-title text-start col mb-30">
-                                <h1>FROM THE BLOG</h1>
-                                <p>Find all latest update here</p>
-                            </div>
-                        </div>
-
-                        <div class="row mbn-40">
-
-                            <div class="col-12 mb-40">
-                                <div class="blog-item">
-                                    <div class="image-wrap">
-                                        <h4 class="date">May <span>25</span></h4>
-                                        <a class="image" href="single-blog.php"><img src="assets/images/blog/blog-1.jpg" alt="Image"></a>
-                                    </div>
-                                    <div class="content">
-                                        <h4 class="title"><a href="single-blog.php">Lates and new Trens for baby fashion</a></h4>
-                                        <div class="desc">
-                                            <p>Jadusona is one of the most of a exclusive Baby shop in the</p>
-                                        </div>
-                                        <ul class="meta">
-                                            <li><a href="#"><img src="assets/images/blog/blog-author-1.jpg" alt="Blog Author">Muhin</a></li>
-                                            <li><a href="#">25 Likes</a></li>
-                                            <li><a href="#">05 Views</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-12 mb-40">
-                                <div class="blog-item">
-                                    <div class="image-wrap">
-                                        <h4 class="date">May <span>20</span></h4>
-                                        <a class="image" href="single-blog.php"><img src="assets/images/blog/blog-2.jpg" alt="Image"></a>
-                                    </div>
-                                    <div class="content">
-                                        <h4 class="title"><a href="single-blog.php">New Collection New Trend all New Style</a></h4>
-                                        <div class="desc">
-                                            <p>Jadusona is one of the most of a exclusive Baby shop in the</p>
-                                        </div>
-                                        <ul class="meta">
-                                            <li><a href="#"><img src="assets/images/blog/blog-author-2.jpg" alt="Blog Author">Takiya</a></li>
-                                            <li><a href="#">25 Likes</a></li>
-                                            <li><a href="#">05 Views</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-            </div>
-        </div> -->
-        <!-- Blog Section End -->
 
         <!-- Brand Section Start -->
         <!-- <div class="brand-section section section-padding pt-0">

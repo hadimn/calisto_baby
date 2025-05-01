@@ -147,7 +147,7 @@ if ($order->create()) {
     }
 
     // Redirect to success page
-    header("Location: ../my-account.php?order_id=" . $order_id);
+    header("Location: ../my-account.php#orders");
     exit();
 } else {
     header("Location: checkout.php?error=order_error");

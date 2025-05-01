@@ -45,6 +45,24 @@ class Order
         return false;
     }
 
+    // In Order class
+    public function getAllOrders()
+    {
+        $query = "SELECT * FROM " . $this->table_name . " ORDER BY created_at DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt;
+    }
+
+    public function getByStatus($status)
+    {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE status = :status ORDER BY created_at DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":status", $status);
+        $stmt->execute();
+        return $stmt;
+    }
+
     // Get all orders by customer
     public function getByCustomer()
     {

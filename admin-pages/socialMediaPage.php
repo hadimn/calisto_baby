@@ -1,4 +1,9 @@
 <?php
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: loginpage.php");
+    exit();
+}
+
 @include('proccess/socialmedia_proccess.php');
 ?>
 
@@ -43,6 +48,8 @@
             text-align: center;
         }
     </style>
+    <!-- pickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css" />
 </head>
 
 <body>
@@ -98,32 +105,9 @@
                             </div>
                         </div>
                         <div class="col-md-2">
-                            <input type="hidden"
-                                name="colors[<?= $platform['social_id'] ?>]"
-                                id="color-input-<?= $platform['social_id'] ?>"
-                                value="<?= htmlspecialchars($platformColor) ?>">
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center"
-                                    type="button"
-                                    id="color-dropdown-<?= $platform['social_id'] ?>"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                    <span class="color-preview <?= htmlspecialchars($platformColor) ?> me-2"></span>
-                                    Color
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="color-dropdown-<?= $platform['social_id'] ?>">
-                                    <?php foreach ($colorOptions as $class => $color): ?>
-                                        <li>
-                                            <a class="dropdown-item d-flex align-items-center"
-                                                href="#"
-                                                onclick="setColor(<?= $platform['social_id'] ?>, '<?= $class ?>')">
-                                                <span class="color-option <?= ($platformColor === $class ? 'selected' : '') ?> <?= $class ?>"></span>
-                                                <span><?= ucfirst(str_replace('bg-', '', $class)) ?></span>
-                                            </a>
-                                        </li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            </div>
+                            <div id="color-picker-<?= $platform['social_id'] ?>"></div>
+                            <input type="hidden" name="colors[<?= $platform['social_id'] ?>]" id="rgba-color-<?= $platform['social_id'] ?>" value="<?= htmlspecialchars($platform['bg_color'] ?? 'rgba(13,110,253,1)') ?>">
+
                         </div>
                         <div class="col-md-2">
                             <button type="submit" name="update_social_media" class="btn btn-primary w-100">Update</button>
@@ -165,7 +149,39 @@
             // Prevent default anchor behavior
             event.preventDefault();
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const platforms = <?= json_encode(array_map(fn($p) => [
+                                    'id' => $p['social_id'],
+                                    'color' => $p['bg_color'] ?? 'rgba(13,110,253,1)'
+                                ], $platforms)) ?>;
+
+            platforms.forEach(platform => {
+                const pickr = Pickr.create({
+                    el: '#color-picker-' + platform.id,
+                    theme: 'classic',
+                    default: platform.color,
+                    components: {
+                        preview: true,
+                        opacity: true,
+                        hue: true,
+                        interaction: {
+                            input: true,
+                            save: true
+                        }
+                    }
+                });
+
+                pickr.on('save', (color) => {
+                    document.getElementById('rgba-color-' + platform.id).value = color.toRGBA().toString();
+                    pickr.hide();
+                });
+            });
+        });
     </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr"></script>
+
 </body>
 
 </html>

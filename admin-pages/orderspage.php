@@ -1,38 +1,40 @@
-    <?php
+<?php
+use Classes\Order;
+use Classes\OrderItem;
 
-    use Classes\Order;
-    use Classes\OrderItem;
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: loginpage.php");
+    exit();
+  }
 
-    require_once '../classes/database.php';
-    require_once '../classes/order.php';
-    include '../classes/order-items.php';
+// Required files
+require_once '../classes/database.php';
+require_once '../classes/order.php';
+require_once '../classes/order-items.php';
 
-    $database = new Database();
-    $db = $database->getConnection();
+// Create DB connection and objects
+$database = new Database();
+$db = $database->getConnection();
 
-    $order = new Order($db);
-    $order->customer_id = $_SESSION['customer_id'];
+$order = new Order($db);
+$orderItem = new OrderItem($db);
 
-    // Get status filter from URL or default to all
-    $status_filter = isset($_GET['status']) ? $_GET['status'] : 'all';
+// Get status filter from URL or default to all
+$status_filter = $_GET['status'] ?? 'all';
 
-    // Build query based on filter
-    if ($status_filter !== 'all') {
-        $orders = $order->getByCustomer()->fetchAll(PDO::FETCH_ASSOC);
-        $orders = array_filter($orders, function ($order) use ($status_filter) {
-            return $order['status'] === $status_filter;
-        });
-    } else {
-        $orders = $order->getByCustomer()->fetchAll(PDO::FETCH_ASSOC);
-    }
+// Fetch orders based on filter
+if ($status_filter === 'all') {
+    $orders = $order->getAllOrders()->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $orders = $order->getByStatus($status_filter)->fetchAll(PDO::FETCH_ASSOC);
+}
 
-    // Sort orders by date (newest first)
-    usort($orders, function ($a, $b) {
-        return strtotime($b['created_at']) - strtotime($a['created_at']);
-    });
+// Sort orders by date (newest first)
+usort($orders, function ($a, $b) {
+    return strtotime($b['created_at']) - strtotime($a['created_at']);
+});
+?>
 
-    $orderItem = new OrderItem($db);
-    ?>
 
     <!doctype html>
     <html class="no-js" lang="en">

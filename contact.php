@@ -79,7 +79,7 @@ $platforms = $stmt->getAllSocialMedia();
                         <div class="d-flex justify-content-center flex-wrap gap-3">
                             <?php foreach ($platforms as $platform): ?>
                                 <?php if ($platform['enabled'] == 1): ?>
-                                    <a href="<?= $platform['link'] ?>" target="_blank" class="btn <?= $platform['bg_color'] ?> btn-lg ">
+                                    <a href="<?= $platform['link'] ?>" target="_blank" class="btn btn-lg " style="background-color: <?= $platform['bg_color'] ?>;">
                                         <i class="<?= $platform['icon_class'] ?> me-2"></i> <?= $platform['platform']; ?>
                                     </a>
                                 <?php endif; ?>
@@ -185,6 +185,7 @@ $platforms = $stmt->getAllSocialMedia();
     <script src="assets/js/plugins.js"></script>
     <!-- Main JS -->
     <script src="assets/js/main.js"></script>
+    
 
 </body>
 

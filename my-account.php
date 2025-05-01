@@ -393,6 +393,32 @@ session_abort();
     <!-- Main JS -->
     <script src="assets/js/main.js"></script>
 
+    <script>
+        $(document).ready(function() {
+            // Check if URL has a hash that matches one of our tabs
+            if (window.location.hash) {
+                var hash = window.location.hash;
+                var validHashes = ['#dashboad', '#orders', '#download', '#address-edit', '#account-info'];
+
+                // If hash is one of our tab hashes, show that tab
+                if (validHashes.includes(hash)) {
+                    $('.myaccount-tab-menu a[href="' + hash + '"]').tab('show');
+
+                    // Also update the active class
+                    $('.myaccount-tab-menu a').removeClass('active');
+                    $('.myaccount-tab-menu a[href="' + hash + '"]').addClass('active');
+                }
+            }
+
+            // Add click handler for all tab links to update URL
+            $('.myaccount-tab-menu a[data-bs-toggle="tab"]').on('click', function() {
+                if ($(this).attr('href') !== '#') { // Skip logout link
+                    window.location.hash = $(this).attr('href');
+                }
+            });
+        });
+    </script>
+
 </body>
 
 </html>

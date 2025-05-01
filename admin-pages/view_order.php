@@ -1,5 +1,10 @@
 <?php
 
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: loginpage.php");
+    exit();
+}
+
 use Classes\Order;
 use Classes\OrderItem;
 
@@ -81,12 +86,12 @@ if (isset($_SESSION['admin_id'])) {
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- CSS -->
+    <!-- CSS
     <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/css/icon-font.min.css">
     <link rel="stylesheet" href="../assets/css/plugins.css">
     <link rel="stylesheet" href="../assets/css/helper.css">
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.css"> -->
 
     <style>
         .order-details-card {

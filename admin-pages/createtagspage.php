@@ -1,4 +1,8 @@
 <?php
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: loginpage.php");
+    exit();
+}
 include('proccess/create_tag_proccess.php');
 ?>
 <!DOCTYPE html>
