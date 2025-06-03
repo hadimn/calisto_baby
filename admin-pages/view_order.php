@@ -4,8 +4,6 @@ if (!isset($_SESSION['admin_id'])) {
     header("Location: loginpage.php");
     exit();
 }
-
-use Classes\Order;
 use Classes\OrderItem;
 
 require_once '../classes/database.php';

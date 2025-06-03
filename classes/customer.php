@@ -65,6 +65,13 @@ class Customer
         return false;
     }
 
+    public function getAll() {
+        $query = "SELECT * FROM " . $this->table_name;
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt;
+    }
+
     // Check if the email already exists in the database
     public function emailExists()
     {

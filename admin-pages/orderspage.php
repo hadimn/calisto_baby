@@ -1,5 +1,4 @@
 <?php
-use Classes\Order;
 use Classes\OrderItem;
 
 if (!isset($_SESSION['admin_id'])) {

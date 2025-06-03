@@ -1,5 +1,4 @@
 <?php
-// namespace Classes;
 class Database {
     private $host = 'localhost';
     private $db_name = 'calisto_baby';

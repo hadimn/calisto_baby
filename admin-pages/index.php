@@ -101,6 +101,14 @@ if (!isset($_GET['file'])) {
               echo 'class="active"'; ?>><a class="text-decoration-none"
             href="?file=orderspage.php&status=all" data-file="orderspage.php"><span
               class="fa fa-shopping-bag mr-3"></span>Orders</a></li>
+        <li <?php if ($last_loaded_file == 'createbannermessages.php')
+              echo 'class="active"'; ?>><a class="text-decoration-none"
+            href="?file=createbannermessages.php&status=all" data-file="createbannermessages.php"><span
+              class="fa fa-commenting mr-3"></span>Create B-Message</a></li>
+        <li <?php if ($last_loaded_file == 'bannermessages.php')
+              echo 'class="active"'; ?>><a class="text-decoration-none"
+            href="?file=bannermessages.php&status=all" data-file="bannermessages.php"><span
+              class="fa fa-comment mr-3"></span>Banner Message</a></li>
       </ul>
     </nav>
 
@@ -160,6 +168,7 @@ if (!isset($_GET['file'])) {
   </div>
 
   <script src="js/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
   <script src="js/popper.js"></script>
   <script src="js/bootstrap.min.js"></script>
   <script src="js/main.js"></script>

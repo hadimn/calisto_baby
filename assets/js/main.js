@@ -101,8 +101,8 @@
     heroSlider.slick({
         arrows: true,
         autoplay: true,
-        autoplaySpeed: 5000,
-        dots: true,
+        autoplaySpeed: 2000,
+        dots: false,
         pauseOnFocus: false,
         pauseOnHover: false,
         fade: true,
@@ -157,14 +157,52 @@
     });
 
     $('.best-deal-slider, .deal-product-slider').slick({
-        arrows: false,
-        dots: false,
+        arrows: true,
+        dots: true,
         autoplay: true,
         infinite: true,
         slidesToShow: 1,
         prevArrow: '<button type="button" class="slick-prev"><i class="icofont icofont-long-arrow-left"></i></button>',
         nextArrow: '<button type="button" class="slick-next"><i class="icofont icofont-long-arrow-right"></i></button>',
     });
+
+    $('.slider-on-sale').slick({
+        arrows: true,
+        dots: false,
+        infinite: true,
+        slidesToShow: 5,
+        slidesToScroll: 1,
+        autoplay: true,
+        prevArrow: '<button type="button" class="slick-prev"><i class="icofont icofont-long-arrow-left"></i></button>',
+        nextArrow: '<button type="button" class="slick-next"><i class="icofont icofont-long-arrow-right"></i></button>',
+        responsive: [
+            {
+                breakpoint: 1200,
+                settings: {
+                    slidesToShow: 4
+                }
+            },
+            {
+                breakpoint: 992,
+                settings: {
+                    slidesToShow: 3
+                }
+            },
+            {
+                breakpoint: 768,
+                settings: {
+                    slidesToShow: 2
+                }
+            },
+            {
+                breakpoint: 576,
+                settings: {
+                    slidesToShow: 1
+                }
+            }
+        ]
+    });
+    
 
     /*----- 
         Testimonial Slider
@@ -229,40 +267,48 @@
     /*--
         Product Slider
     -----------------------------------*/
-    $('.pro-thumb-img').slick({
-        arrows: true,
-        dots: false,
-        autoplay: true,
-        infinite: true,
-        slidesToShow: 4,
-        prevArrow: '<button type="button" class="slick-prev"><i class="fa fa-angle-left"></i></button>',
-        nextArrow: '<button type="button" class="slick-next"><i class="fa fa-angle-right"></i></button>',
-        responsive: [
-            {
-                breakpoint: 1199,
-                settings: {
-                    slidesToShow: 3,
+    $(document).ready(function () {
+        var $slider = $('.pro-thumb-img');
+        var itemCount = $slider.children().length;
+    
+        // Decide how many slides to show (up to 3, or less if fewer items)
+        var slidesToShow = itemCount >= 3 ? 3 : itemCount;
+    
+        $slider.slick({
+            arrows: true,
+            dots: false,
+            autoplay: true,
+            infinite: itemCount > slidesToShow, // prevent infinite if not enough items
+            slidesToShow: slidesToShow,
+            prevArrow: '<button type="button" class="slick-prev"><i class="fa fa-angle-left"></i></button>',
+            nextArrow: '<button type="button" class="slick-next"><i class="fa fa-angle-right"></i></button>',
+            responsive: [
+                {
+                    breakpoint: 320,
+                    settings:{
+                        slidesToShow: itemCount == 1 ? 1 : itemCount
+                    }
+                },
+                {
+                    breakpoint: 479,
+                    settings: {
+                        slidesToShow: itemCount >= 2 ? 2 : itemCount
+                    }
+                },
+                {
+                    breakpoint: 800,
+                    settings:{
+                        slidesToShow: itemCount >= 3 ? 3 : itemCount
+                    }
+                },
+                { 
+                    breakpoint:1000,
+                    settings:{
+                        slidesToShow: itemCount >= 5 ? 5 : itemCount
+                    }
                 }
-            },
-            {
-                breakpoint: 991,
-                settings: {
-                    slidesToShow: 4,
-                }
-            },
-            {
-                breakpoint: 767,
-                settings: {
-                    slidesToShow: 4,
-                }
-            },
-            {
-                breakpoint: 479,
-                settings: {
-                    slidesToShow: 3,
-                }
-            }
-        ]
+            ]
+        });
     });
     $('.product-slider, .related-product-slider-1').slick({
         arrows: true,

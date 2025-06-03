@@ -10,16 +10,12 @@ $tag = new Tag($db);
 $tags = $tag->getProductCountPerTag();
 
 $product = new Product($db);
-$colors = $product->getAvailableColors();
 
 // Initial values for filters
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 8;
 $sort = isset($_GET['sort']) ? $_GET['sort'] : 'created_at DESC';
-$color_filter = isset($_GET['color']) ? (array)$_GET['color'] : [];
 $tag_filter = isset($_GET['tag']) ? (array)$_GET['tag'] : [];
-$min_price = isset($_GET['min_price']) && $_GET['min_price'] !== '' ? (float)$_GET['min_price'] : 0;
-$max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_GET['max_price'] : 1000;
 ?>
 
 <!doctype html>
@@ -45,62 +41,13 @@ $max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_G
     <script src="assets/js/vendor/modernizr-3.11.2.min.js"></script>
 
     <style>
-        /* Checkbox list styles */
-        .checkbox-list {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .checkbox-list li {
-            margin-bottom: 8px;
-        }
-
-        .checkbox-list label {
+        #products-row {
             display: flex;
-            align-items: center;
-            cursor: pointer;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
-        .checkbox-list input[type="checkbox"] {
-            margin-right: 10px;
-        }
-
-        .checkbox-list .color {
-            display: inline-block;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-
-        /* Filter buttons */
-        .apply-filters-btn {
-            background: #333;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            width: 100%;
-            cursor: pointer;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .apply-filters-btn:hover {
-            background: #555;
-        }
-
-        .clear-filters-btn {
-            display: block;
-            text-align: center;
-            color: #333;
-            text-decoration: underline;
-        }
-
-        .clear-filters-btn:hover {
-            color: #555;
-        }
-
-        /* Add loading spinner style */
+        /* Loading spinner style */
         .loading-spinner {
             display: none;
             text-align: center;
@@ -109,6 +56,64 @@ $max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_G
 
         .loading-spinner img {
             width: 50px;
+        }
+
+        /* Filter dropdown styles */
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .filter-dropdown {
+            flex: 1 1 150px;
+            min-width: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .filter-dropdown select {
+            width: 100%;
+        }
+
+        /* Hide labels on small screens */
+        @media (max-width: 600px) {
+            .filter-label {
+                display: none;
+            }
+
+            .filter-dropdown {
+                flex: 1 1 100px;
+            }
+
+            .nice-select {
+                width: 130px;
+                font-size: 10px;
+            }
+        }
+
+
+        /* Clear filters button */
+        .clear-filters-btn {
+            display: inline-block;
+            padding: 8px 15px;
+            background: #f5f5f5;
+            color: #333;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .clear-filters-btn:hover {
+            background: #eee;
+            color: #000;
+        }
+
+        .badge {
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 20px;
         }
     </style>
 </head>
@@ -124,10 +129,10 @@ $max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_G
             <div class="container">
                 <div class="row">
                     <div class="page-banner-content col">
-                        <h1>Shop</h1>
+                        <h1>Categories</h1>
                         <ul class="page-breadcrumb">
-                            <li><a href="index.html">Home</a></li>
-                            <li><a href="shop-left-sidebar.html">Shop</a></li>
+                            <li><a href="index.php">Home</a></li>
+                            <li><a href="">Categories</a></li>
                         </ul>
                     </div>
                 </div>
@@ -148,33 +153,39 @@ $max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_G
                         </div>
                     <?php unset($_SESSION['error']);
                     endif; ?>
-                    
 
-                    <div class="col-xl-9 col-lg-8 col-12 order-1 order-lg-2 mb-40">
+
+                    <div class="col">
                         <div class="row">
+                            <div class="mb-4 col-12 d-flex align-items-center justify-content-between">
+                                <div class="d-flex flex-wrap gap-2 align-items-center">
+                                    <span class="badge bg-primary text-white">Showing: <?= $limit ?></span>
+                                    <span class="badge bg-secondary text-white">Sorted by: <?= ucwords(str_replace(['_', 'DESC', 'ASC'], [' ', '↓', '↑'], $sort)) ?></span>
 
-                            <div class="col-12">
-                                <div class="product-show">
-                                    <h4>Show:</h4>
-                                    <select class="nice-select" id="limit-select">
-                                        <option value="8" <?= $limit == 8 ? 'selected' : '' ?>>8</option>
-                                        <option value="12" <?= $limit == 12 ? 'selected' : '' ?>>12</option>
-                                        <option value="16" <?= $limit == 16 ? 'selected' : '' ?>>16</option>
-                                        <option value="20" <?= $limit == 20 ? 'selected' : '' ?>>20</option>
-                                    </select>
+                                    <?php if (!empty($tag_filter)): ?>
+                                        <span class="badge bg-info text-dark">
+                                            Category:
+                                            <?php
+                                            $selectedNames = array_filter($tags, function ($tag) use ($tag_filter) {
+                                                return in_array($tag['tag_id'], $tag_filter);
+                                            });
+                                            echo implode(', ', array_map(fn($t) => $t['name'], $selectedNames));
+                                            ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-light text-dark">Category: All</span>
+                                    <?php endif; ?>
                                 </div>
-                                <div class="product-short">
-                                    <h4>Sort by:</h4>
-                                    <select class="nice-select" id="sort-select">
-                                        <option value="name ASC" <?= $sort == 'name ASC' ? 'selected' : '' ?>>Name Ascending</option>
-                                        <option value="name DESC" <?= $sort == 'name DESC' ? 'selected' : '' ?>>Name Descending</option>
-                                        <option value="created_at ASC" <?= $sort == 'created_at ASC' ? 'selected' : '' ?>>Date Ascending</option>
-                                        <option value="created_at DESC" <?= $sort == 'created_at DESC' ? 'selected' : '' ?>>Date Descending</option>
-                                        <option value="price ASC" <?= $sort == 'price ASC' ? 'selected' : '' ?>>Price Ascending</option>
-                                        <option value="price DESC" <?= $sort == 'price DESC' ? 'selected' : '' ?>>Price Descending</option>
-                                    </select>
+
+                                <!-- filter row -->
+                                <div>
+                                    <button class="btn btn-outline-primary" id="open-filter-sheet">
+                                        <i class="fa fa-filter" aria-hidden="true"></i> Filter
+                                    </button>
                                 </div>
                             </div>
+
+
 
                             <!-- Products container -->
                             <div class="col-12" id="products-container">
@@ -194,70 +205,7 @@ $max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_G
                         </div>
                     </div>
 
-                    <div class="col-xl-3 col-lg-4 col-12 order-2 order-lg-1 mb-40">
-                        <form id="filter-form" method="get">
-                            <!-- Hidden fields to maintain pagination and sorting -->
-                            <input type="hidden" name="page" value="1">
-                            <input type="hidden" name="limit" value="<?= htmlspecialchars($limit) ?>">
-                            <input type="hidden" name="sort" value="<?= htmlspecialchars($sort) ?>">
 
-                            <!-- Category Filter -->
-                            <div class="sidebar">
-                                <h4 class="sidebar-title">Category</h4>
-                                <ul class="list-group">
-                                    <?php foreach ($tags as $tag): ?>
-                                        <li class="list-group-item border-0 py-2 px-0">
-                                            <div class="form-check d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <input class="form-check-input" type="checkbox" name="tag[]" value="<?= $tag['tag_id'] ?>"
-                                                        <?= in_array($tag['tag_id'], $tag_filter) ? 'checked' : '' ?> id="tag-<?= $tag['tag_id'] ?>">
-                                                    <label class="form-check-label" for="tag-<?= $tag['tag_id'] ?>">
-                                                        <?= $tag['name'] ?>
-                                                    </label>
-                                                </div>
-                                                <span class="badge rounded-pill ms-2" style="background-color: #94c7eb;"><?= $tag['product_count'] ?></span>
-                                            </div>
-                                        </li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            </div>
-
-                            <!-- Color Filter -->
-                            <div class="sidebar">
-                                <h4 class="sidebar-title">Colors</h4>
-                                <ul class="sidebar-list checkbox-list">
-                                    <?php foreach ($colors as $color): ?>
-                                        <li>
-                                            <label>
-                                                <input type="checkbox" name="color[]" value="<?= $color ?>"
-                                                    <?= in_array($color, $color_filter) ? 'checked' : '' ?>>
-                                                <span class="color" style="background-color: <?= $color ?>"></span> <?= $color ?>
-                                            </label>
-                                        </li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            </div>
-
-                            <!-- Price Filter -->
-                            <div class="sidebar">
-                                <h3 class="sidebar-title">Price</h3>
-                                <div class="sidebar-price">
-                                    <div id="price-range"></div>
-                                    <input type="text" id="price-amount" readonly>
-                                    <input type="hidden" id="min-price" name="min_price" value="<?= $min_price ?>">
-                                    <input type="hidden" id="max-price" name="max_price" value="<?= $max_price ?>">
-                                </div>
-                            </div>
-
-                            <!-- Apply Filters Button -->
-                            <div class="sidebar">
-                                <button type="submit" class="apply-filters-btn">Apply Filters</button>
-                                <?php if (!empty($color_filter) || !empty($tag_filter) || $min_price !== null || $max_price !== null): ?>
-                                    <a href="?" class="clear-filters-btn">Clear All Filters</a>
-                                <?php endif; ?>
-                            </div>
-                        </form>
-                    </div>
 
                 </div>
             </div>
@@ -278,6 +226,45 @@ $max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_G
                 </div>
             </div>
         </div><!-- Brand Section End -->
+        <div class="offcanvas offcanvas-bottom" tabindex="-1" id="filterBottomSheet" style="height: 40vh;">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title">Filter Options</h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+            </div>
+            <div class="offcanvas-body">
+                <div class="filter-dropdown">
+                    <h4><span class="filter-label">Category:</span></h4>
+                    <select class="nice-select" id="category-select" aria-placeholder="choose category" multiple>
+                        <option value="" disabled selected hidden>Select an option</option>
+                        <?php foreach ($tags as $tag): ?>
+                            <option value="<?= $tag['tag_id'] ?>" <?= in_array($tag['tag_id'], $tag_filter) ? 'selected' : '' ?>>
+                                <?= $tag['name'] ?> (<?= $tag['product_count'] ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="filter-dropdown">
+                    <h4><span class="filter-label">Show:</span></h4>
+                    <select class="nice-select" id="limit-select">
+                        <option value="8" <?= $limit == 8 ? 'selected' : '' ?>>8</option>
+                        <option value="12" <?= $limit == 12 ? 'selected' : '' ?>>12</option>
+                        <option value="16" <?= $limit == 16 ? 'selected' : '' ?>>16</option>
+                        <option value="20" <?= $limit == 20 ? 'selected' : '' ?>>20</option>
+                    </select>
+                </div>
+
+                <div class="filter-dropdown">
+                    <h4><span class="filter-label">Sort by:</span></h4>
+                    <select class="nice-select" id="sort-select">
+                        <option value="created_at DESC" <?= $sort == 'created_at DESC' ? 'selected' : '' ?>>Newest First</option>
+                        <option value="created_at ASC" <?= $sort == 'created_at ASC' ? 'selected' : '' ?>>Oldest First</option>
+                        <option value="price ASC" <?= $sort == 'price ASC' ? 'selected' : '' ?>>Price: Low to High</option>
+                        <option value="price DESC" <?= $sort == 'price DESC' ? 'selected' : '' ?>>Price: High to Low</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
         <?php include 'footer.php'; ?>
 
@@ -292,37 +279,46 @@ $max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_G
 
     <script>
         $(document).ready(function() {
-            // Initialize price slider
-            $("#price-range").slider({
-                range: true,
-                min: 0,
-                max: 1000,
-                values: [<?= $min_price !== null ? $min_price : 0 ?>, <?= $max_price !== null ? $max_price : 1000 ?>],
-                slide: function(event, ui) {
-                    $("#price-amount").val("$" + ui.values[0] + " - $" + ui.values[1]);
-                    $("#min-price").val(ui.values[0]);
-                    $("#max-price").val(ui.values[1]);
-                }
-            });
-            $("#price-amount").val("$" + $("#price-range").slider("values", 0) +
-                " - $" + $("#price-range").slider("values", 1));
-
             // Function to load products via AJAX
             function loadProducts() {
-                const formData = $('#filter-form').serialize();
-                const urlParams = new URLSearchParams(window.location.search);
+                const formData = new FormData();
+
+                // Get all form values
+                const currentPage = new URLSearchParams(window.location.search).get('page') || '1';
+                formData.append('page', currentPage);
+                // Always reset to page 1 when filters change
+                formData.append('limit', $('#limit-select').val());
+                formData.append('sort', $('#sort-select').val());
+
+                // Get selected tags from dropdown
+                $('#category-select option:selected').each(function() {
+                    const val = $(this).val();
+                    if (val !== "") {
+                        formData.append('tag[]', val);
+                    }
+                });
+
+                // Convert FormData to URLSearchParams
+                const urlParams = new URLSearchParams();
+                for (const pair of formData.entries()) {
+                    if (Array.isArray(pair[1])) {
+                        pair[1].forEach(val => urlParams.append(pair[0], val));
+                    } else {
+                        urlParams.append(pair[0], pair[1]);
+                    }
+                }
 
                 // Show loading spinner
                 $('#products-row').hide();
                 $('.loading-spinner').show();
 
                 $.ajax({
-                    url: 'proccess/ajax_filter.php?' + formData,
+                    url: 'proccess/ajax_filter.php?' + urlParams.toString(),
                     type: 'GET',
                     dataType: 'json',
                     success: function(response) {
                         // Update URL without reloading
-                        const newUrl = window.location.pathname + '?' + formData;
+                        const newUrl = window.location.pathname + '?' + urlParams.toString();
                         window.history.pushState({
                             path: newUrl
                         }, '', newUrl);
@@ -346,7 +342,6 @@ $max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_G
             }
 
             // Function to render products
-            // Function to render products
             function renderProducts(products) {
                 let html = '';
 
@@ -354,14 +349,6 @@ $max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_G
                     html = '<div class="col-12 text-center"><p>No products found matching your criteria.</p></div>';
                 } else {
                     products.forEach(product => {
-                        // Prepare tags HTML
-                        // let tagsHtml = '';
-                        // if (product.tags && product.tags.length > 0) {
-                        //     product.tags.forEach(tag => {
-                        //         tagsHtml += `<span class="product-tag" style="background-color: #94c7eb; padding: 2px 5px; border-radius: 3px; font-size: 12px; margin-right: 5px;">${tag.name}</span>`;
-                        //     });
-                        // }
-
                         // Prepare colors HTML
                         let colorsHtml = '';
                         if (product.colors && product.colors.length > 0) {
@@ -444,11 +431,8 @@ $max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_G
             // Initial load
             loadProducts();
 
-            // Handle form submission
-            $('#filter-form').on('submit', function(e) {
-                e.preventDefault();
-                // Reset to page 1 when filters change
-                $('input[name="page"]').val(1);
+            // Handle filter changes
+            $('#limit-select, #sort-select, #category-select').change(function() {
                 loadProducts();
             });
 
@@ -456,23 +440,31 @@ $max_price = isset($_GET['max_price']) && $_GET['max_price'] !== '' ? (float)$_G
             $(document).on('click', '.page-pagination a', function(e) {
                 e.preventDefault();
                 const page = $(this).data('page');
-                $('input[name="page"]').val(page);
-                loadProducts();
-            });
+                const urlParams = new URLSearchParams(window.location.search);
+                urlParams.set('page', page);
 
-            // Handle limit change
-            $('#limit-select').change(function() {
-                $('input[name="limit"]').val($(this).val());
-                $('input[name="page"]').val(1); // Reset to page 1
-                loadProducts();
-            });
+                // Update URL
+                window.history.pushState({}, '', '?' + urlParams.toString());
 
-            // Handle sort change
-            $('#sort-select').change(function() {
-                $('input[name="sort"]').val($(this).val());
-                $('input[name="page"]').val(1); // Reset to page 1
-                loadProducts();
+                // Load products for the new page
+                $.ajax({
+                    url: 'proccess/ajax_filter.php?' + urlParams.toString(),
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        renderProducts(response.products);
+                        renderPagination(response.pagination);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(error);
+                    }
+                });
             });
+        });
+
+        document.getElementById('open-filter-sheet').addEventListener('click', function() {
+            const filterSheet = new bootstrap.Offcanvas(document.getElementById('filterBottomSheet'));
+            filterSheet.show();
         });
     </script>
 

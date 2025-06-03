@@ -707,7 +707,7 @@ only screen and (min-width: 768px) and (max-width: 991px) {
 
 /* Default style for all screen sizes */
 .banner-section img {
-  height: 100px;
+  height: 200px;
   width: 100%;
   object-fit: cover;
   /* This ensures the image covers the area without distortion */
@@ -1895,14 +1895,6 @@ only screen and (min-width: 768px) and (max-width: 991px) {
   border-radius: 50%;
 }
 
-@media (max-width: 1350px) {
-
-  .hero-slider-one .slick-arrow,
-  .hero-slider-three .slick-arrow {
-    background-color: rgba(148, 199, 235, 0.85);
-  }
-}
-
 .hero-slider-one .slick-arrow i,
 .hero-slider-three .slick-arrow i {
   font-size: 30px;
@@ -1917,6 +1909,35 @@ only screen and (min-width: 768px) and (max-width: 991px) {
 .hero-slider-one .slick-arrow.slick-next,
 .hero-slider-three .slick-arrow.slick-next {
   right: 40px;
+}
+
+
+@media (max-width: 1350px) {
+
+  .hero-slider-one .slick-arrow,
+  .hero-slider-three .slick-arrow {
+    background-color: rgba(148, 199, 235, 0.85);
+    width: 40px;
+    height: 40px;
+    margin-top: -20px;
+  }
+
+  .hero-slider-one .slick-arrow i,
+  .hero-slider-three .slick-arrow i {
+    font-size: 20px;
+    line-height: 40px;
+  }
+
+  .hero-slider-one .slick-arrow.slick-prev,
+  .hero-slider-three .slick-arrow.slick-prev {
+    left: 20px;
+  }
+
+  .hero-slider-one .slick-arrow.slick-next,
+  .hero-slider-three .slick-arrow.slick-next {
+    right: 20px;
+  }
+
 }
 
 .hero-slider-one .slick-arrow:hover,
@@ -1971,10 +1992,10 @@ only screen and (min-width: 768px) and (max-width: 991px) {
 
 @media only screen and (max-width: 767px) {
 
-  .hero-slider-one .slick-arrow,
+  /* .hero-slider-one .slick-arrow,
   .hero-slider-three .slick-arrow {
     display: none !important;
-  }
+  } */
 
   .hero-slider-one .slick-dots,
   .hero-slider-three .slick-dots {
@@ -1983,15 +2004,70 @@ only screen and (min-width: 768px) and (max-width: 991px) {
   }
 }
 
-
+/* best deal slider arrows style section */
 .best-deal-slider {
-  max-height: 400px;
-  /* Or any desired height */
-  overflow: hidden;
+  position: relative;
 }
 
+.best-deal-slider .slick-prev,
+.best-deal-slider .slick-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  background-color: #94c7eb;
+  /* Optional for visibility */
+  border: none;
+  border-radius: 50%;
+  -moz-border-radius: 50%;
+  -webkit-border-radius: 50%;
+  /* padding: 10px; */
+  cursor: pointer;
+}
+
+.best-deal-slider .slick-dots li {
+  line-height: 14px;
+  margin: 1px 5px 0;
+  float: left;
+}
+
+.best-deal-slider .slick-dots li button {
+  background-color: transparent;
+  border: 1px solid #1a161e;
+  padding: 0;
+  text-indent: -9999px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.best-deal-slider .slick-dots li.slick-active button {
+  background-color: #ff708a;
+  border-color: #ff708a;
+}
+
+.best-deal-slider .slick-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 0px;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  background-color: #94c7eb;
+  padding: 10px;
+  border-radius: 50px;
+}
+
+.best-deal-slider .slick-prev {
+  left: 10px;
+}
+
+.best-deal-slider .slick-next {
+  right: 10px;
+}
+
+
 .deal-image {
-  height: 300px;
+  height: 500px;
   /* Or adjust as needed */
   object-fit: cover;
   /* Keeps image from stretching */
@@ -2053,12 +2129,14 @@ only screen and (min-width: 768px) and (max-width: 991px) {
 
 /*-- Hero Content --*/
 .hero-content {
+  width: auto;
   text-align: center;
   background-color: rgba(148, 199, 235, 0.45);
   padding: 77px 140px 87px;
 }
 
 .hero-content h1 {
+  width: 100%;
   font-size: 60px;
   line-height: 66px;
   margin-bottom: 26px;
@@ -3819,7 +3897,7 @@ only screen and (min-width: 768px) and (max-width: 991px) {
   clear: none;
   line-height: 36px;
   height: 38px;
-  width: 70px;
+  width: 100px;
 }
 
 .product-show .nice-select::after {
@@ -4731,7 +4809,7 @@ only screen and (max-width: 767px) {
   /* Needed for centering */
   padding-bottom: 75%;
   /* Adjust this percentage for desired aspect ratio (e.g., 100% for square, 56.25% for 16:9) */
-  border: #000000 solid 1px;
+
 }
 
 .pro-large-img a {
@@ -4780,11 +4858,12 @@ only screen and (max-width: 767px) {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  width: 100%;
 }
 
 .pro-thumb-img li {
   padding: 5px;
-  width: 150px;
+  width: 500px;
   /* Fixed width for all images */
   height: 150px;
   /* Fixed height for all images */

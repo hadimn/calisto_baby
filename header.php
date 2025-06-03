@@ -1,5 +1,6 @@
 <?php
 include_once 'classes/wishlist.php';
+include_once 'classes/banner_messages.php';
 
 session_start();
 
@@ -16,9 +17,58 @@ if (isset($_SESSION['customer_id'])) {
     $wishlist = new Wishlist($db);
     $wishlist->customer_id = $_SESSION['customer_id'];
     $wishlist_count = $wishlist->countWishlistItems();
+
+    $bannerM = new BannerMessage($db);
+    $bannerMessages = $bannerM->getAllActive()->fetchAll(PDO::FETCH_ASSOC);
 }
 
 ?>
+
+<style>
+    .top-banner {
+        background-color: black;
+        color: white;
+        padding: 8px 0;
+        overflow: hidden;
+    }
+
+    .message-container {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .scrolling-text {
+        white-space: nowrap;
+        display: inline-block;
+        font-size: 14px;
+        animation: moveMessage 7s linear;
+    }
+
+    @keyframes moveMessage {
+        0% {
+            transform: translateX(100%);
+        }
+
+        100% {
+            transform: translateX(-100%);
+        }
+    }
+</style>
+
+<!-- Catchable Scrolling Message Banner -->
+<div class="top-banner">
+    <div class="message-container">
+        <div id="scrolling-text" class="scrolling-text">
+            <!-- Message will appear here -->
+        </div>
+    </div>
+</div>
+
+
+
 
 <div class="header-section section">
 
@@ -54,11 +104,11 @@ if (isset($_SESSION['customer_id'])) {
                         <div class="header-wishlist">
                             <a href="wishlist.php"><img src="assets/images/icons/wishlist.png" alt="Wishlist">
                                 <span>
-                                    <?php if(isset($wishlist_count)):?>
-                                    <?= $wishlist_count ?>
-                                    <?php else:?>
-                                    00
-                                    <?php endif;?>  
+                                    <?php if (isset($wishlist_count)): ?>
+                                        <?= $wishlist_count ?>
+                                    <?php else: ?>
+                                        00
+                                    <?php endif; ?>
                                 </span>
                             </a>
                         </div>
@@ -102,8 +152,11 @@ if (isset($_SESSION['customer_id'])) {
                             <ul>
                                 <li class="<?php if (explode('/', $_SERVER['PHP_SELF'])[2] == 'index.php'): ?>active<?php endif ?>"><a href="index.php">HOME</a>
                                 </li>
-                                <li <?php if (explode('/', $_SERVER['PHP_SELF'])[2] == 'shop.php'): ?>active<?php endif ?>><a
-                                        href="shop-left-sidebar.php">SHOP</a></li>
+                                <li class ="<?php if (explode('/', $_SERVER['PHP_SELF'])[2] == 'shop-left-sidebar.php'): ?>active<?php endif ?>">
+                                    <a href="shop-left-sidebar.php">
+                                        Categories
+                                    </a>
+                                </li>
                                 <li><a href="#">PAGES</a>
                                     <ul class="sub-menu">
                                         <li><a href="cart.php">Cart</a></li>
@@ -117,14 +170,11 @@ if (isset($_SESSION['customer_id'])) {
                                         <li><a href="wishlist.php">Wishlist</a></li>
                                     </ul>
                                 </li>
-                                <li><a href="blog.php">BLOG</a>
-                                    <ul class="sub-menu">
-                                        <li><a href="blog.php">Blog</a></li>
-                                        <li><a href="single-blog.php">Single Blog</a></li>
-                                    </ul>
+                                <li class="<?php if (explode('/', $_SERVER['PHP_SELF'])[2] == 'contact.php'): ?>active<?php endif ?>">
+                                    <a href="contact.php">
+                                        CONTACT
+                                    </a>
                                 </li>
-                                <li class="<?php if (explode('/', $_SERVER['PHP_SELF'])[2] == 'contact.php'): ?>active<?php endif ?>"><a
-                                        href="contact.php">CONTACT</a></li>
                             </ul>
                         </nav>
                     </div>
@@ -138,3 +188,28 @@ if (isset($_SESSION['customer_id'])) {
     </div><!-- Header BOttom End -->
 
 </div><!-- Header Section End -->
+
+<script>
+    const messages = [
+        <?php foreach($bannerMessages as $bannerMessage):?>
+            "<?= $bannerMessage['message']?>",
+        <?php endforeach;?>
+    ];
+
+    const textEl = document.getElementById("scrolling-text");
+    let index = 0;
+
+    function showNextMessage() {
+        textEl.style.animation = "none";
+        void textEl.offsetWidth; // restart animation
+        textEl.textContent = messages[index];
+        textEl.style.animation = "moveMessage 10s linear";
+
+        index = (index + 1) % messages.length;
+    }
+
+    textEl.addEventListener("animationend", showNextMessage);
+
+    // Start with the first message
+    showNextMessage();
+</script>

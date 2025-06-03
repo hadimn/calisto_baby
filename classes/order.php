@@ -1,7 +1,4 @@
 <?php
-
-namespace Classes;
-
 class Order
 {
     private $conn;
@@ -43,6 +40,27 @@ class Order
             return true;
         }
         return false;
+    }
+
+    public function getTotalRevenue() {
+        $query = "SELECT SUM(total_amount) AS total_revenue FROM " . $this->table_name . " WHERE status = 'Delivered'";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row['total_revenue'] ? (float)$row['total_revenue'] : 0;
+    }
+    
+    public function getSalesDataLast7Days() {
+        $query = "SELECT 
+                    DATE(created_at) AS date, 
+                    SUM(total_amount) AS total 
+                  FROM " . $this->table_name . " 
+                  WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+                  GROUP BY DATE(created_at)
+                  ORDER BY date ASC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // In Order class

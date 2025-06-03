@@ -29,6 +29,15 @@ class Discount
         return $row['order_count'] == 0;
     }
 
+    public function getActiveDiscountsCount()
+    {
+        $query = "SELECT COUNT(*) AS count FROM " . $this->table_name . " WHERE status = 'active'";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row['count'];
+    }
+
     // Apply a first-order discount (10%)
     public function applyFirstOrderDiscount()
     {

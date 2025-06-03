@@ -1,8 +1,8 @@
 <?php
-include "classes/database.php";
-include "classes/product.php";
-include "classes/cart.php";
-include "classes/tag.php";
+require_once "classes/database.php";
+include_once "classes/product.php";
+include_once "classes/cart.php";
+include_once "classes/tag.php";
 
 $database = new Database();
 $db = $database->getConnection();
@@ -19,11 +19,11 @@ $popular_products = $product->getPorductsPopular();
 // best_deal products
 $best_deal_products = $product->getPorductsBestDeal();
 // bab new toys tag id
-$babyNewToys_tagId = $tag->getNewBabyToysTag()['tag_id'];
+$babyNewToys_tagId = $tag->getNewBabyToysTag()['tag_id']??"12";
 // must have basics tag id
-$MustHaveBasics_tagId = $tag->getMustHaveBasicsTag()['tag_id'];
+$MustHaveBasics_tagId = $tag->getMustHaveBasicsTag()['tag_id']??"34";
 // baby items tag id
-$babyItems_tagId = $tag->getBabyItemsTag()['tag_id'];
+$babyItems_tagId = $tag->getBabyItemsTag()['tag_id']??"43";
 
 ?>
 
@@ -108,7 +108,7 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id'];
                     <div class="hero-item" style="background-image: url(admin-pages/<?= $latest_tag['image'] ?>); background-size: cover">
 
                         <!-- Hero Content -->
-                        <div class="hero-content">
+                        <div class="hero-content border">
                             <h1><?= $latest_tag['name'] ?> <br><?php echo htmlspecialchars(substr($latest_tag['description'], 0, 50)); ?>...</h1>
                             <a href="shop-left-sidebar.php?tag=<?= $latest_tag['tag_id'] ?>">SHOP NOW</a>
                         </div>
@@ -132,7 +132,7 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id'];
 
                             <div class="content">
                                 <h1 style="color: #FF7790;">New Arrival <br>Baby’s items <br>GET ALL YOU WANT</h1>
-                                <a href="#" data-hover="SHOP NOW">SHOP NOW</a>
+                                <a href="shop-left-sidebar.php?tag=<?= $babyItems_tagId ?>" data-hover="SHOP NOW">SHOP NOW</a>
                             </div>
 
                         </div>
@@ -159,7 +159,7 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id'];
 
                             <div class="content">
                                 <h1 style="color: #FF7790;">Must <br>Have Basics <br> products</h1>
-                                <a href="#" data-hover="SHOP NOW">SHOP NOW</a>
+                                <a href="shop-left-sidebar.php?tag=<?= $MustHaveBasics_tagId ?>" data-hover="SHOP NOW">SHOP NOW</a>
                             </div>
 
                         </div>
@@ -420,21 +420,21 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id'];
         <!-- Feature Section Start -->
         <div class="feature-section bg-theme-two section section-padding fix mb-5" style="background-image: url(assets/images/pattern/pattern-dot.png);">
             <div class="container">
-                <div class="feature-wrap row justify-content-between mbn-30">
+                <div class="feature-wrap row justify-content-center mbn-30">
 
                     <div class="col-md-4 col-12 mb-30">
                         <div class="feature-item text-center">
 
                             <div class="icon"><img src="assets/images/feature/feature-1.png" alt="Image"></div>
                             <div class="content">
-                                <h3>Free Shipping</h3>
+                                <h3>Free Delivery</h3>
                                 <p>Start from $99</p>
                             </div>
 
                         </div>
                     </div>
 
-                    <div class="col-md-4 col-12 mb-30">
+                    <!-- <div class="col-md-4 col-12 mb-30">
                         <div class="feature-item text-center">
 
                             <div class="icon"><img src="assets/images/feature/feature-2.png" alt="Image"></div>
@@ -456,7 +456,7 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id'];
                             </div>
 
                         </div>
-                    </div>
+                    </div> -->
 
                 </div>
             </div>

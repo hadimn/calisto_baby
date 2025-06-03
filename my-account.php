@@ -1,7 +1,5 @@
 <?php
 
-use Classes\Order;
-
 session_start();
 include "classes/database.php";
 include "classes/customer.php";
@@ -104,16 +102,16 @@ session_abort();
 
                             <a href="#orders" data-bs-toggle="tab"><i class="fa fa-cart-arrow-down"></i> Orders</a>
 
-                            <a href="#download" data-bs-toggle="tab"><i class="fa fa-cloud-download"></i> Download</a>
+                            <!-- <a href="#download" data-bs-toggle="tab"><i class="fa fa-cloud-download"></i> Download</a> -->
 
                             <!-- <a href="#payment-method" data-bs-toggle="tab"><i class="fa fa-credit-card"></i> Payment
                                 Method</a> -->
 
-                            <a href="#address-edit" data-bs-toggle="tab"><i class="fa fa-map-marker"></i> address</a>
+                            <!-- <a href="#address-edit" data-bs-toggle="tab"><i class="fa fa-map-marker"></i> address</a> -->
 
                             <a href="#account-info" data-bs-toggle="tab"><i class="fa fa-user"></i> Account Details</a>
 
-                            <a href="proccess/logout-proccess.php"><i class="fa fa-sign-out"></i> Logout</a>
+                            <!-- <a href="proccess/logout-proccess.php"><i class="fa fa-sign-out"></i> Logout</a> -->
                         </div>
                     </div>
                     <!-- My Account Tab Menu End -->

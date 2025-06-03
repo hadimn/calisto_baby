@@ -1,7 +1,5 @@
 <?php
 // process_order.php
-
-use Classes\Order;
 use Classes\OrderItem;
 
 session_start();
