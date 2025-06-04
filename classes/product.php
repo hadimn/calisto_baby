@@ -258,7 +258,13 @@ class Product
 
     public function getPorductsOnSale()
     {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE on_sale = :on_sale ORDER BY created_at DESC LIMIT 8";
+        $query = "SELECT p.*, GROUP_CONCAT(DISTINCT ps.color) as colors 
+                  FROM " . $this->table_name . " p
+                  LEFT JOIN " . $this->size_table . " ps ON p.product_id = ps.product_id
+                  WHERE p.on_sale = :on_sale 
+                  GROUP BY p.product_id
+                  ORDER BY p.created_at DESC 
+                  LIMIT 8";
         $stmt = $this->conn->prepare($query);
         $on_sale = 1;
         $stmt->bindParam(":on_sale", $on_sale, PDO::PARAM_INT);
@@ -268,34 +274,36 @@ class Product
 
     public function getPorductsBestDeal()
     {
-        // Calculate sale percentage and filter products where sale percentage >= 30%
-        $query = "SELECT *, 
-                         ((price - new_price) / price) * 100 AS sale_percentage 
-                  FROM " . $this->table_name . " 
-                  WHERE best_deal = :best_deal 
-                    AND on_sale = :on_sale 
-                    AND ((price - new_price) / price) * 100 >= 30 
-                  ORDER BY created_at DESC 
+        $query = "SELECT p.*, 
+                         ((p.price - p.new_price) / p.price) * 100 AS sale_percentage,
+                         GROUP_CONCAT(DISTINCT ps.color) as colors
+                  FROM " . $this->table_name . " p
+                  LEFT JOIN " . $this->size_table . " ps ON p.product_id = ps.product_id
+                  WHERE p.best_deal = :best_deal 
+                    AND p.on_sale = :on_sale 
+                    AND ((p.price - p.new_price) / p.price) * 100 >= 30 
+                  GROUP BY p.product_id
+                  ORDER BY p.created_at DESC 
                   LIMIT 4";
 
         $stmt = $this->conn->prepare($query);
-
-        // Bind parameters
         $best_deal = 1;
         $on_sale = 1;
         $stmt->bindParam(":best_deal", $best_deal, PDO::PARAM_INT);
         $stmt->bindParam(":on_sale", $on_sale, PDO::PARAM_INT);
-
-        // Execute the query
         $stmt->execute();
-
-        // Fetch and return the results
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getPorductsPopular()
     {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE popular = :popular ORDER BY created_at DESC LIMIT 8";
+        $query = "SELECT p.*, GROUP_CONCAT(DISTINCT ps.color) as colors 
+                  FROM " . $this->table_name . " p
+                  LEFT JOIN " . $this->size_table . " ps ON p.product_id = ps.product_id
+                  WHERE p.popular = :popular 
+                  GROUP BY p.product_id
+                  ORDER BY p.created_at DESC 
+                  LIMIT 8";
         $stmt = $this->conn->prepare($query);
         $popular = 1;
         $stmt->bindParam(":popular", $popular, PDO::PARAM_INT);

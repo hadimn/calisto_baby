@@ -4,6 +4,9 @@ include_once 'classes/banner_messages.php';
 
 session_start();
 
+$bannerM = new BannerMessage($db);
+$bannerMessages = $bannerM->getAllActive()->fetchAll(PDO::FETCH_ASSOC);
+
 if (isset($_SESSION['customer_id'])) {
     $database = new Database();
     $db = $database->getConnection();
@@ -17,11 +20,7 @@ if (isset($_SESSION['customer_id'])) {
     $wishlist = new Wishlist($db);
     $wishlist->customer_id = $_SESSION['customer_id'];
     $wishlist_count = $wishlist->countWishlistItems();
-
-    $bannerM = new BannerMessage($db);
-    $bannerMessages = $bannerM->getAllActive()->fetchAll(PDO::FETCH_ASSOC);
 }
-
 ?>
 
 <style>
@@ -107,7 +106,7 @@ if (isset($_SESSION['customer_id'])) {
                                     <?php if (isset($wishlist_count)): ?>
                                         <?= $wishlist_count ?>
                                     <?php else: ?>
-                                        00
+                                        0
                                     <?php endif; ?>
                                 </span>
                             </a>
@@ -118,9 +117,9 @@ if (isset($_SESSION['customer_id'])) {
                                 <img src="assets/images/icons/cart.png" alt="Cart">
                                 <span>
                                     <?php if (isset($cartCount) && isset($totals)): ?>
-                                        <?= $cartCount ?>($<?= $total ?>)
+                                        <?= $cartCount ?>
                                     <?php else: ?>
-                                        00($0.00)
+                                        0
                                     <?php endif; ?>
                                 </span>
                             </a>
@@ -152,7 +151,7 @@ if (isset($_SESSION['customer_id'])) {
                             <ul>
                                 <li class="<?php if (explode('/', $_SERVER['PHP_SELF'])[2] == 'index.php'): ?>active<?php endif ?>"><a href="index.php">HOME</a>
                                 </li>
-                                <li class ="<?php if (explode('/', $_SERVER['PHP_SELF'])[2] == 'shop-left-sidebar.php'): ?>active<?php endif ?>">
+                                <li class="<?php if (explode('/', $_SERVER['PHP_SELF'])[2] == 'shop-left-sidebar.php'): ?>active<?php endif ?>">
                                     <a href="shop-left-sidebar.php">
                                         Categories
                                     </a>
@@ -191,9 +190,8 @@ if (isset($_SESSION['customer_id'])) {
 
 <script>
     const messages = [
-        <?php foreach($bannerMessages as $bannerMessage):?>
-            "<?= $bannerMessage['message']?>",
-        <?php endforeach;?>
+        <?php foreach ($bannerMessages as $bannerMessage): ?> "<?= $bannerMessage['message'] ?>",
+        <?php endforeach; ?>
     ];
 
     const textEl = document.getElementById("scrolling-text");

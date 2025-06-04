@@ -33,10 +33,9 @@ $tags = $tag->getAll();
                 <ul>
                     <li><a href="about.php">About us</a></li>
                     <li><a href="assets/documents/terms-and-conditions.pdf" download>Terms & Conditions</a></li>
-                    <li><a href="#">Payment Method</a></li>
+                    <li><a href="#">Payment Method: cash</a></li>
                     <li><a href="#">Product Warranty</a></li>
-                    <li><a href="#">Return Process</a></li>
-                    <li><a href="#">Payment Security</a></li>
+                    <li><a href="return-proccess.php">Return Process</a></li>
                 </ul>
             </div>
 

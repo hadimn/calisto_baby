@@ -225,13 +225,18 @@ $tag_filter = isset($_GET['tag']) ? (array)$_GET['tag'] : [];
                     </div>
                 </div>
             </div>
-        </div><!-- Brand Section End -->
+        </div>
+        <!-- Brand Section End -->
+
+
+        <!-- off canvas filter section -->
         <div class="offcanvas offcanvas-bottom" tabindex="-1" id="filterBottomSheet" style="height: 40vh;">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title">Filter Options</h5>
                 <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
             </div>
             <div class="offcanvas-body">
+
                 <div class="filter-dropdown">
                     <h4><span class="filter-label">Category:</span></h4>
                     <select class="nice-select" id="category-select" aria-placeholder="choose category" multiple>
@@ -279,38 +284,84 @@ $tag_filter = isset($_GET['tag']) ? (array)$_GET['tag'] : [];
 
     <script>
         $(document).ready(function() {
+
+            // Initialize Nice Select for all dropdowns (this is crucial)
+            $('#category-select').niceSelect();
+            $('#limit-select').niceSelect();
+            $('#sort-select').niceSelect();
+
+            // Function to update the display text of the category-select Nice Select
+            function updateCategoryNiceSelectDisplay() {
+                const $categorySelect = $('#category-select');
+                const $niceSelectCurrent = $categorySelect.next('.nice-select').find('.current'); // The visible text span
+
+                let selectedOptionsText = [];
+                let hasActualSelection = false;
+
+                $categorySelect.find('option:selected').each(function() {
+                    const value = $(this).val();
+                    const text = $(this).text().trim();
+
+                    // Exclude the "Select an option" if it's the disabled, hidden one
+                    if (value !== "" && !$(this).is(':disabled') && !$(this).is(':hidden')) {
+                        selectedOptionsText.push(text.replace(/\s*\(\d+\)\s*$/, '')); // Remove (count) from the display
+                        hasActualSelection = true;
+                    }
+                });
+
+                if (selectedOptionsText.length === 0) {
+                    // If no actual tags are selected, show "Select an option"
+                    $niceSelectCurrent.text('Select an option');
+                } else {
+                    // If tags are selected, display them comma-separated
+                    $niceSelectCurrent.text(selectedOptionsText.join(', '));
+                }
+
+                // If "Select an option" was selected initially and no tags are active
+                // Ensure it's not shown if other options are selected.
+                // This part might need fine-tuning based on Nice Select's exact default behavior.
+                // For a multi-select, the 'Select an option' typically only appears if nothing is truly selected.
+                // If it's still causing issues, you might remove the 'selected' from it in PHP if tag_filter is not empty.
+            }
+
             // Function to load products via AJAX
             function loadProducts() {
                 const formData = new FormData();
 
-                // Get all form values
+                // Get current page from URL or default to 1
                 const currentPage = new URLSearchParams(window.location.search).get('page') || '1';
                 formData.append('page', currentPage);
-                // Always reset to page 1 when filters change
-                formData.append('limit', $('#limit-select').val());
-                formData.append('sort', $('#sort-select').val());
 
-                // Get selected tags from dropdown
+                // Get filter values from dropdowns
+                const currentLimit = $('#limit-select').val();
+                const currentSort = $('#sort-select').val();
+                const selectedTags = [];
+
+                formData.append('limit', currentLimit);
+                formData.append('sort', currentSort);
+
                 $('#category-select option:selected').each(function() {
                     const val = $(this).val();
-                    if (val !== "") {
+                    if (val !== "") { // Ensure we only append actual tag values
                         formData.append('tag[]', val);
+                        selectedTags.push({
+                            id: val,
+                            name: $(this).text().split(' (')[0]
+                        }); // Store tag ID and name
                     }
                 });
 
                 // Convert FormData to URLSearchParams
                 const urlParams = new URLSearchParams();
                 for (const pair of formData.entries()) {
-                    if (Array.isArray(pair[1])) {
-                        pair[1].forEach(val => urlParams.append(pair[0], val));
-                    } else {
-                        urlParams.append(pair[0], pair[1]);
-                    }
+                    // For multiple 'tag[]' parameters, URLSearchParams.append handles it correctly
+                    urlParams.append(pair[0], pair[1]);
                 }
 
                 // Show loading spinner
                 $('#products-row').hide();
                 $('.loading-spinner').show();
+                $('#pagination-container').empty(); // Clear pagination during load
 
                 $.ajax({
                     url: 'proccess/ajax_filter.php?' + urlParams.toString(),
@@ -322,6 +373,34 @@ $tag_filter = isset($_GET['tag']) ? (array)$_GET['tag'] : [];
                         window.history.pushState({
                             path: newUrl
                         }, '', newUrl);
+
+                        // --- START OF BADGE UPDATE ---
+                        // Update 'Showing' badge
+                        $('.badge.bg-primary').text(`Showing: ${currentLimit}`);
+
+                        // Update 'Sorted by' badge
+                        let sortText = currentSort.replace(/_/g, ' '); // Replace underscores with spaces
+                        if (sortText.includes('DESC')) {
+                            sortText = sortText.replace('DESC', '↓');
+                        } else if (sortText.includes('ASC')) {
+                            sortText = sortText.replace('ASC', '↑');
+                        }
+                        $('.badge.bg-secondary').text(`Sorted by: ${sortText}`);
+
+                        // Update 'Category' badge
+                        const categoryBadge = $('.badge.bg-info');
+                        const defaultCategoryBadge = $('.badge.bg-light'); // The 'Category: All' badge
+
+                        if (selectedTags.length > 0) {
+                            const tagNames = selectedTags.map(tag => tag.name).join(', ');
+                            categoryBadge.removeClass('bg-light text-dark').addClass('bg-info text-dark').text(`Category: ${tagNames}`).show();
+                            defaultCategoryBadge.hide(); // Hide the 'Category: All' badge
+                        } else {
+                            // If no tags selected, show 'Category: All' badge and hide info badge
+                            defaultCategoryBadge.removeClass('bg-info text-dark').addClass('bg-light text-dark').text('Category: All').show();
+                            categoryBadge.hide();
+                        }
+                        // --- END OF BADGE UPDATE ---
 
                         // Render products
                         renderProducts(response.products);
@@ -341,7 +420,7 @@ $tag_filter = isset($_GET['tag']) ? (array)$_GET['tag'] : [];
                 });
             }
 
-            // Function to render products
+            // Function to render products (your existing function, no changes needed)
             function renderProducts(products) {
                 let html = '';
 
@@ -349,7 +428,6 @@ $tag_filter = isset($_GET['tag']) ? (array)$_GET['tag'] : [];
                     html = '<div class="col-12 text-center"><p>No products found matching your criteria.</p></div>';
                 } else {
                     products.forEach(product => {
-                        // Prepare colors HTML
                         let colorsHtml = '';
                         if (product.colors && product.colors.length > 0) {
                             product.colors.forEach(color => {
@@ -373,7 +451,6 @@ $tag_filter = isset($_GET['tag']) ? (array)$_GET['tag'] : [];
                         <div class="content">
                             <div class="content-left">
                                 <h4 class="title"><a href="single-product.php?product_id=${product.product_id}">${product.name}</a></h4>
-                                
                                 <div class="ratting">
                                     <i class="fa fa-star"></i>
                                     <i class="fa fa-star"></i>
@@ -398,7 +475,7 @@ $tag_filter = isset($_GET['tag']) ? (array)$_GET['tag'] : [];
                 $('#products-row').html(html);
             }
 
-            // Function to render pagination
+            // Function to render pagination (your existing function, no changes needed)
             function renderPagination(pagination) {
                 let html = '';
                 const currentPage = pagination.current_page;
@@ -428,13 +505,23 @@ $tag_filter = isset($_GET['tag']) ? (array)$_GET['tag'] : [];
                 $('#pagination-container').html(html);
             }
 
-            // Initial load
+            // Initial load of products and update of display text
             loadProducts();
+            updateCategoryNiceSelectDisplay(); // Call this immediately after Nice Select initializes
 
             // Handle filter changes
             $('#limit-select, #sort-select, #category-select').change(function() {
+                // Reset page to 1 when filters change
+                const urlParams = new URLSearchParams(window.location.search);
+                urlParams.set('page', '1');
+                window.history.pushState({
+                    path: window.location.pathname + '?' + urlParams.toString()
+                }, '', window.location.pathname + '?' + urlParams.toString());
+
                 loadProducts();
+                updateCategoryNiceSelectDisplay(); // Update display after selecting categories
             });
+
 
             // Handle pagination clicks
             $(document).on('click', '.page-pagination a', function(e) {
@@ -460,11 +547,16 @@ $tag_filter = isset($_GET['tag']) ? (array)$_GET['tag'] : [];
                     }
                 });
             });
-        });
 
-        document.getElementById('open-filter-sheet').addEventListener('click', function() {
-            const filterSheet = new bootstrap.Offcanvas(document.getElementById('filterBottomSheet'));
-            filterSheet.show();
+            // Handle message dismissal
+            setTimeout(function() {
+                $('#message').fadeOut('slow');
+            }, 5000); // Message disappears after 5 seconds
+
+            document.getElementById('open-filter-sheet').addEventListener('click', function() {
+                const filterSheet = new bootstrap.Offcanvas(document.getElementById('filterBottomSheet'));
+                filterSheet.show();
+            });
         });
     </script>
 

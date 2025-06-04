@@ -19,11 +19,11 @@ $popular_products = $product->getPorductsPopular();
 // best_deal products
 $best_deal_products = $product->getPorductsBestDeal();
 // bab new toys tag id
-$babyNewToys_tagId = $tag->getNewBabyToysTag()['tag_id']??"12";
+$babyNewToys_tagId = $tag->getNewBabyToysTag()['tag_id'] ?? "12";
 // must have basics tag id
-$MustHaveBasics_tagId = $tag->getMustHaveBasicsTag()['tag_id']??"34";
+$MustHaveBasics_tagId = $tag->getMustHaveBasicsTag()['tag_id'] ?? "34";
 // baby items tag id
-$babyItems_tagId = $tag->getBabyItemsTag()['tag_id']??"43";
+$babyItems_tagId = $tag->getBabyItemsTag()['tag_id'] ?? "43";
 
 ?>
 
@@ -75,6 +75,23 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id']??"43";
             /* Adjust width as needed */
             max-width: 500px;
             /* Limit maximum width */
+        }
+
+        .see-more-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-family: Arial, sans-serif;
+            transition: background-color 0.3s;
+            color: black;
+        }
+
+
+
+        .arrow {
+            margin-left: 5px;
         }
     </style>
 </head>
@@ -175,10 +192,15 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id']??"43";
         <div class="product-section section section-padding">
             <div class="container">
 
-                <div class="row">
-                    <div class="section-title text-center col mb-30">
-                        <h1>Popular Products</h1>
-                        <p>All popular product find here</p>
+                <div class="row border-bottom mb-2">
+                    <div class="section-title text-center col mb-30 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1>Popular Products</h1>
+                            <p>All popular product find here</p>
+                        </div>
+                        <a href="special-product.php?type=popular" class="see-more-btn">
+                            See More <span class="arrow">→</span>
+                        </a>
                     </div>
                 </div>
 
@@ -318,10 +340,15 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id']??"43";
 
                     <div class="col-lg-4 col-md-6 col-12 mb-40">
 
-                        <div class="row">
-                            <div class="section-title text-start col mb-30">
-                                <h1>Best Deal</h1>
-                                <p>Exclusive deals for you</p>
+                        <div class="row border-bottom mb-2">
+                            <div class="section-title text-start col mb-30 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h1>Best Deal</h1>
+                                    <p>Exclusive deals for you</p>
+                                </div>
+                                <a href="special-product.php?type=best-deal" class="see-more-btn">
+                                    See More <span class="arrow">→</span>
+                                </a>
                             </div>
                         </div>
 
@@ -373,10 +400,15 @@ $babyItems_tagId = $tag->getBabyItemsTag()['tag_id']??"43";
 
                     <div class="col-lg-8 col-md-6 col-12 ps-3 ps-lg-4 ps-xl-5 mb-40">
 
-                        <div class="row">
-                            <div class="section-title text-start col mb-30">
-                                <h1>On Sale Products</h1>
-                                <p>All featured product find here</p>
+                        <div class="row border-bottom mb-2">
+                            <div class="section-title text-start col mb-30 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h1>On Sale Products</h1>
+                                    <p>All featured product find here</p>
+                                </div>
+                                <a href="special-product.php?type=on-sale" class="see-more-btn">
+                                    See More <span class="arrow">→</span>
+                                </a>
                             </div>
                         </div>
 
