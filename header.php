@@ -160,13 +160,11 @@ if (isset($_SESSION['customer_id'])) {
                                     <ul class="sub-menu">
                                         <li><a href="cart.php">Cart</a></li>
                                         <li><a href="checkout.php">Checkout</a></li>
-                                        <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] == true): ?>
-                                            <li><a href="proccess/logout-proccess.php">logout</a></li>
-                                        <?php else: ?>
-                                            <li class="active"><a href="login-register.php">Login & Register</a></li>
-                                        <?php endif ?>
                                         <li><a href="my-account.php">My Account</a></li>
                                         <li><a href="wishlist.php">Wishlist</a></li>
+                                        <li><a href="about.php">About Us</a></li>
+                                        <li><a href="waranty.php">Product Warranty</a></li>
+                                        <li><a href="return-proccess.php">Return Process</a></li>
                                     </ul>
                                 </li>
                                 <li class="<?php if (explode('/', $_SERVER['PHP_SELF'])[2] == 'contact.php'): ?>active<?php endif ?>">

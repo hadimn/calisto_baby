@@ -34,32 +34,20 @@ $tags = $tag->getAll();
                     <li><a href="about.php">About us</a></li>
                     <li><a href="assets/documents/terms-and-conditions.pdf" download>Terms & Conditions</a></li>
                     <li><a href="#">Payment Method: cash</a></li>
-                    <li><a href="#">Product Warranty</a></li>
+                    <li><a href="waranty.php">Product Warranty</a></li>
                     <li><a href="return-proccess.php">Return Process</a></li>
                 </ul>
             </div>
 
             <div class="footer-widget col-lg-3 col-md-6 col-12 mb-40">
-                <h4 class="title">NEWSLETTER</h4>
-                <p>Subscribe our newsletter and get all update of our product</p>
-
-                <form id="mc-form" class="mc-form footer-subscribe-form">
-                    <input id="mc-email" autocomplete="off" placeholder="Enter your email here"
-                        name="EMAIL" type="email">
-                    <button id="mc-submit"><i class="fa fa-paper-plane-o"></i></button>
-                </form>
-                <!-- mailchimp-alerts Start -->
-                <div class="mailchimp-alerts">
-                    <div class="mailchimp-submitting"></div><!-- mailchimp-submitting end -->
-                    <div class="mailchimp-success"></div><!-- mailchimp-success end -->
-                    <div class="mailchimp-error"></div><!-- mailchimp-error end -->
-                </div><!-- mailchimp-alerts end -->
-
-                <h5>FOLLOW US</h5>
-                <p class="footer-social"><a href="#">Facebook</a> - <a href="#">Twitter</a> - <a
-                        href="#">Google+</a></p>
-
+                <h5 class="title">FOLLOW US</h5>
+                <p class="footer-social">
+                    <a href="https://www.facebook.com/profile.php?id=100077276937756" target="_blank">Facebook</a> -
+                    <a href="https://www.instagram.com/calistobaby.lb?igsh=eXJzNXp1aTUxNnRz" target="_blank">Instagram</a> -
+                    <a href="https://www.tiktok.com/@calistobaby?_t=ZS-8tdIAqM8t4D&_r=1" target="_blank">TikTok</a>
+                </p>
             </div>
+
 
         </div>
     </div>

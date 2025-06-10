@@ -74,7 +74,7 @@ $platforms = $stmt->getAllSocialMedia();
                 <div class="row justify-content-center">
                     <div class="contact-info-wrap col-md-6 col-12 mb-40">
                         <h3>Get in Touch</h3>
-                        <p>Jadusona is the best theme for elit, sed do eiusmod tempor dolor sit ame tse ctetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et lorna aliquatd minim veniam,</p>
+                        <p>At Calisto Baby, we believe every baby deserves comfort, care, and style. Whether you have a question, need assistance with an order, or simply want to share your experience, we’re here for you. Reach out to us anytime — our team is happy to help and always just a message away.</p>
                         <ul class="contact-info list-unstyled">
                             <li>
                                 <i class="fa fa-map-marker"></i>

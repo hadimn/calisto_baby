@@ -56,6 +56,7 @@ $messages = $banner->getAll()->fetchAll(PDO::FETCH_ASSOC);
                         </button>
                         <button class="btn btn-sm btn-warning edit-btn">Edit</button>
                         <button class="btn btn-sm btn-primary save-btn" style="display:none;">Save</button>
+                        <button class="btn btn-sm btn-danger delete-btn">Delete</button>
                     </div>
                 </li>
             <?php endforeach; ?>
@@ -65,71 +66,98 @@ $messages = $banner->getAll()->fetchAll(PDO::FETCH_ASSOC);
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-            $(function () {
-        // Toggle activation
-        $('.toggle-btn').click(function () {
-            const button = $(this);
-            const item = button.closest('.sortable-item');
-            const id = item.data('id');
-            $.post('proccess/toggle_banner_status.php', { id: id }, function (response) {
-                if (response.success) {
-                    button.toggleClass('btn-success btn-secondary');
-                    button.text(button.hasClass('btn-success') ? 'Active' : 'Inactive');
-                }
-            }, 'json');
-        });
-
-        // Enable sorting
-        $('#sortable').sortable({
-            update: function (event, ui) {
-                const order = $(this).children().map(function (index, element) {
-                    return {
-                        id: $(element).data('id'),
-                        order: index
-                    };
-                }).get();
-                $.post('proccess/update_banner_order.php', { order: order }, function (response) {
-                    if (!response.success) {
-                        alert('Failed to update order.');
+        $(function() {
+            // Toggle activation
+            $('.toggle-btn').click(function() {
+                const button = $(this);
+                const item = button.closest('.sortable-item');
+                const id = item.data('id');
+                $.post('proccess/toggle_banner_status.php', {
+                    id: id
+                }, function(response) {
+                    if (response.success) {
+                        button.toggleClass('btn-success btn-secondary');
+                        button.text(button.hasClass('btn-success') ? 'Active' : 'Inactive');
                     }
                 }, 'json');
-            }
-        });
+            });
 
-        // Toggle to edit mode
-        $('.edit-btn').click(function () {
-            const item = $(this).closest('.sortable-item');
-            const span = item.find('.message-text');
-            const input = item.find('.edit-input');
-            const saveBtn = item.find('.save-btn');
-
-            input.val(span.text()).show();
-            span.hide();
-            $(this).hide();
-            saveBtn.show();
-        });
-
-        // Save edit
-        $('.save-btn').click(function () {
-            const item = $(this).closest('.sortable-item');
-            const id = item.data('id');
-            const input = item.find('.edit-input');
-            const span = item.find('.message-text');
-            const editBtn = item.find('.edit-btn');
-            const newMessage = input.val();
-
-            $.post('proccess/update_banner_message.php', { id: id, message: newMessage }, function (response) {
-                if (response.success) {
-                    span.text(newMessage).show();
-                    input.hide();
-                    editBtn.show();
-                    item.find('.save-btn').hide();
-                } else {
-                    alert('Update failed.');
+            // Enable sorting
+            $('#sortable').sortable({
+                update: function(event, ui) {
+                    const order = $(this).children().map(function(index, element) {
+                        return {
+                            id: $(element).data('id'),
+                            order: index
+                        };
+                    }).get();
+                    $.post('proccess/update_banner_order.php', {
+                        order: order
+                    }, function(response) {
+                        if (!response.success) {
+                            alert('Failed to update order.');
+                        }
+                    }, 'json');
                 }
-            }, 'json');
+            });
+
+            // Toggle to edit mode
+            $('.edit-btn').click(function() {
+                const item = $(this).closest('.sortable-item');
+                const span = item.find('.message-text');
+                const input = item.find('.edit-input');
+                const saveBtn = item.find('.save-btn');
+
+                input.val(span.text()).show();
+                span.hide();
+                $(this).hide();
+                saveBtn.show();
+            });
+
+            // Save edit
+            $('.save-btn').click(function() {
+                const item = $(this).closest('.sortable-item');
+                const id = item.data('id');
+                const input = item.find('.edit-input');
+                const span = item.find('.message-text');
+                const editBtn = item.find('.edit-btn');
+                const newMessage = input.val();
+
+                $.post('proccess/update_banner_message.php', {
+                    id: id,
+                    message: newMessage
+                }, function(response) {
+                    if (response.success) {
+                        span.text(newMessage).show();
+                        input.hide();
+                        editBtn.show();
+                        item.find('.save-btn').hide();
+                    } else {
+                        alert('Update failed.');
+                    }
+                }, 'json');
+            });
+
+            // Delete banner
+            $('.delete-btn').click(function() {
+                if (!confirm('Are you sure you want to delete this banner message?')) return;
+
+                const item = $(this).closest('.sortable-item');
+                const id = item.data('id');
+                console.log(id);
+
+                $.post('proccess/delete_banner_message.php', {
+                    id: id
+                }, function(response) {
+                    if (response.success) {
+                        item.remove();
+                    } else {
+                        alert('Failed to delete message.');
+                    }
+                }, 'json');
+            });
+
         });
-    });
     </script>
 </body>
 

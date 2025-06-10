@@ -305,7 +305,7 @@ $page_title = $page_titles[$type];
                             </div>
                             <div class="content">
                                 <div class="content-left">
-                                    <h4 class="title"><a href="product-details.php?id=${product.product_id}">${escapeHtml(product.name)}</a></h4>
+                                    <h4 class="title"><a href="single-product.php?product_id=${product.product_id}">${escapeHtml(product.name)}</a></h4>
                                     <div class="ratting">
                                         <i class="fa fa-star"></i>
                                         <i class="fa fa-star"></i>
