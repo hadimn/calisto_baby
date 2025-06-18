@@ -70,6 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label for="icon_class" class="col-sm-2 col-form-label">Icon Class</label>
                 <div class="col-sm-10">
                     <input type="text" name="icon_class" class="form-control" placeholder="e.g. fa fa-facebook" required>
+                    <label for="icon_class"><b class="text-warning">Get icon tags from: </b><a href="https://fontawesome.com/v4/icons/">https://fontawesome.com/v4/icons/</a></label>
                 </div>
             </div>
 

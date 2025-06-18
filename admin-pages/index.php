@@ -93,6 +93,10 @@ if (!isset($_GET['file'])) {
               echo 'class="active"'; ?>><a class="text-decoration-none"
             href="?file=socialMediaPage.php" data-file="socialMediaPage.php"><span
               class="fa fa-file-image-o mr-3"></span>Social Media</a></li>
+        <li <?php if ($last_loaded_file == 'createsocialmedia.php')
+              echo 'class="active"'; ?>><a class="text-decoration-none"
+            href="?file=createsocialmedia.php" data-file="createsocialmedia.php"><span
+              class="fa fa-file-image-o mr-3"></span>+ Social Media</a></li>
         <li <?php if ($last_loaded_file == 'shippingfeepage.php')
               echo 'class="active"'; ?>><a class="text-decoration-none"
             href="?file=shippingfeepage.php" data-file="shippingfeepage.php"><span
